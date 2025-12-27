@@ -5,6 +5,33 @@
 **Target:** Works for ages 7-90 in a power outage  
 **Inspiration:** Swish, SOS Alarm, BankID  
 **Constraints:** Must work on 5-year-old Android phone with cracked screen  
+**Development:** AI-assisted (Claude generates React Native components)
+
+**Version:** 2.0 (Revised for two-phase deployment)
+
+---
+
+## 📱 MVP vs Production Features
+
+**This UI spec describes the COMPLETE vision, but features are rolled out in two phases:**
+
+### Phase 1: MVP (Q2 2026)
+**Core features only** - validate concept with Väsby pilot
+- ✅ Home screen (neighbor map)
+- ✅ Resource posting (offer/need)
+- ✅ Hearts sending
+- ✅ Basic settings
+- ✅ Swedish language
+
+### Phase 2: Production (Q4 2026+)
+**Enhanced features** - after CivicBase migration
+- ✅ Improved offline indicators
+- ✅ True mesh visualization
+- ✅ Advanced Bluetooth discovery
+- ✅ FRG coordinator features
+- ✅ English translation
+
+**UI components stay 90%+ the same - backend upgrades transparently.**
 
 ---
 
@@ -17,8 +44,11 @@
 **Solutions:**
 - ✅ Clear offline/online indicators
 - ✅ Optimistic UI (assume success, sync later)
-- ✅ Mesh status visualization
+- ✅ Mesh status visualization (Production only)
 - ✅ "Last synced" timestamps
+
+**MVP:** Firebase offline persistence (delayed sync indicators)  
+**Production:** True mesh status (real-time P2P indicators)
 
 ### 2. Crisis-Appropriate Tone
 
@@ -48,18 +78,19 @@
 
 ### 4. Language
 
-**Swedish primary, English secondary**
+**MVP:** Swedish only  
+**Production:** Swedish primary, English secondary
 
-All UI text in Swedish by default:
+All MVP UI text in Swedish:
 - "Skicka Hearts" (not "Send Hearts")
 - "Grannkarta" (not "Neighbor Map")
 - "Resurs" (not "Resource")
 
-English toggle available (Settings).
+English toggle available in Production version (Settings).
 
 ---
 
-## Core Screens (6 Total)
+## Core Screens (6 Total - Same for MVP and Production)
 
 ### Screen 1: HOME / GRANNKARTA
 
@@ -67,7 +98,7 @@ English toggle available (Settings).
 
 ```
 ┌─────────────────────────────────┐
-│ ☰  Stuga           🔌 Offline   │  ← Status indicator
+│ ☰  Stuga           🌐 Online    │  ← Status indicator (MVP: Firebase)
 ├─────────────────────────────────┤
 │                                 │
 │  📍 GRANNAR (12 INOM 500M)      │
@@ -80,11 +111,11 @@ English toggle available (Settings).
 │     Behöver: Mat, Värme         │
 │     🔥 180 Hearts               │
 │                                 │
-│  🟡 Maria Johansson   350m ↖️   │  ← Yellow = via mesh (1 hop)
-│     Erbjuder: Matlagning        │
-│     🔥 320 Hearts               │
+│  🟡 Maria Johansson   350m ↖️   │  ← Yellow = further away
+│     Erbjuder: Matlagning        │  ← (MVP: all same color)
+│     🔥 320 Hearts               │  ← (Production: mesh hops indicated)
 │                                 │
-│  🔴 Erik Nilsson     480m ↘️    │  ← Red = via mesh (2+ hops)
+│  🔴 Erik Nilsson     480m ↘️    │  ← Red = mesh hops (Production only)
 │     Behöver: Verktyg            │
 │     🔥 95 Hearts                │
 │                                 │
@@ -92,22 +123,44 @@ English toggle available (Settings).
 │  [➕ Lägg till resurs]          │
 │  [💖 Skicka Hearts]             │
 ├─────────────────────────────────┤
-│  Senast synkad: 2 tim sedan     │  ← Offline awareness
-│  🔵🔵🔵⚪️⚪️ (3 noder nåbara)    │  ← Mesh network status
+│  Senast synkad: 2 tim sedan     │  ← MVP: Firebase sync
+│  🔵🔵🔵⚪️⚪️ (3 noder nåbara)    │  ← Production: Mesh visualization
 └─────────────────────────────────┘
 ```
 
 **Key Decisions:**
-- **Green/Yellow/Red dots:** Immediate visual signal of connection quality
-- **Distance + Direction:** Helps with physical coordination
-- **Hearts visible:** Builds trust in active contributors
-- **Mesh status bar:** Users understand network quality
-- **No chat:** Reduces complexity, forces face-to-face (builds community)
+- **Green/Yellow/Red dots:** 
+  - MVP: All green (simple)
+  - Production: Color codes mesh quality
+- **Distance + Direction:** GPS-based (both phases)
+- **Hearts visible:** Builds trust (both phases)
+- **Mesh status bar:** 
+  - MVP: Basic "last synced" timestamp
+  - Production: Real-time mesh node count
+- **No chat:** Reduces complexity, forces face-to-face (both phases)
 
-**Interaction:**
-- Tap neighbor → View profile + resources
-- Swipe down → Refresh (if online)
-- Pull-to-refresh animation shows mesh sync, not internet
+**Implementation Notes (React Native):**
+```typescript
+// HomeScreen.tsx
+import { FlatList, View, Text } from 'react-native';
+import { useNeighbors } from '@/hooks/useNeighbors';
+
+export function HomeScreen() {
+  const { neighbors, loading } = useNeighbors();
+  
+  return (
+    <View>
+      <StatusBar /> {/* Online/offline indicator */}
+      <FlatList
+        data={neighbors}
+        renderItem={({ item }) => <NeighborCard neighbor={item} />}
+      />
+      <ActionButtons />
+      <SyncStatus /> {/* Last synced timestamp */}
+    </View>
+  );
+}
+```
 
 ---
 
@@ -121,7 +174,7 @@ English toggle available (Settings).
 ├─────────────────────────────────┤
 │                                 │
 │  Anna Svensson            🟢    │
-│  [Profile Photo]                │
+│  [Profile Photo]                │  ← Optional in MVP
 │  120m norr · 🔥 245 Hearts     │
 │                                 │
 ├─────────────────────────────────┤
@@ -136,7 +189,7 @@ English toggle available (Settings).
 │   Vi har eldvärme själva."      │
 │                                 │
 ├─────────────────────────────────┤
-│  [💬 Kontakta Anna]             │  ← Opens simple contact sheet
+│  [💬 Kontakta Anna]             │  ← Opens contact options
 │  [💖 Skicka Hearts (tack)]      │
 └─────────────────────────────────┘
 
@@ -146,17 +199,16 @@ English toggle available (Settings).
 │  Kontakta Anna                  │
 ├─────────────────────────────────┤
 │  📍 Gå dit (120m norr)          │  ← GPS navigation
-│  🔔 Skicka signal               │  ← Bluetooth "ping"
-│  💖 Skicka Hearts               │  ← Jump to Hearts flow
+│  🔔 Skicka signal               │  ← Bluetooth "ping" (Production)
+│  💖 Skicka Hearts               │
 │  ❌ Avbryt                      │
 └─────────────────────────────────┘
 ```
 
-**Key Decisions:**
-- **No in-app messaging:** Forces physical meeting (builds trust, reduces screen time)
-- **"Skicka signal" (Bluetooth ping):** Simple "I'm interested" without text
-- **GPS navigation:** Helps find neighbor in dark/snow
-- **Hearts as gratitude:** Simple thank-you mechanism
+**MVP vs Production:**
+- **Profile photo:** Optional (MVP), recommended (Production)
+- **"Skicka signal":** Production only (requires mesh)
+- **GPS navigation:** Both phases
 
 ---
 
@@ -165,41 +217,56 @@ English toggle available (Settings).
 **Purpose:** Post what you offer or need
 
 ```
-┌──────────────────────────────────┐
-│  ← Avbryt          Spara         │
-├──────────────────────────────────┤
-│                                  │
-│  Jag...                          │
-│  ○ Erbjuder   ● Behöver          │
-│                                  │
-│  Kategori                        │
-│  ┌────────────────────────────┐  │
-│  │ [Mat  🥔]  [Värme 🔥]      │  │  ← Icon buttons
-│  │ [Verktyg 🔨] [Transport🚗] │  │
-│  │ [Kunskap 📚] [Boende 🏠]   │  │
-│  │ [Första hjälpen ⚕️] [Annat]│  │
-│  └────────────────────────────┘  │
-│                                  │
-│  Beskrivning                     │
-│  ┌───────────────────────────┐   │
-│  │ Generator, 5kW            │   │
-│  │ Diesel, kan köra 8h/dag   │   │  ← Max 200 characters
-│  │ 25/200                    │   │
-│  └───────────────────────────┘   │
-│                                  │
-│  [ ] Synlig för alla grannar     │  ← Privacy option
-│  [✓] Synlig för FRG-medlemmar    │
-│  [ ] Endast nära grannar (<100m) │
-│                                  │
-└──────────────────────────────────┘
+┌─────────────────────────────────┐
+│  ← Avbryt          Spara        │
+├─────────────────────────────────┤
+│                                 │
+│  Jag...                         │
+│  ○ Erbjuder   ● Behöver         │
+│                                 │
+│  Kategori                       │
+│  ┌───────────────────────────┐ │
+│  │ [Mat  🥔]  [Värme 🔥]     │ │  ← Icon buttons
+│  │ [Verktyg 🔨] [Transport🚗]│ │
+│  │ [Kunskap 📚] [Boende 🏠]  │ │
+│  │ [Första hjälpen ⚕️] [Annat]│ │
+│  └───────────────────────────┘ │
+│                                 │
+│  Beskrivning                    │
+│  ┌───────────────────────────┐ │
+│  │ Generator, 5kW            │ │
+│  │ Diesel, kan köra 8h/dag   │ │  ← Max 200 characters
+│  │ 25/200                    │ │
+│  └───────────────────────────┘ │
+│                                 │
+│  [ ] Synlig för alla grannar    │  ← Privacy options
+│  [✓] Synlig för FRG-medlemmar   │  ← Production feature
+│  [ ] Endast nära grannar (<100m)│
+│                                 │
+└─────────────────────────────────┘
 ```
 
-**Key Decisions:**
-- **Icons + text:** Works for low-literacy users
-- **Character limit:** Forces conciseness
-- **Privacy toggles:** User controls visibility
-- **No photos (MVP):** Reduces complexity, saves battery
-- **Offline creation:** Saved locally, synced later
+**Implementation (React Native form):**
+```typescript
+// AddResourceScreen.tsx
+import { useState } from 'react';
+import { TextInput, Switch } from 'react-native';
+import { createResource } from '@/lib/firebase'; // MVP
+// import { createResource } from '@civicbase/sdk'; // Production
+
+export function AddResourceScreen() {
+  const [type, setType] = useState<'offer' | 'need'>('need');
+  const [category, setCategory] = useState('');
+  const [description, setDescription] = useState('');
+  
+  const handleSave = async () => {
+    await createResource({ type, category, description });
+    navigation.goBack();
+  };
+  
+  // ... render form
+}
+```
 
 ---
 
@@ -219,15 +286,15 @@ English toggle available (Settings).
 │  🔥 Hennes saldo: 245 Hearts    │
 │                                 │
 │  Hur mycket?                    │
-│  ┌───────────────────────────┐  │
-│  │  ⭕️ 25    ⭕️ 50    ⭕️ 10  │  │  ← Quick select
-│  │  ⭕️ Annat: [____]         │  │
-│  └───────────────────────────┘  │
+│  ┌───────────────────────────┐ │
+│  │  ⭕️ 25    ⭕️ 50    ⭕️ 100  │ │  ← Quick select
+│  │  ⭕️ Annat: [____]          │ │
+│  └───────────────────────────┘ │
 │                                 │
 │  Varför? (valfritt)             │
-│  ┌───────────────────────────┐  │
-│  │ Tack för veden!           │  │
-│  └───────────────────────────┘  │
+│  ┌───────────────────────────┐ │
+│  │ Tack för veden!           │ │
+│  └───────────────────────────┘ │
 │                                 │
 │  🔥 Ditt saldo: 180 Hearts      │  ← Shows your balance
 │  (blir 130 efter detta)         │
@@ -246,18 +313,13 @@ English toggle available (Settings).
 │  "Tack för veden!"              │
 │                                 │
 │  Bekräftelse kommer när Anna    │
-│  är online eller inom Bluetooth-│
-│  räckvidd.                      │
-│                                 │
+│  är online eller synkar data.   │  ← MVP: Firebase sync
+│                                 │  ← Production: Mesh sync
 │  [Klar]                         │
 └─────────────────────────────────┘
 ```
 
-**Key Decisions:**
-- **Pre-set amounts:** Reduces cognitive load during crisis
-- **Balance shown:** Prevents overdraft, builds awareness
-- **Optional message:** Human touch without forcing it
-- **Delayed confirmation:** Honest about offline reality
+**Both phases same UI - backend handles sync differently.**
 
 ---
 
@@ -284,7 +346,7 @@ English toggle available (Settings).
 │  💚 Sven Andersson              │
 │     -30 Hearts                  │
 │     "Hjälp med snöskottning"    │
-│     2024-12-24 09:15 ⏳         │  ← Pending confirmation
+│     2024-12-24 09:15 ⏳         │  ← Pending (offline)
 │                                 │
 │  MOTTAGIT                       │
 │                                 │
@@ -301,11 +363,9 @@ English toggle available (Settings).
 └─────────────────────────────────┘
 ```
 
-**Key Decisions:**
-- **Green (sent) vs. Yellow (received):** Quick visual scan
-- **Checkmark vs. Hourglass:** Confirmation status clear
-- **System transactions visible:** Transparency
-- **30-day window:** Prevents information overload
+**Pending transactions:**
+- MVP: Shows ⏳ until Firebase syncs
+- Production: Shows ⏳ until mesh confirms
 
 ---
 
@@ -321,7 +381,7 @@ English toggle available (Settings).
 │                                 │
 │  Profil                         │
 │  > Min profil                   │
-│  > Byt profilbild               │
+│  > Byt profilbild               │  ← Optional feature
 │                                 │
 │  Synlighet                      │
 │  [✓] Synlig för grannar         │
@@ -333,33 +393,33 @@ English toggle available (Settings).
 │  [✓] Nya resurser i närheten    │
 │  [ ] Daglig sammanfattning      │
 │                                 │
-│  Offline-läge                   │
-│  [✓] Bluetooth mesh aktivt      │
-│  [✓] Spara data vid låg batterinivå│
+│  Offline-läge                   │  ← Production enhanced
+│  [✓] Bluetooth mesh aktivt      │  ← Production only
+│  [✓] Spara data vid låg batteri │
 │  [ ] Endast WiFi-synk           │
 │                                 │
-│  FRG-medlemskap                 │
-│  [ ] Jag är FRG-medlem          │  ← Unlocks group features
+│  FRG-medlemskap                 │  ← Production feature
+│  [ ] Jag är FRG-medlem          │
 │  > Gå med i lokal FRG-grupp     │
 │                                 │
-│  Språk                          │
+│  Språk                          │  ← Production feature
 │  ● Svenska  ○ English           │
 │                                 │
 │  Om Stuga                       │
 │  > Användarvillkor              │
 │  > Integritetspolicy            │
 │  > Kontakta support             │
-│  > Version 1.0.0                │
+│  > Version 1.0.0 (Firebase)     │  ← Shows backend
 │                                 │
 │  [Logga ut]                     │
 └─────────────────────────────────┘
 ```
 
-**Key Decisions:**
-- **Privacy defaults:** Conservative (exact location off)
-- **FRG toggle:** Unlocks group coordination features
-- **Offline controls:** Users can manage battery
-- **Language toggle:** Swedish default, English available
+**MVP vs Production differences:**
+- **Bluetooth mesh toggle:** Production only
+- **FRG membership:** Production enhanced
+- **Language:** Production adds English
+- **Version shows backend:** Firebase (MVP) vs CivicBase (Production)
 
 ---
 
@@ -369,13 +429,23 @@ English toggle available (Settings).
 
 **Always visible top-right:**
 
+**MVP (Firebase-based):**
 ```
-🔌 Offline  (red)   ← No internet, Bluetooth only
-📡 Mesh     (yellow) ← Mesh network active
-🌐 Online   (green)  ← Internet connection
+🌐 Online   (green)  ← Connected to Firebase
+⏳ Synkar   (yellow) ← Syncing queued data
+🔌 Offline  (red)    ← No internet, using cache
+```
+
+**Production (CivicBase-based):**
+```
+🌐 Online   (green)  ← Internet + mesh active
+📡 Mesh     (yellow) ← Mesh only, no internet
+🔌 Offline  (red)    ← Neither (rare - should still work via Bluetooth)
 ```
 
 **Tap indicator →**
+
+**MVP:**
 ```
 ┌─────────────────────────────────┐
 │  Nätverksstatus                 │
@@ -383,20 +453,40 @@ English toggle available (Settings).
 │  🔌 OFFLINE-LÄGE                │
 │                                 │
 │  Senast online: 2 tim sedan     │
-│  Bluetooth-mesh: Aktiv          │
-│  Grannar nåbara: 3              │
-│  Pending synk: 2 transaktioner  │
+│  Cachad data: 45 grannar        │
+│  Väntande transaktioner: 2      │
 │                                 │
-│  Stuga fungerar fullt ut i      │
-│  offline-läge. Din data         │
-│  synkroniseras automatiskt      │
-│  när internet återvänder.       │
+│  Stuga fungerar offline genom   │
+│  cachad data. Synkronisering    │
+│  sker automatiskt när internet  │
+│  återvänder.                    │
 │                                 │
 │  [Klar]                         │
 └─────────────────────────────────┘
 ```
 
-### Mesh Network Visualization
+**Production:**
+```
+┌─────────────────────────────────┐
+│  Nätverksstatus                 │
+├─────────────────────────────────┤
+│  📡 MESH-LÄGE                   │
+│                                 │
+│  Senast online: 2 tim sedan     │
+│  Bluetooth-mesh: Aktiv          │
+│  Grannar nåbara: 3 (direkt)     │
+│  Mesh-hopp: 2 grannar via relay │
+│                                 │
+│  Stuga fungerar fullt ut via    │
+│  Bluetooth mesh-nätverk. Data   │
+│  synkroniseras när internet     │
+│  återvänder.                    │
+│                                 │
+│  [Klar]                         │
+└─────────────────────────────────┘
+```
+
+### Mesh Network Visualization (Production Only)
 
 **Bottom of Home screen:**
 ```
@@ -424,26 +514,11 @@ English toggle available (Settings).
 └─────────────────────────────────┘
 ```
 
-### Hearts Balance Widget (Home Screen)
-
-**Prominent display:**
-```
-┌───────────────────────────────┐
-│  💖 DINA HEARTS               │
-│  ════════════════════         │
-│                               │
-│     180 Hearts                │
-│                               │
-│  +25 (denna vecka)            │
-│  -75 (denna vecka)            │
-│                               │
-│  [Se historik →]              │
-└───────────────────────────────┘
-```
+**Not available in MVP** (Firebase doesn't support true mesh)
 
 ---
 
-## Onboarding Flow (First-Time Users)
+## Onboarding Flow (Same for Both Phases)
 
 ### Step 1: Welcome
 
@@ -494,7 +569,7 @@ English toggle available (Settings).
 │  För att visa grannar i         │
 │  närheten (avrundad till 50m).  │
 │                                 │
-│  📡 Bluetooth                   │
+│  📡 Bluetooth                   │  ← MVP: basic, Production: full mesh
 │  För offline mesh-nätverk när   │
 │  internet ligger nere.          │
 │                                 │
@@ -545,51 +620,13 @@ English toggle available (Settings).
 
 ---
 
-## Accessibility Features
-
-### Screen Reader Support
-
-All elements have descriptive labels:
-```typescript
-<TouchableOpacity
-  accessible={true}
-  accessibilityLabel="Skicka 50 Hearts till Anna Svensson"
-  accessibilityHint="Bekräfta transaktion genom att dubbelklicka"
->
-  <Text>Skicka 50 Hearts</Text>
-</TouchableOpacity>
-```
-
-### High Contrast Mode
-
-Settings toggle: "Hög kontrast"
-
-- Increases contrast to 7:1
-- Thicker borders
-- Larger tap targets (48x48pt minimum)
-
-### Font Scaling
-
-Respects system font size settings:
-- Minimum: 16px body text
-- Maximum: 24px (prevents layout breaks)
-
-### Color Blindness
-
-No information conveyed by color alone:
-- Green dot + "Nära" text
-- Red dot + "Via mesh" text
-- Icons supplement all colors
-
----
-
 ## Performance & Battery
 
-### Battery-Saving Mode
+### Battery-Saving Mode (Both Phases)
 
 **Auto-enabled at <20% battery:**
-- Reduce Bluetooth scan frequency (60s → 300s)
-- Disable background sync
+- Reduce sync frequency
+- Disable background operations
 - Reduce UI animations
 - Monochrome mode (saves OLED power)
 
@@ -597,86 +634,72 @@ No information conveyed by color alone:
 ```
 ⚠️ Batterisparläge aktiverat
 
-Bluetooth-skanning reducerad.
-Din plats uppdateras var 5:e minut.
+Bakgrundssynkning reducerad.
+Din plats uppdateras var 15:e minut.
 ```
 
-### Data Usage (Offline-First)
+### Data Usage
 
-**Typical 72-hour crisis scenario:**
+**MVP (Firebase):**
 
-| Activity | Data Used |
-|----------|-----------|
-| 100 resource posts | ~50 KB |
-| 50 Hearts transactions | ~25 KB |
-| Mesh gossip (local) | 0 bytes (Bluetooth) |
-| **Total:** | **<100 KB** |
+| Activity | Data Used (72h) |
+|----------|----------------|
+| Neighbor updates | ~5 MB (frequent sync) |
+| Resource posts | ~2 MB |
+| Hearts transactions | ~1 MB |
+| Images (profile) | ~10 MB (optional) |
+| **Total** | **~20 MB** |
 
-**Compare to WhatsApp:** 10-20 MB for similar activity
+**Production (CivicBase):**
+
+| Activity | Data Used (72h) |
+|----------|----------------|
+| Mesh gossip | 0 bytes (Bluetooth) |
+| Internet sync (when available) | ~5 MB (compressed) |
+| **Total offline** | **0 MB** |
 
 ---
 
-## Future Features (Not MVP)
+## Future Features (Not MVP, Maybe Production)
 
-### Phase 2 (Months 4-6)
-
-- [ ] In-app messaging (simple, Signal-style encryption)
+**Phase 3+ (2027):**
+- [ ] In-app messaging (Signal-style encryption)
 - [ ] Resource photos (1 photo per resource)
 - [ ] Voice notes (for elderly)
 - [ ] Group coordination (FRG-specific)
-
-### Phase 3 (Months 7-12)
-
 - [ ] Offline maps (cached OpenStreetMap)
 - [ ] Resource history/archive
 - [ ] Hearts leaderboard ("Top Contributors")
-- [ ] Multi-language (Arabic, Somali for Swedish immigrant communities)
+- [ ] Multi-language (Arabic, Somali for Swedish immigrants)
 
 ---
 
-## Design Assets Needed
+## AI-Assisted Implementation Notes
 
-**Before development:**
+**For Claude/Gemini when generating React Native components:**
 
-1. **App icon** (1024x1024)
-   - Stuga cottage silhouette
-   - Forest green + warm orange
-   - Simple, recognizable at small size
+1. **Use TypeScript** for all components
+2. **Use Expo SDK** (not bare React Native)
+3. **Follow React Navigation v6** patterns
+4. **Use React Native Paper** for Material Design components
+5. **Implement offline-first** (optimistic UI, queue actions)
+6. **Test on both iOS and Android**
+7. **Keep accessibility in mind** (screen readers, large touch targets)
 
-2. **Category icons** (SVG)
-   - Mat 🥔, Värme 🔥, Verktyg 🔨, etc.
-   - Line art style, 2px stroke
-   - Forest green color
+**Example component request to AI:**
 
-3. **Splash screen**
-   - Stuga logo + "Grannskap som fungerar"
-   - 3 seconds max
+```
+Claude, create a NeighborCard component that displays:
+- Neighbor name
+- Distance (e.g. "120m ↗️")  
+- Resources offered (truncated to 40 chars)
+- Hearts balance
+- Online status indicator (green/yellow/red dot)
 
-4. **Empty states**
-   - "Inga grannar i närheten än"
-   - "Inga resurser tillagda"
-   - "Ingen Hearts-historik"
-
-5. **Illustrations**
-   - Onboarding screens (simple, Swedish aesthetic)
-   - Offline explanation diagram
-   - Mesh network visualization
-
----
-
-## Platform-Specific Notes
-
-### iOS
-
-- Use SF Symbols for system icons
-- Follow iOS Human Interface Guidelines
-- SwiftUI for native feel (if budget allows)
-
-### Android
-
-- Material Design 3 components
-- Adaptive icons
-- Respect system gestures
+Use React Native Paper's Card component.
+Make it tappable (navigate to neighbor detail screen).
+Add TypeScript types.
+```
 
 ---
 
@@ -687,15 +710,18 @@ Din plats uppdateras var 5:e minut.
 ✅ 70-year-old can post a resource in <3 taps  
 ✅ Works on 5-year-old phone with cracked screen  
 ✅ Clear offline status at all times  
-✅ No confusion about Hearts value (SEK vs. Hearts)  
-✅ Passes government accessibility audit  
+✅ No confusion about Hearts value (not SEK)  
+✅ Passes WCAG 2.1 AA accessibility audit  
 ✅ <5% user error rate in pilot  
 ✅ Battery lasts 72+ hours with active use  
+✅ Migration from Firebase → CivicBase seamless for users  
 
 ---
 
 **END OF UI SPECIFICATION**
 
-*Designed for crisis, optimized for offline, accessible for all ages. Every screen must answer: "Does this help neighbors coordinate when the internet is down?"*
+*Designed for crisis, optimized for offline (MVP: good enough, Production: excellent), accessible for all ages. Every screen answers: "Does this help neighbors coordinate when internet is down?"*
 
-*Next steps: Interactive prototypes (Figma), user testing with Väsby pilot group, iOS/Android implementation.*
+*UI stays 90%+ identical between Firebase MVP and CivicBase Production - only backend changes. Users see gradual improvements, not disruptive switches.*
+
+*AI-assisted development (Claude generates React Native components) enables fast iteration and 10-week timeline to pilot.*

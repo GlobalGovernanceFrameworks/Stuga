@@ -1,10 +1,37 @@
 # Stuga
 ## Grannsamverkan för krisberedskap / Neighborhood Coordination for Crisis Preparedness
 
-**Status:** Early Development  
+**Status:** MVP Development (Firebase-based)  
 **Pilot:** Upplands Väsby kommun + Civilförsvarsförbundet Väsby  
-**Platform:** Built on [CivicBase](../CivicBase)  
-**Currency:** Uses Hearts from [love-ledger](../love-ledger)  
+**Current Platform:** Firebase (MVP) → CivicBase (Production, late 2026)  
+**Currency:** Uses Hearts concept from [love-ledger](../love-ledger)  
+**Timeline:** MVP pilot Q2 2026, CivicBase migration Q4 2026
+
+---
+
+## 🚨 Important: Two-Phase Development Strategy
+
+**Why two phases?**
+
+Stuga's long-term vision requires robust P2P mesh networking (CivicBase), but Upplands Väsby needs a pilot by **April 2026**. Building production-grade CivicBase takes 12 months with expert help (starting August 2026 when consultant is hired).
+
+**Solution:** Build working MVP first, migrate to production infrastructure later.
+
+### Phase 1: MVP (Firebase) - Jan-Jun 2026
+
+**Goal:** Validate Stuga concept with real users  
+**Stack:** React Native + Firebase + Basic Bluetooth  
+**Users:** 20-50 pilot users in Väsby  
+**Features:** Core functionality, "good enough" offline support  
+
+### Phase 2: Production (CivicBase) - Aug 2026-2027
+
+**Goal:** Production-grade P2P mesh infrastructure  
+**Stack:** React Native + CivicBase + Full libp2p mesh  
+**Users:** 100+ users, multiple municipalities  
+**Features:** True offline mesh, advanced crypto, full sovereignty  
+
+**This document describes BOTH phases clearly.**
 
 ---
 
@@ -31,7 +58,7 @@ Stuga is an app that helps neighbors coordinate resources and mutual aid during 
 **🏘️ Grannkarta (Neighborhood Map)**
 - Visa grannar inom 500m som också använder Stuga
 - Vilka resurser de kan dela (mat, verktyg, kunskap)
-- Fungerar via Bluetooth när internet är nere
+- MVP: Firebase location sync | Production: P2P Bluetooth mesh
 
 **🤝 Resursdelning (Resource Sharing)**
 - "Jag behöver: såg, värme, mat, hjälp med..."
@@ -39,13 +66,13 @@ Stuga is an app that helps neighbors coordinate resources and mutual aid during 
 - Enkel matchning mellan behov och tillgångar
 
 **💖 Hearts-valuta (Hearts Currency)**
-- Spåra ömsesidig hjälp med Hearts från love-ledger
+- Spåra ömsesidig hjälp med Hearts från love-ledger-konceptet
 - "Du hjälpte mig snöskotta → +50 Hearts"
 - Bygger kultur av ömsesidighet som fortsätter efter krisen
 
 **📡 Offline-kapabel (Offline Capable)**
-- Mesh-nätverk via Bluetooth/Wi-Fi Direct
-- Synkroniserar när internet återvänder
+- MVP: Firebase offline persistence (delayed sync when connection returns)
+- Production: True mesh-nätverk via Bluetooth/Wi-Fi Direct
 - Fungerar i 72+ timmar utan anslutning
 
 **🛡️ Integrerad med FRG (Integrated with FRG)**
@@ -57,44 +84,102 @@ Stuga is an app that helps neighbors coordinate resources and mutual aid during 
 
 ## Teknisk Grund / Technical Foundation
 
-### Bygger på CivicBase-plattformen
+### MVP Architecture (Phase 1: Jan-Jun 2026)
 
-Stuga är **inte** en fristående app - det är en applikation byggd på [CivicBase](../CivicBase) infrastruktur:
+**Frontend:**
+- React Native (Expo framework)
+- Cross-platform iOS/Android from single codebase
+- AI-assisted development (Claude, Gemini for implementation)
 
-**CivicBase tillhandahåller:**
+**Backend:**
+- **Firebase Firestore** (real-time database with offline support)
+- **Firebase Auth** (with BankID integration)
+- **Firebase Functions** (serverless backend logic)
+- **SQLite** (local cache for offline data)
+
+**Offline Support:**
+- Firestore offline persistence (built-in)
+- Queue transactions for later sync
+- Basic Bluetooth neighbor discovery (react-native-ble-plx)
+
+**Why Firebase for MVP?**
+- ✅ 2-3 month development time (realistic for pilot deadline)
+- ✅ Proven offline support (works well enough for validation)
+- ✅ BankID integration available
+- ✅ Free for pilot scale (<50 users)
+- ✅ AI assistants (Claude) excel at Firebase development
+- ✅ Focus on UX/validation, not infrastructure complexity
+
+**Limitations acknowledged:**
+- ⚠️ Not true P2P mesh (delayed sync to central server)
+- ⚠️ Data stored on Google servers (not sovereign)
+- ⚠️ Requires eventual internet connection for sync
+- ⚠️ Limited Bluetooth range (direct connections only)
+
+**Why this is OK for pilot:**
+- Validates Hearts concept
+- Tests resource matching UX
+- Gathers user requirements
+- Proves municipal interest
+- Informs CivicBase development
+
+### Production Architecture (Phase 2: Aug 2026-2027)
+
+**Migration to CivicBase platform:**
+
+**CivicBase will provide:**
 - Offline-först P2P-nätverk (libp2p)
 - Agent-centrisk datamodell
 - End-to-end kryptering (AES-256-GCM)
-- Mesh-nätverk backup
+- True mesh-nätverk (multi-hop Bluetooth/Wi-Fi)
 - GDPR-efterlevnad by design
+- No central servers (true data sovereignty)
 
-**Stuga tillför:**
-- Grannsamverkans-specifik logik
-- Resursdelning UI
-- Hearts-integration från love-ledger
+**Stuga will add:**
+- Grannsamverkans-specifik logik (reused from MVP)
+- Resursdelning UI (same React Native components)
+- Hearts-integration (refined based on pilot feedback)
 - FRG/Civilförsvarsförbundet koppling
-- Svensk totalförsvarsfokus
 
-### Relation till love-ledger
+**Migration plan:**
+```
+Q3 2026: CivicBase mesh ready (consultant builds)
+Q4 2026: Stuga backend migration begins
+  - Keep React Native UI (100% reusable)
+  - Swap Firebase → CivicBase backend
+  - Progressive rollout (beta → full)
+Q1 2027: Full CivicBase deployment
+  - All users migrated
+  - Firebase deprecated
+  - True P2P mesh operational
+```
 
-Stuga använder **Hearts-valutan** från [love-ledger](../love-ledger) projektet:
+**User experience during migration:**
+- Gradual improvements (better offline, longer range)
+- No disruptive "everything changes" moment
+- Data preserved and migrated
+- "Stuga just got better!"
 
-**love-ledger:** Global vårdekonomisk vision  
-**Stuga:** Svensk krisberedskapsimplementation
+### Relation to love-ledger
 
-Hearts i Stuga spårar ömsesidig hjälp under kriser:
+Stuga uses the **Hearts currency concept** from [love-ledger](../love-ledger) project:
+
+**love-ledger:** Global care economy vision with AUBI, Leaves NFTs, complex validation  
+**Stuga:** Swedish crisis-focused implementation with simplified Hearts
+
+Hearts in Stuga track mutual aid during crises:
 - Granne hjälper med snöskottning → +30 Hearts
 - Delar generator med grannfamilj → +80 Hearts
 - Lagar mat åt äldre grannar → +50 Hearts
 
-**Skillnad från love-ledger:**
-- Ingen AUBI-integration (inga kronor, bara Hearts)
-- Ingen Leaves (ekologiska NFTs)
-- Ingen Community Weaver-validering (enkel peer-godkännande)
-- Fokus på krisscenarier, inte vardaglig vårdekopi
+**Differences from love-ledger:**
+- No AUBI-integration (no fiat currency, Hearts only)
+- No Leaves (ecological NFTs)
+- No Community Weaver-validation (simple peer confirmation)
+- Focus on crisis scenarios, not everyday care economy
 
-**Framtida koppling:**
-När love-ledger implementeras i Sverige kan Stuga-Hearts integreras i det större vårdekonomi-systemet. Men för MVPn: Stuga är fristående krisberedskap.
+**Future connection:**
+If/when love-ledger is implemented in Sweden, Stuga Hearts could integrate with the larger care economy system. But for MVP: Stuga is standalone crisis preparedness.
 
 ---
 
@@ -102,7 +187,7 @@ När love-ledger implementeras i Sverige kan Stuga-Hearts integreras i det stör
 
 ### Primär: Grannskapsgrupper (Primary: Neighborhood Groups)
 
-**Väsby-piloter:**
+**Väsby-pilot:**
 - Bostadsområden i Upplands Väsby
 - Villaområden med aktiva Hemvärnsmedlemmar
 - Föreningsaktiva grannskapsgrupper
@@ -122,7 +207,7 @@ När love-ledger implementeras i Sverige kan Stuga-Hearts integreras i det stör
 
 **Användning:**
 - Koordinera medlemmar under övningar
-- Testa mesh-nätverk kapacitet
+- Testa offline-kapacitet (först Firebase, sen CivicBase mesh)
 - Koppla till kommunal beredskapsplan
 
 ### Tertiär: Kommunal Beredskap (Tertiary: Municipal Preparedness)
@@ -143,228 +228,312 @@ När love-ledger implementeras i Sverige kan Stuga-Hearts integreras i det stör
 
 ### Nuvarande Status (December 2025)
 
-**✅ Teknisk Grund:**
-- CivicBase-plattformen utvecklad (proof-of-concept)
-- Offline P2P-nätverk fungerar
-- Hearts-koncept definierat
+**✅ Planering:**
+- MVP architecture defined (Firebase-based)
+- UI/UX specifications complete
+- Technical specifications documented
+- AI-assisted development approach planned
 
 **🔄 Pågående:**
-- Dialoger med Upplands Väsby kommun
-- Partnership-diskussioner med Civilförsvarsförbundet
-- UI/UX-design för Stuga-specifik funktionalitet
+- Dialoger med Upplands Väsby kommun (waiting for beredskapsamordnare contact)
+- Partnership-diskussioner med Civilförsvarsförbundet Väsby (waiting for response)
+- Preparing meeting materials (one-pager, presentation)
 
 **⏳ Väntande:**
 - Institutionellt stöd från Väsby
-- Vinnova-finansiering för CivicBase (2.5M SEK)
-- MCF pilotfinansiering
+- Vinnova-finansiering för CivicBase (2.5M SEK, 12 månader)
+- MCF pilot-financing discussion
 
-### Fas 1: MVP (Q1-Q2 2026)
+### Phase 1: MVP Development (Q1-Q2 2026)
 
-**Om finansiering säkras:**
+**Month 1 (January 2026) - Planning & Setup**
+- [ ] Väsby confirms interest
+- [ ] Firebase project setup
+- [ ] React Native Expo initialization
+- [ ] BankID test environment
+- [ ] AI development workflow (Claude/Gemini for coding)
 
-**Sprint 1-4 (3 månader):**
-- [ ] Grannkarta-funktion (Bluetooth-upptäckt)
-- [ ] Resursdelning (behov + erbjudanden)
-- [ ] Hearts-integration (enkel spårning)
-- [ ] Offline-läge (mesh-nätverk)
-- [ ] Svenska + Engelsk UI
+**Month 2 (February 2026) - Core Features**
+- [ ] Firebase Firestore schema (users, resources, hearts)
+- [ ] React Native UI (grannkarta, resource posting)
+- [ ] Hearts transactions (basic send/receive)
+- [ ] Offline persistence (Firestore + SQLite)
+- [ ] BankID authentication flow
 
-**Sprint 5-6 (6 veckor):**
-- [ ] Pilottest med 20-30 grannar i Väsby
-- [ ] Civilförsvarsförbundet-integration
-- [ ] Feedback-iteration
-- [ ] Offline-scenariotest (72-timmar)
+**Month 3 (March 2026) - Polish & Testing**
+- [ ] Basic Bluetooth neighbor discovery
+- [ ] Swedish translations complete
+- [ ] Accessibility improvements (WCAG 2.1 AA)
+- [ ] Beta testing with 5-10 users
+- [ ] Bug fixes and UX refinements
 
-**Framgångskriterier:**
-- App fungerar offline i 72+ timmar
-- Grannar kan dela resurser via Bluetooth-mesh
-- Hearts spårar ömsesidig hjälp
-- Användare upplever systemet som användbart
+**Month 4-6 (April-June 2026) - Pilot Running**
+- [ ] Recruit 20-50 Väsby users
+- [ ] Onboarding and support
+- [ ] Monitor usage and gather feedback
+- [ ] Document learnings for CivicBase requirements
+- [ ] Evaluation report for municipality
 
-### Fas 2: Skalning (Q3-Q4 2026)
+**Pilot Success Criteria:**
+- 30+ active users
+- Offline capability demonstrated (72-hour test)
+- Hearts transactions functional
+- Positive user feedback (>70% satisfaction)
+- Municipality endorsement for continued development
 
-**Sprint 7-12 (6 månader):**
-- [ ] Expansion till 100-200 användare (flera grannskap)
-- [ ] FRG-grupp integration
-- [ ] Kommunal beredskapsplan-koppling
-- [ ] Native mobilapp (iOS/Android)
-- [ ] Onboarding-material på svenska
+### Phase 2: CivicBase Migration (Q3-Q4 2026)
 
-### Fas 3: Regional (2027)
+**If Vinnova grant approved:**
 
-- [ ] Expansion till andra kommuner
-- [ ] Integration med MCF totalförsvarssystem
-- [ ] Eventuell koppling till love-ledger (om implementerat)
+**August 2026: Distributed Systems Consultant Hired**
+- Expert begins CivicBase production development
+- User requirements from Stuga pilot inform architecture
+- Parallel development (Stuga keeps running on Firebase)
+
+**September-November 2026: CivicBase Core Built**
+- libp2p mesh networking
+- Agent-centric database
+- End-to-end encryption
+- BankID integration
+- Offline sync protocol
+
+**December 2026: Migration Preparation**
+- CivicBase SDK for React Native
+- Migration testing with beta users (5-10)
+- Data migration scripts
+- Rollback plan if issues
+
+**Q1 2027: Progressive Migration**
+- 10% rollout → monitoring
+- 25% rollout → feedback
+- 50% rollout → optimization
+- 100% rollout → complete
+- Firebase sunset
+
+**Migration Success Criteria:**
+- No data loss
+- Better offline capability (multi-hop mesh)
+- Improved user experience
+- GDPR compliance validated
+- Security audit passed
+
+### Phase 3: Scale (2027+)
+
+**If pilot successful:**
+- [ ] Expansion to other Swedish municipalities
+- [ ] Integration with MCF totalförsvar systems
+- [ ] Native mobile apps (not just Expo)
+- [ ] Advanced FRG coordination features
+- [ ] Possible love-ledger integration (if implemented)
 
 ---
 
 ## Varför Stuga, inte bara CivicBase? / Why Stuga, not just CivicBase?
 
-**CivicBase** = Infrastrukturplattform (som libp2p, SQLite)  
-**Stuga** = Grannsamverkansapplikation (som Swish, men för ömsesidig hjälp)
+**CivicBase** = Infrastructure platform (like libp2p, SQLite)  
+**Stuga** = Crisis coordination application (like Swish, but for mutual aid)
 
 **Analogier:**
 
-| Infrastruktur | Applikation |
-|---------------|-------------|
+| Infrastructure | Application |
+|----------------|-------------|
 | Internet | Gmail |
 | Telefonnät | Swish |
 | CivicBase | Stuga |
 
-**CivicBase kan användas för många applikationer:**
+**CivicBase can power many applications:**
 - TAK-405 (kollektivtrafikvälfärd)
 - DPOP (politisk organisering)
 - DiDiS (digital identitet)
-- **Stuga (grannsamverkan)**
+- **Stuga (grannsamverkan)** ← Our first application
 
-**Stuga fokuserar på:**
-- Grannskap (inte hela kommunen)
-- Krisberedskap (inte vardaglig vård)
-- Svensk totalförsvar (inte global vårdekopi)
-- Praktisk resursdelning (inte filosofisk transformation)
+**Stuga focuses on:**
+- Grannskap (not whole municipality)
+- Krisberedskap (not everyday coordination)
+- Svensk totalförsvar (not global systems)
+- Practical resource sharing (not philosophical transformation)
+
+**Development phasing:**
+- Phase 1: Prove Stuga concept works (Firebase MVP)
+- Phase 2: Build robust infrastructure (CivicBase)
+- Phase 3: Stuga runs on CivicBase + expand to new applications
 
 ---
 
 ## Tekniska Detaljer / Technical Details
 
-### Arkitektur
+### MVP Architecture (Firebase-Based)
 
 ```
 ┌─────────────────────────────────────┐
-│ Stuga App (React Native)            │
+│ Stuga App (React Native + Expo)    │
 │ - Grannkarta UI                     │
 │ - Resursdelning                     │
 │ - Hearts-integration                │
+│ - Expo managed workflow             │
+└────────────┬────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────┐
+│ Firebase Backend                    │
+│ - Firestore (real-time database)    │
+│ - Auth (BankID integration)         │
+│ - Functions (serverless backend)    │
+│ - Storage (profile images)          │
+└────────────┬────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────┐
+│ Local Storage                       │
+│ - SQLite (offline cache)            │
+│ - Firestore offline persistence     │
+│ - AsyncStorage (user preferences)   │
+└─────────────────────────────────────┘
+```
+
+### Production Architecture (CivicBase)
+
+```
+┌─────────────────────────────────────┐
+│ Stuga App (React Native - Same!)   │
+│ - Grannkarta UI (reused)            │
+│ - Resursdelning (reused)            │
+│ - Hearts-integration (reused)       │
 └────────────┬────────────────────────┘
              │
              ▼
 ┌─────────────────────────────────────┐
 │ CivicBase Platform                  │
 │ - libp2p P2P-nätverk                │
-│ - SQLite lokal databas              │
-│ - Offline-synkronisering            │
-│ - Mesh-nätverk (Bluetooth/WiFi)     │
-└────────────┬────────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────────┐
-│ love-ledger (Hearts Logic)          │
-│ - Hearts-skapande                   │
-│ - Transaktionslogik                 │
-│ - Ömsesidighetsspårning            │
+│ - SQLite agent-centric DB           │
+│ - Offline-synkronisering (mesh)     │
+│ - End-to-end encryption             │
+│ - No central servers                │
 └─────────────────────────────────────┘
 ```
 
-### Data Model (Förenklad)
+**What stays the same:** React Native UI (100% reusable)  
+**What changes:** Backend layer (Firebase → CivicBase)
+
+### Data Model (Same for Both Phases)
 
 **Granne (Neighbor):**
 ```typescript
 {
   id: string,
   name: string,
+  bankid_verified: boolean,
   location: {lat: number, lon: number},
-  distance: number, // meters
   resources_offered: string[],
   resources_needed: string[],
   hearts_balance: number,
-  last_seen: timestamp,
-  bluetooth_address: string // för mesh
+  availability_status: 'available' | 'away' | 'emergency'
 }
 ```
 
-**Resursdelning (Resource Exchange):**
+**Resursdelning (Resource):**
 ```typescript
 {
   id: string,
-  type: 'need' | 'offer',
-  category: 'mat' | 'verktyg' | 'kunskap' | 'värme' | 'transport' | 'annat',
+  user_id: string,
+  type: 'offer' | 'need',
+  category: 'mat' | 'värme' | 'verktyg' | ...,
   description: string,
-  from_neighbor: string,
-  to_neighbor: string | null, // null = öppen förfrågan
-  hearts_value: number | null, // tilldelat efter transaktion
   status: 'open' | 'matched' | 'completed',
-  offline_sync_status: 'synced' | 'pending'
+  hearts_value: number | null
 }
 ```
 
-**Hearts-transaktion:**
+**Hearts Transaction:**
 ```typescript
 {
   id: string,
-  from: string,
-  to: string,
+  from_user: string,
+  to_user: string,
   amount: number,
   reason: string,
-  timestamp: timestamp,
-  confirmed_by_recipient: boolean,
-  offline_created: boolean // skapad offline, synkad senare
+  confirmed_by_receiver: boolean,
+  timestamp: timestamp
 }
 ```
 
-### Offline-kapabilitet
+### Offline Capability
 
-**Scenario: 72-timmars internetavbrott**
+**MVP (Firebase):**
+- Firestore offline persistence (built-in, ~10MB cache)
+- Queued transactions sync when connection returns
+- SQLite for larger local storage
+- Works for 24-48 hours offline (depends on cache size)
 
-**Dag 1 (0-24h):**
-- App fortsätter fungera via Bluetooth-mesh
-- Grannar inom 50m kan kommunicera direkt
-- Grannar 50-500m når varandra via mesh-hopp
-- Hearts-transaktioner skapas lokalt
-
-**Dag 2 (24-48h):**
-- Data synkroniseras mellan grannar via mesh
-- Konflikter löses (vector clocks + last-write-wins)
-- Grannkarta uppdateras när enheter möts
-
-**Dag 3 (48-72h):**
-- System fortsätter fungera
-- Tombstone-märkning för raderade poster
-- Eventual consistency när internet återvänder
-
-**Internet återvänder:**
-- Automatisk synkronisering till CivicBase
-- Konfliktlösning (låt lokal data vinna vid kris)
-- Validering av Hearts-transaktioner
+**Production (CivicBase):**
+- True P2P mesh (no server needed)
+- Multi-hop Bluetooth/Wi-Fi Direct
+- Unlimited offline duration (72+ hours easily)
+- Data syncs peer-to-peer when devices in range
 
 ---
 
 ## Säkerhet & Integritet / Security & Privacy
 
-### GDPR-efterlevnad
+### MVP (Firebase)
 
-**Agent-centrisk data:**
-- Varje användare äger sin data (SQLite på enhet)
-- Ingen central databas att hacka
-- Rätt att bli glömd: radera appen = radera data
+**Data Location:**
+- Stored on Google Cloud servers (Europe region)
+- Subject to GDPR (Google is compliant)
+- Not sovereign (controlled by Google)
 
-**Vad delas med grannar:**
-- Namn, ungefärlig plats (500m-radie)
-- Resurser erbjudna/efterfrågade
-- Hearts-transaktioner (bara mellan parter)
+**Encryption:**
+- TLS in transit
+- AES-256 at rest (Google manages keys)
+- End-to-end only for some data types
 
-**Vad delas INTE:**
-- Exakt hemadress (bara Bluetooth-räckvidd)
-- Personligt personnummer
-- Finansiell data
-- Kommunikation utanför app
+**Authentication:**
+- BankID (Swedish national identity)
+- Firebase Auth integration
+- Prevents sybil attacks
 
-### Säkerhet
+**Privacy:**
+- Location rounded to ~50m
+- Exact address not shared
+- Hearts balances visible to neighbors
 
-**Kryptering:**
+**Acknowledged limitations:**
+- Data on US company servers (not ideal for totalförsvar)
+- Google could theoretically access data
+- Requires trust in Firebase service
+
+**Why acceptable for pilot:**
+- Standard practice for most Swedish apps
+- Focus is validating concept, not perfect sovereignty
+- Will migrate to sovereign solution (CivicBase) later
+
+### Production (CivicBase)
+
+**Data Sovereignty:**
+- Agent-centric (each user owns their data)
+- Stored locally on user's device
+- No central database to hack or subpoena
+
+**Encryption:**
 - End-to-end: AES-256-GCM
-- Signaturer: Ed25519
-- Mesh-kommunikation: TLS 1.3
+- Perfect forward secrecy
+- User controls keys
 
-**Identitet:**
-- BankID-validering vid onboarding (förhindrar sybil-attacker)
-- Lokalt lagrad identitetsnyckel
-- Ingen central ID-databas
+**Authentication:**
+- BankID (same as MVP)
+- Local identity storage
+- No central identity database
 
-**Attacker vi skyddar mot:**
-- Man-in-the-middle: E2E-kryptering
-- Sybil-attacker: BankID-verifiering
-- Data breach: Ingen central databas
-- GPS-tracking: Bara ungefärlig plats delad
+**Privacy:**
+- Location approximation (user-controlled precision)
+- Mesh communication encrypted
+- No tracking by central authority
+
+**Totalförsvar-aligned:**
+- ✅ Works without internet (true offline)
+- ✅ No foreign cloud dependencies
+- ✅ Data stays in Sweden
+- ✅ Resilient to infrastructure attacks
 
 ---
 
@@ -372,49 +541,42 @@ När love-ledger implementeras i Sverige kan Stuga-Hearts integreras i det stör
 
 ### Scenario 1: Vinterström (Winter Power Outage)
 
-**Situation:**
-- Snöoväder slår ut el i Väsby (faktiskt hände januari 2024)
-- Internet fungerar inte
-- Telefonnät överbelastat
-- Värme behövs
+**MVP behavior:**
+- Anna opens app (works from local cache)
+- Sees neighbors last synced 2 hours ago
+- Posts "Behöver värme" (queued for sync)
+- Walks to Sven's house (remembered from map)
+- When power returns: transaction syncs
 
-**Stuga-användning:**
-1. Anna öppnar app (fungerar offline via Bluetooth)
-2. Ser att Sven 200m bort har generator
-3. Skickar begäran: "Kan vi dela värme? +50 Hearts"
-4. Sven accepterar via Bluetooth-mesh
-5. Annas familj går till Svens hus
-6. Efter krisen: Hearts registreras, ömsesidighet förstärks
+**Production behavior:**
+- Anna opens app (mesh network active via Bluetooth)
+- Sees Sven 200m away via mesh (real-time)
+- Sends request via Bluetooth mesh (no internet needed)
+- Sven gets notification immediately
+- Hearts transaction recorded locally, syncs via mesh
 
 ### Scenario 2: Livsmedelsbrist (Food Shortage)
 
-**Situation:**
-- Hamn blockad → butiker tomma (hypotetisk)
-- Internet fungerar sporadiskt
-- Grannar har olika resurser
-
-**Stuga-användning:**
-1. Erik har för mycket potatis från trädgården
-2. Postar erbjudande: "10kg potatis, gratis (eller +30 Hearts)"
-3. Maria behöver mat för familj
-4. Matchar via Bluetooth när de är inom räckvidd
-5. Utbyte sker, Hearts tilldelas
-6. Nätverk av ömsesidighet växer
+**Both MVP and Production:**
+- Erik posts "10kg potatis, +30 Hearts"
+- Maria matches (offline or online)
+- Exchange happens in person
+- Hearts transferred after confirmation
+- Mutual aid culture strengthened
 
 ### Scenario 3: FRG-övning (FRG Exercise)
 
-**Situation:**
-- Civilförsvarsförbundet testar beredskap
-- Simulerad 48-timmars IT-avbrott
-- 30 medlemmar deltar
+**MVP (limited):**
+- Simulated internet outage (airplane mode)
+- Users work from cached data
+- Record actions offline
+- Sync when "internet returns" (end of exercise)
 
-**Stuga-användning:**
-1. FRG-koordinator skapar "övnings-läge"
-2. Medlemmar testar mesh-nätverk
-3. Resursdelning simuleras
-4. Hearts spårar "transaktioner"
-5. Efter övning: rapport om vad fungerade
-6. Feedback till CivicBase-utveckling
+**Production (full capability):**
+- True mesh network via Bluetooth
+- No internet needed at all
+- Real-time coordination across neighborhood
+- Proves 72-hour resilience capability
 
 ---
 
@@ -423,37 +585,60 @@ När love-ledger implementeras i Sverige kan Stuga-Hearts integreras i det stör
 **Varför inte bara använda...**
 
 ### Facebook-grupper?
-- ❌ Kräver internet
-- ❌ Ingen offline-kapabilitet
-- ❌ Ingen resursdelnings-struktur
-- ❌ Ingen Hearts-spårning
-- ✅ Stuga: Fungerar offline, strukturerad resursdelning
+- ❌ Kräver internet (alltid)
+- ❌ Ingen offline-kapabilitet alls
+- ❌ Ingen strukturerad resursdelning
+- ✅ Stuga: Works offline (MVP: limited, Production: fully)
 
 ### WhatsApp/Signal?
 - ❌ Kräver telefonnät eller internet
 - ❌ Ingen geografisk matchning
 - ❌ Ingen systematisk resursdelning
-- ✅ Stuga: Bluetooth-mesh, grannkarta, strukturerade resurser
+- ✅ Stuga: Neighbor map + structured resources
 
-### Zello (walkie-talkie app)?
-- ❌ Bara röstsamtal
-- ❌ Ingen resursdelning
-- ❌ Ingen ömsesidighetsspårning
-- ✅ Stuga: Text + röst + resursstruktur + Hearts
-
-### Klassisk granntavla?
-- ✅ Fungerar utan el!
-- ❌ Ingen digital sökning
-- ❌ Ingen ömsesidighetsspårning
-- ❌ Begränsad till ett område
-- ⚖️ Komplement: Stuga digitaliserar tavlan, backup är analog
+### Existing crisis apps?
+- ⚠️ Most require central servers
+- ⚠️ Proprietary/closed source
+- ⚠️ No mutual aid tracking (Hearts)
+- ✅ Stuga: Open source + Hearts economy
 
 **Stugas unika värde:**
-- Offline-först design
-- Bluetooth-mesh (verkligen fungerar utan internet)
-- Hearts ömsesidighetsspårning
-- Totalförsvarsinriktad
-- CivicBase infrastruktur (beprövad P2P-teknik)
+- Crisis-focused design
+- Offline-capable (MVP: good enough, Production: excellent)
+- Hearts mutual aid tracking
+- Totalförsvar-aligned
+- Open source (AGPL-3.0)
+- Progressive enhancement (MVP → Production)
+
+---
+
+## AI-Assisted Development Strategy
+
+**Development approach:**
+- **Claude/Gemini** handle implementation (React Native + Firebase code)
+- **Björn** provides requirements, architecture decisions, user research
+- **Iterative refinement** via AI pair programming
+
+**Why this works:**
+- ✅ AI assistants excel at React Native + Firebase
+- ✅ Björn focuses on vision, strategy, user needs
+- ✅ Fast iteration (AI writes code, Björn reviews)
+- ✅ Good use of recovery time (meaningful but not overwhelming)
+
+**Development workflow:**
+```
+1. Björn: Define feature requirement
+2. Claude: Implement React Native component
+3. Björn: Test and provide feedback
+4. Claude: Refine based on feedback
+5. Repeat until feature complete
+```
+
+**Benefits:**
+- Realistic 2-3 month timeline
+- Focus on UX/product, not syntax
+- Learn by reviewing code, not writing from scratch
+- Sustainable pace during recovery period
 
 ---
 
@@ -468,15 +653,13 @@ När love-ledger implementeras i Sverige kan Stuga-Hearts integreras i det stör
 
 **Kontakt:** bjorn.kenneth.holmstrom@gmail.com
 
-### Utvecklare
-- React Native-utvecklare (mobilapp)
-- P2P-nätverk expert (mesh-optimering)
-- UI/UX-designer (användarvänlighet för 7-90 år)
-
-**Se:** [CivicBase CONTRIBUTING.md](../CivicBase/CONTRIBUTING.md)
+### Utvecklare (Optional - After Pilot Success)
+- React Native-utvecklare (if scaling beyond AI-assisted approach)
+- P2P-nätverk expert (for CivicBase migration support)
+- UI/UX-designer (polish and accessibility)
 
 ### Institutionella Partners
-- Upplands Väsby kommun (referenskommun)
+- Upplands Väsby kommun (reference municipality)
 - Civilförsvarsförbundet lokalavdelningar
 - Andra kommuner intresserade av pilot
 
@@ -486,24 +669,41 @@ När love-ledger implementeras i Sverige kan Stuga-Hearts integreras i det stör
 
 ## Finansiering / Funding
 
-### Nuvarande Status
+### MVP Pilot (Phase 1: Jan-Jun 2026)
 
-**Stuga ingår i CivicBase-grant:**
-- Vinnova-ansökan: 2.5M SEK (12 månader)
-- MCF pilotfinansiering: Under diskussion
-- Status: Väntande institutionellt stöd från Väsby
+**Current status:** Self-funded during recovery period
 
-**Budget för Stuga-utveckling:**
-- ~400K SEK av total CivicBase-budget
-- 2 månader utvecklartid (ur 12-månadersperiod)
-- Pilottest med 50-100 användare
+**Costs:**
+- Development: 0 kr (AI-assisted, own time during sick leave)
+- Firebase: 0 kr (free tier covers <50 users)
+- Testing devices: Personal phones
+- **Total: ~0 kr**
+
+### Production Development (Phase 2: Aug 2026+)
+
+**Vinnova-ansökan: 2.5M SEK (12 månader)**
+- 800K SEK: Distributed Systems Consultant (CivicBase development)
+- 400K SEK: Stuga-specific features + migration
+- 300K SEK: Security audit + penetration testing
+- 200K SEK: Pilotexpansion (100+ användare)
+- 800K SEK: Overhead, administration, documentation
+
+**Status:** Application on hold pending:
+- Väsby institutional backing (beredskapsamordnare confirmation)
+- Civilförsvarsförbundet partnership
+- Pilot results from Phase 1
+
+**Backup funding:**
+- MCF totalförsvar pilot (exploratory)
+- Region Stockholm (TAK-405 connection)
+- EU Digital Sovereignty programs
 
 ### Framtida Finansiering
 
-**Om piloten lyckas:**
-- Expansion till andra kommuner
-- MCF stöd för FRG-integration
-- Eventuell EU Digital Sovereignty funding
+**If pilot succeeds:**
+- Expansion to other municipalities
+- MCF support for FRG-integration
+- Possible EU funding for cross-border coordination
 
 ---
 
@@ -514,10 +714,15 @@ När love-ledger implementeras i Sverige kan Stuga-Hearts integreras i det stör
 Varför AGPL?
 - Säkerställer att förbättringar delas mellan kommuner
 - Förhindrar vendor lock-in
-- Möjliggör konkurrenskraftig supportmarknad
+- Möjliggör konkurrensmässig supportmarknad
 - Överensstämmer med public infrastructure-uppdraget
 
-Se [LICENSE](../CivicBase/LICENSE) i CivicBase-repository.
+**Applies to:**
+- ✅ MVP (Firebase-based)
+- ✅ Production (CivicBase-based)
+- ✅ All Stuga code regardless of backend
+
+Se LICENSE i repository.
 
 ---
 
@@ -529,42 +734,54 @@ Lead Architect, Global Governance Frameworks
 bjorn.kenneth.holmstrom@gmail.com
 
 **Organisation:**  
-Global Governance Frameworks (forskningsinitiativ)  
+Global Governance Frameworks (research initiative)  
 https://github.com/GlobalGovernanceFrameworks
 
 **Relaterade Projekt:**
-- [CivicBase](../CivicBase) - Plattformen Stuga bygger på
-- [love-ledger](../love-ledger) - Hearts-valutans ursprung
+- [CivicBase](../CivicBase) - Platform Stuga will migrate to (Production)
+- [love-ledger](../love-ledger) - Hearts currency inspiration
 
 ---
 
 ## Vanliga Frågor / FAQ
 
-**Q: Fungerar Stuga verkligen utan internet?**  
-A: Ja, via Bluetooth Low Energy mesh-nätverk. Grannar inom 50m kommunicerar direkt, grannar 50-500m via mesh-hopp. Synkronisering sker när internet återvänder.
+**Q: Varför Firebase först, sedan CivicBase?**  
+A: Timeline. Väsby needs pilot April 2026. CivicBase takes 12 months to build properly (requires distributed systems expert, starting August 2026). Firebase gets us to pilot in 3 months, then we upgrade infrastructure when ready.
 
-**Q: Behöver jag BankID?**  
-A: Ja, för onboarding (förhindrar falska konton). Men efter det fungerar appen utan BankID.
+**Q: Är Firebase-versionen "riktig" offline-kapabel?**  
+A: Delvis. Firebase offline persistence fungerar för 24-48 timmar. Det är inte lika bra som CivicBase mesh (72+ timmar, true P2P), men tillräckligt för att validera konceptet. Vi är ärliga om begränsningarna.
+
+**Q: Vad händer med min data vid migrering till CivicBase?**  
+A: All data migreras säkert. Din Hearts-historik, resursdelningar, och grannkontakter bevaras. Du ser gradvis förbättring (bättre offline, längre räckvidd), inte störande byte.
 
 **Q: Kostar Hearts kronor?**  
-A: Nej. Hearts är ömsesidighetsspårning, inte pengar. Ingen koppling till bankkonto (för MVPn).
+A: Nej. Hearts är ömsesidighetsspårning, inte pengar. Ingen koppling till bankkonto.
 
-**Q: Vad händer om någon missbrukar systemet?**  
-A: Peer-validering + BankID-verifiering förhindrar de flesta missbruk. Lokalsamhället ser vem som hjälper och vem som bara tar.
+**Q: Fungerar Stuga verkligen utan internet?**  
+A: MVP (Firebase): Fungerar 24-48 timmar med cachad data. Production (CivicBase): Fungerar 72+ timmar via Bluetooth mesh. Båda tillräckliga för "de första 72 timmarna" som MCF pratar om.
+
+**Q: Behöver jag BankID?**  
+A: Ja, för onboarding (förhindrar falska konton). Men efter det fungerar appen offline.
+
+**Q: Vad händer om Firebase stänger ner?**  
+A: Vi migrerar till CivicBase Q4 2026 oavsett. Firebase är tillfällig. Långsiktigt kör vi på egen infrastruktur (ingen vendor lock-in).
 
 **Q: Kan Stuga integreras med FRG?**  
-A: Ja, det är målet. Civilförsvarsförbundet Väsby är pilot-partner.
+A: Ja. MVP har grundläggande FRG-koppling. Production (CivicBase) ger avancerade koordineringsfunktioner.
 
 **Q: Är detta relaterat till Fjärilspartiet?**  
-A: Björn Holmström är grundare av båda. Fjärilspartiet förespråkar policy för denna typ av infrastruktur (STR-506), men Stuga/CivicBase är oberoende forskningsprojekt.
+A: Björn Holmström grundade båda. Fjärilspartiet förespråkar policy (STR-506), men Stuga/CivicBase är oberoende forskningsprojekt. Ingen partipolitik i appen.
 
 **Q: Hur skiljer sig Stuga från love-ledger?**  
-A: love-ledger är global vårdekonomivision med AUBI-integration. Stuga är svensk krisberedskapsimplementation. Delar Hearts-koncept, men olika scope.
+A: love-ledger är global vårdekonomivision med AUBI, Leaves, complex validation. Stuga är svensk krisberedskaps-implementation med bara Hearts. Olika scope, delar koncept.
+
+**Q: Varför AI-assisterad utveckling?**  
+A: Effektivt under återhämtningsperiod. AI (Claude/Gemini) skriver kod, Björn fokuserar på strategi, UX, användarbehov. Realistisk 2-3 månaders tidslinje. Sustainable.
 
 ---
 
 **Stuga.** Grannskap som fungerar när allt annat slutar fungera. 🏘️
 
-*Byggd på CivicBase-plattformen. Använder Hearts från love-ledger. Utvecklad som del av Global Governance Frameworks forskningsinitiativ.*
+*Pilot: Firebase-baserad MVP (Q2 2026). Production: CivicBase-powered (Q4 2026+). Utvecklad som del av Global Governance Frameworks forskningsinitiativ.*
 
-*Nästa steg: Säkra institutionellt stöd från Upplands Väsby kommun och Civilförsvarsförbundet för pilotstart Q2 2026.*
+*Nästa steg: Säkra institutionellt stöd från Upplands Väsby kommun och Civilförsvarsförbundet, börja MVP-utveckling januari 2026.*
