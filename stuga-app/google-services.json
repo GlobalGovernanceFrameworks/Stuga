@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "18054475774",
+    "project_id": "stuga-pilot",
+    "storage_bucket": "stuga-pilot.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:18054475774:android:7eebd6013e1a93e880daaf",
+        "android_client_info": {
+          "package_name": "org.globalgovernanceframeworks.stuga"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_4TbPVJlr4dY9Z29Nl2SWUu5t8rTydzM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
