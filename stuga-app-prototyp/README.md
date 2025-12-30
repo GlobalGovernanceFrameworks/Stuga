@@ -1,3 +1,16 @@
+# Stuga Prototyp
+
+Detta är den **första UI-prototypen** av Stuga, skapad för att visualisera konceptet.
+
+**Status:** Arkiverad - använd inte för utveckling  
+**Syfte:** Demonstration och UI-exploration
+
+**För aktiv utveckling, se:** [../stuga-app/](../stuga-app/)
+
+Denna prototyp skapades i projekteringsfasen och ersattes av den fullständiga MVP-implementationen.
+
+Ursprunglig README.md:
+
 # Stuga Demo App
 ## React Native Prototype for Meetings
 
