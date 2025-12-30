@@ -1,0 +1,163 @@
+import React, { useEffect, useState } from 'react';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../config/firebase';
+import { Resource } from '../types';
+
+export default function NeighborDetailScreen({ route }: any) {
+  const { neighbor } = route.params;
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadNeighborResources();
+  }, []);
+
+  async function loadNeighborResources() {
+    try {
+      const q = query(
+        collection(db, 'resources'),
+        where('user_id', '==', neighbor.user_id)
+      );
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Resource[];
+      setResources(data);
+    } catch (error) {
+      console.error('Error loading resources:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const offers = resources.filter(r => r.type === 'offer');
+  const needs = resources.filter(r => r.type === 'need');
+
+  return (
+    <ScrollView style={styles.container}>
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text style={styles.name}>{neighbor.name}</Text>
+          <Text style={styles.info}>🔥 {neighbor.hearts_balance} Hearts</Text>
+          <Text style={styles.info}>
+            📍 {neighbor.availability_status === 'available' ? 'Tillgänglig' : 'Borta'}
+          </Text>
+        </Card.Content>
+      </Card>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#2D5016" style={{ marginTop: 32 }} />
+      ) : (
+        <>
+          {offers.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>ERBJUDER</Text>
+              {offers.map(resource => (
+                <Card key={resource.id} style={styles.resourceCard}>
+                  <Card.Content>
+                    <Text style={styles.resourceTitle}>{resource.title}</Text>
+                    <Text style={styles.resourceDesc}>{resource.description}</Text>
+                  </Card.Content>
+                </Card>
+              ))}
+            </>
+          )}
+
+          {needs.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>BEHÖVER</Text>
+              {needs.map(resource => (
+                <Card key={resource.id} style={styles.resourceCard}>
+                  <Card.Content>
+                    <Text style={styles.resourceTitle}>{resource.title}</Text>
+                    <Text style={styles.resourceDesc}>{resource.description}</Text>
+                  </Card.Content>
+                </Card>
+              ))}
+            </>
+          )}
+
+          {resources.length === 0 && (
+            <Text style={styles.emptyText}>Inga resurser registrerade</Text>
+          )}
+        </>
+      )}
+
+      <View style={styles.actions}>
+        <Button 
+          mode="contained" 
+          style={styles.button}
+          buttonColor="#FF6B35"
+        >
+          💬 Kontakta {neighbor.name.split(' ')[0]}
+        </Button>
+        <Button 
+          mode="contained" 
+          style={styles.button}
+          buttonColor="#2D5016"
+        >
+          💖 Skicka Hearts
+        </Button>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F3F0',
+    padding: 16
+  },
+  card: {
+    marginBottom: 16,
+    backgroundColor: '#fff'
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#2D5016'
+  },
+  info: {
+    fontSize: 16,
+    marginBottom: 4,
+    color: '#666'
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 8,
+    color: '#2D5016'
+  },
+  resourceCard: {
+    marginBottom: 12,
+    backgroundColor: '#fff'
+  },
+  resourceTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4
+  },
+  resourceDesc: {
+    fontSize: 14,
+    color: '#666'
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 32,
+    fontSize: 16,
+    color: '#999'
+  },
+  actions: {
+    marginTop: 24,
+    marginBottom: 32
+  },
+  button: {
+    marginBottom: 12
+  }
+});

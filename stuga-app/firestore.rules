@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Users: All authenticated can read, only owner can write
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId);
+      allow update, delete: if isOwner(userId);
+    }
+    
+    // Resources: All can read, only owner can modify
+    match /resources/{resourceId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                       request.resource.data.user_id == request.auth.uid;
+      allow update, delete: if resource.data.user_id == request.auth.uid;
+    }
+    
+    // Hearts transactions: Both parties can read
+    match /hearts_transactions/{txId} {
+      allow read: if isAuthenticated() && 
+                     (request.auth.uid == resource.data.from_user ||
+                      request.auth.uid == resource.data.to_user);
+      allow create: if isAuthenticated() && 
+                       request.auth.uid == request.resource.data.from_user;
+      allow update: if request.auth.uid == resource.data.to_user &&
+                       request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['confirmed_by_receiver', 'completed_at']);
+    }
+    
+    // Mesh nodes: All can read, only owner can write
+    match /mesh_nodes/{nodeId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() &&
+                      request.resource.data.user_id == request.auth.uid;
+    }
+  }
+}
