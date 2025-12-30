@@ -38,7 +38,12 @@ const firebaseConfig = {
   projectId: "stuga-pilot",
   // ... etc
 };
+
+# Om appen inte laddar
+npx expo start --tunnel
+
 ```
+
 
 ## Projektstruktur
 ```
