@@ -7,11 +7,37 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 ## [Unreleased]
 
 ### Planerat
-- Hearts-transaktioner (skicka tack till grannar)
+- Cloud Functions för automatisk Hearts-balansuppdatering
 - Offline-stöd med lokal databas
 - BankID-integration
 - Bluetooth granndiscovery
 - Push-notifikationer
+
+## [0.2.0] - 2025-12-30
+
+### Tillagt
+- **Hearts-transaktioner**: Skicka tack till grannar med Hearts
+  - Snabbval (25, 50, 100 Hearts) eller anpassat belopp
+  - Valfritt meddelande med varje transaktion
+  - Visar ditt saldo och förhandsvisning
+- **Hearts Historik**: Se alla skickade och mottagna transaktioner
+  - Separata sektioner för skickat/mottagit
+  - Visa vem, när, hur mycket, och status (bekräftat/väntande)
+  - Nuvarande saldo överst
+- **Ta bort resurser**: Radera egna erbjudanden/behov
+  - Lista alla dina resurser
+  - Bekräftelsedialog innan borttagning
+- **Förbättrad UI**:
+  - Sidobredd-knappar för Lägg till / Ta bort resurser
+  - Bättre tomma tillstånd (när inga grannar/resurser finns)
+  - Förhindra att skicka Hearts till dig själv
+  - Bättre kontrast på knappar (vit text på mörk bakgrund)
+
+### Tekniskt
+- Firestore-frågor för transaktionshistorik med OR-filtrering
+- Dynamisk namnuppslagning från user_id till namn
+- Säker borttagning med bekräftelsedialog
+- Förbättrad knapppositionering med SafeAreaInsets
 
 ## [0.1.0] - 2025-12-30
 
@@ -40,4 +66,4 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 
 ---
 
-**Nästa milstolpe:** Hearts-transaktioner och offline-kapabilitet (Vecka 4-5)
+**Nästa milstolpe:** Cloud Functions för Hearts-balansuppdatering, offline-kapabilitet (Vecka 4-5)

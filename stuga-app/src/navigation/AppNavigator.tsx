@@ -4,6 +4,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import NeighborDetailScreen from '../screens/NeighborDetailScreen';
 import AddResourceScreen from '../screens/AddResourceScreen';
+import RemoveResourceScreen from '../screens/RemoveResourceScreen';
+import SendHeartsScreen from '../screens/SendHeartsScreen';
+import HeartsHistoryScreen from '../screens/HeartsHistoryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +34,21 @@ export default function AppNavigator() {
           name="AddResource" 
           component={AddResourceScreen}
           options={{ title: 'Lägg till resurs' }}
+        />
+        <Stack.Screen 
+          name="RemoveResource" 
+          component={RemoveResourceScreen}
+          options={{ title: 'Ta bort resurs' }}
+        />
+        <Stack.Screen 
+          name="SendHearts" 
+          component={SendHeartsScreen}
+          options={{ title: 'Skicka Hearts' }}
+        />
+        <Stack.Screen 
+          name="HeartsHistory" 
+          component={HeartsHistoryScreen}
+          options={{ title: 'Hearts Historik' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

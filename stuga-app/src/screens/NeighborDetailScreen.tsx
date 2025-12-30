@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { auth, db } from '../config/firebase';
 import { Resource } from '../types';
 
-export default function NeighborDetailScreen({ route }: any) {
+export default function NeighborDetailScreen({ route, navigation }: any) {
   const { neighbor } = route.params;
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
+  const currentUser = auth.currentUser;
+  const isMe = currentUser?.uid === neighbor.user_id;
+
 
   useEffect(() => {
     loadNeighborResources();
@@ -81,26 +84,44 @@ export default function NeighborDetailScreen({ route }: any) {
           )}
 
           {resources.length === 0 && (
-            <Text style={styles.emptyText}>Inga resurser registrerade</Text>
+            <Card style={styles.emptyCard}>
+              <Card.Content style={styles.emptyContent}>
+                <Text style={styles.emptyIcon}>📦</Text>
+                <Text style={styles.emptyTitle}>Inga resurser än</Text>
+                <Text style={styles.emptyText}>
+                  {neighbor.name.split(' ')[0]} har inte lagt till några resurser ännu.
+                </Text>
+                {!isMe && (
+                  <Text style={styles.emptyHint}>
+                    💡 Du kan ändå skicka Hearts för hjälp du fått tidigare!
+                  </Text>
+                )}
+              </Card.Content>
+            </Card>
           )}
         </>
       )}
 
       <View style={styles.actions}>
-        <Button 
-          mode="contained" 
-          style={styles.button}
-          buttonColor="#FF6B35"
-        >
-          💬 Kontakta {neighbor.name.split(' ')[0]}
-        </Button>
-        <Button 
-          mode="contained" 
-          style={styles.button}
-          buttonColor="#2D5016"
-        >
-          💖 Skicka Hearts
-        </Button>
+        {!isMe && (
+          <Button 
+            mode="contained" 
+            style={styles.button}
+            buttonColor="#FF6B35"
+          >
+            💬 Kontakta {neighbor.name.split(' ')[0]}
+          </Button>
+        )}
+        {!isMe && (
+          <Button 
+            mode="contained" 
+            style={styles.button}
+            buttonColor="#2D5016"
+            onPress={() => navigation.navigate('SendHearts', { neighbor })}
+          >
+            💖 Skicka Hearts
+          </Button>
+        )}
       </View>
     </ScrollView>
   );
@@ -147,11 +168,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666'
   },
-  emptyText: {
-    textAlign: 'center',
+  emptyCard: {
     marginTop: 32,
-    fontSize: 16,
-    color: '#999'
+    backgroundColor: '#FFF4E6'
+  },
+  emptyContent: {
+    alignItems: 'center',
+    paddingVertical: 24
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: 16
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2D5016',
+    marginBottom: 8
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8
+  },
+  emptyHint: {
+    fontSize: 12,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 8,
+    fontStyle: 'italic'
   },
   actions: {
     marginTop: 24,

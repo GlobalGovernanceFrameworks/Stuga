@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Text, Card, ActivityIndicator, FAB } from 'react-native-paper';
+import { Button, Text, Card, ActivityIndicator, FAB } from 'react-native-paper';
 import { collection, getDocs } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 import { db, auth } from '../config/firebase';
@@ -18,8 +18,8 @@ export default function HomeScreen({ navigation }: any) {
 
   async function authenticateAndLoad() {
     try {
-      // Sign in anonymously for testing
-      await signInAnonymously(auth);
+      const userCredential = await signInAnonymously(auth);
+      console.log('🔑 Your anonymous UID:', userCredential.user.uid);
       await loadNeighbors();
     } catch (error) {
       console.error('Error:', error);
@@ -53,29 +53,78 @@ export default function HomeScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>🏘️ GRANNAR ({neighbors.length})</Text>
-      
-      <FlatList
-        data={neighbors}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <Card 
-            style={styles.card}
-            onPress={() => navigation.navigate('NeighborDetail', { neighbor: item })}
-          >
-            <Card.Content>
-              <Text style={styles.name}>🟢 {item.name}</Text>
-              <Text style={styles.hearts}>🔥 {item.hearts_balance} Hearts</Text>
-            </Card.Content>
-          </Card>
-        )}
-      />
 
-      <FAB
-        icon="plus"
-        label="Lägg till resurs"
-        style={[styles.fab, { bottom: insets.bottom + 16 }]}
-        onPress={() => navigation.navigate('AddResource')}
-      />
+      {neighbors.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>🏘️</Text>
+          <Text style={styles.emptyTitle}>Inga grannar hittade</Text>
+          <Text style={styles.emptyText}>
+            Det verkar inte finnas några grannar i närheten som använder Stuga än.
+          </Text>
+          <Button
+            mode="contained"
+            onPress={loadNeighbors}
+            style={{ marginTop: 16 }}
+            buttonColor="#2D5016"
+            textColor="#fff"
+          >
+            Uppdatera
+          </Button>
+        </View>
+      ) : (      
+        <FlatList
+          data={neighbors}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <Card 
+              style={styles.card}
+              onPress={() => navigation.navigate('NeighborDetail', { neighbor: item })}
+            >
+              <Card.Content>
+                <Text style={styles.name}>🟢 {item.name}</Text>
+                <Text style={styles.hearts}>🔥 {item.hearts_balance} Hearts</Text>
+              </Card.Content>
+            </Card>
+          )}
+        />
+      )}
+
+      <View style={[styles.heartsButton, { bottom: insets.bottom + 96 }]}>
+        <Button
+          mode="outlined"
+          icon="heart"
+          onPress={() => navigation.navigate('HeartsHistory')}
+          style={{ borderColor: '#2D5016' }}
+          textColor="#2D5016"
+        >
+          Visa Hearts Historik
+        </Button>
+      </View>
+      <View style={[styles.fabContainer, { bottom: insets.bottom + 16 }]}>
+        <Button
+          mode="contained"
+          icon="plus"
+          onPress={() => navigation.navigate('AddResource')}
+          style={styles.fabButton}
+          buttonColor="#2D5016"
+          textColor="#fff"
+          contentStyle={styles.fabContent}
+        >
+          Lägg till
+        </Button>
+        
+        <Button
+          mode="contained"
+          icon="delete"
+          onPress={() => navigation.navigate('RemoveResource')}
+          style={styles.fabButton}
+          buttonColor="#C1121F"
+          textColor="#fff"
+          contentStyle={styles.fabContent}
+        >
+          Ta bort
+        </Button>
+      </View>
     </View>
   );
 }
@@ -106,14 +155,51 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 4
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32
+  },
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 16
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2D5016',
+    marginBottom: 8
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20
+  },
   hearts: {
     fontSize: 14,
     color: '#666'
   },
-  fab: {
+  heartsButton: {
     position: 'absolute',
+    left: 16,
     right: 16,
-    bottom: 16,
-    backgroundColor: '#2D5016'
+    // bottom: removed, set dynamically above
+    zIndex: 1
+  },
+  fabContainer: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    flexDirection: 'row',
+    gap: 12,
+    zIndex: 1
+  },
+  fabButton: {
+    flex: 1
+  },
+  fabContent: {
+    paddingVertical: 8
   }
 });

@@ -75,6 +75,25 @@ async function seedTestData() {
     console.log(`✅ Created user: ${user.name}`);
   }
 
+  const currentUID = '2Dx0SsdQSxTpJarSBITT2WHXRF02'; // From console logs
+
+  // Create a test user for your anonymous auth
+  await db.collection('users').doc(currentUID).set({
+    user_id: currentUID,
+    name: 'Testanvändare (Du)',
+    bankid_verified: false,
+    created_at: Date.now(),
+    location: {
+      lat: 59.5186,
+      lon: 17.9448,
+      accuracy: 50,
+      updated_at: Date.now()
+    },
+    hearts_balance: 500,
+    availability_status: 'available'
+  });
+  console.log('✅ Created test user for anonymous auth');
+
   // Create test resources
   const resources = [
     {
