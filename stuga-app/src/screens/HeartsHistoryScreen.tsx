@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import { Text, Card, ActivityIndicator, Divider } from 'react-native-paper';
-import { collection, query, where, getDocs, or } from 'firebase/firestore';
+import { Text, Card, ActivityIndicator, Divider, Button } from 'react-native-paper';
+import { collection, query, where, getDocs, or, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { HeartsTransaction } from '../types';
 
@@ -79,6 +79,21 @@ export default function HeartsHistoryScreen() {
     );
   }
 
+  async function handleConfirm(tx: HeartsTransaction) {
+    try {
+      await updateDoc(doc(db, 'hearts_transactions', tx.id), {
+        confirmed_by_receiver: true
+      });
+      
+      // Reload to see updated balances
+      await loadTransactions();
+      alert('✅ Hearts bekräftade! Saldo uppdaterat.');
+    } catch (error) {
+      console.error('Error confirming Hearts:', error);
+      alert('Kunde inte bekräfta Hearts');
+    }
+  }
+
   const sent = transactions.filter(tx => tx.from_user === auth.currentUser?.uid);
   const received = transactions.filter(tx => tx.to_user === auth.currentUser?.uid);
 
@@ -142,6 +157,17 @@ export default function HeartsHistoryScreen() {
                   {' '}
                   {tx.completed_at ? '✓' : '⏳'}
                 </Text>
+                {!tx.confirmed_by_receiver && (
+                  <Button
+                    mode="contained"
+                    onPress={() => handleConfirm(tx)}
+                    style={{ marginTop: 8 }}
+                    buttonColor="#6BCF7F"
+                    textColor="#fff"
+                  >
+                    Bekräfta mottagning
+                  </Button>
+                )}
               </Card.Content>
             </Card>
           ))}

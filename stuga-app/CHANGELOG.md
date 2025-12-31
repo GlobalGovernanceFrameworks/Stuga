@@ -7,11 +7,30 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 ## [Unreleased]
 
 ### Planerat
-- Cloud Functions för automatisk Hearts-balansuppdatering
+- Validering av Hearts-saldo (förhindra överskridande)
 - Offline-stöd med lokal databas
 - BankID-integration
 - Bluetooth granndiscovery
 - Push-notifikationer
+
+## [0.3.0] - 2025-12-31
+
+### Tillagt
+- **Cloud Functions**: Automatisk Hearts-balansuppdatering
+  - Balans dras från avsändare när mottagare bekräftar
+  - Balans läggs till för mottagare
+  - Transaktion markeras som slutförd med tidsstämpel
+  - Loggar i Firebase Functions för debugging
+- **Bekräfta mottagning**: Knapp i Hearts Historik för att bekräfta mottagna Hearts
+  - Triggar Cloud Function automatiskt
+  - Uppdaterar bägge användares saldon
+  - Visar bekräftelsestatus (✓ eller ⏳)
+
+### Tekniskt
+- Firebase Cloud Functions v2 med Firestore triggers
+- onDocumentUpdated trigger för transaktionsbekräftelse
+- Batch-operationer för atomiska uppdateringar
+- Service account permissions konfigurerade
 
 ## [0.2.0] - 2025-12-30
 
@@ -66,4 +85,4 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 
 ---
 
-**Nästa milstolpe:** Cloud Functions för Hearts-balansuppdatering, offline-kapabilitet (Vecka 4-5)
+**Nästa milstolpe:** Saldovalidering, offline-kapabilitet (Vecka 4-5)
