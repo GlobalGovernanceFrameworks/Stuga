@@ -3,7 +3,7 @@ import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Text, Card, ActivityIndicator, FAB } from 'react-native-paper';
 import { collection, getDocs } from 'firebase/firestore';
-import { signInAnonymously } from 'firebase/auth';
+import { signInAnonymously, signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../config/firebase';
 import { User } from '../types';
 import { SkeletonCard } from '../components/SkeletonCard';
@@ -18,10 +18,17 @@ export default function HomeScreen({ navigation }: any) {
     authenticateAndLoad();
   }, []);
 
+  const USE_TEST_ACCOUNT = true; // Toggle this for demos vs development
+
   async function authenticateAndLoad() {
     try {
-      const userCredential = await signInAnonymously(auth);
-      console.log('🔑 Your anonymous UID:', userCredential.user.uid);
+      if (USE_TEST_ACCOUNT) {
+        await signInWithEmailAndPassword(auth, 'test@stuga.local', 'test1234');
+        console.log('🔑 Signed in as test user');
+      } else {
+        const userCredential = await signInAnonymously(auth);
+        console.log('🔑 Your anonymous UID:', userCredential.user.uid);
+      }
       await loadNeighbors();
     } catch (error) {
       console.error('Error:', error);

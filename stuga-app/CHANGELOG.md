@@ -12,6 +12,21 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Bluetooth granndiscovery
 - Push-notifikationer
 
+## [0.4.1] - 2025-12-31
+
+### Utveckling/Testing
+- **Email/lösenord testanvändare**: Möjliggör konsistent testanvändare på flera enheter
+  - Anonymous auth skapar olika UID per enhet
+  - Email/lösenord (`test@stuga.local`) ger samma användare överallt
+  - Automatisk fallback: Försöker email först, sedan anonymous
+  - Gör demonstrationer enklare på olika datorer/telefoner
+  - Användbara för pilotutveckling och demos
+
+### Tekniskt
+- Firebase Email/Password authentication aktiverad
+- signInWithEmailAndPassword med fallback till anonymous
+- Samma Hearts-saldo och transaktionshistorik på alla enheter
+
 ## [0.4.0] - 2026-01-02
 
 ### Tillagt
