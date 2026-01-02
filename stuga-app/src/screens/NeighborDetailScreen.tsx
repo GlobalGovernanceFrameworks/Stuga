@@ -5,6 +5,9 @@ import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { Resource } from '../types';
+import { getCategoryLabel } from '../lib/categoryHelpers';
+import { SkeletonCard } from '../components/SkeletonCard';
+import { StatusBadge } from '../components/StatusBadge';
 
 export default function NeighborDetailScreen({ route, navigation }: any) {
   const { neighbor } = route.params;
@@ -55,34 +58,42 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
       </Card>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#2D5016" style={{ marginTop: 32 }} />
+        <>
+          <Text style={styles.sectionTitle}>Laddar resurser...</Text>
+          {[1, 2].map(i => (
+            <SkeletonCard key={i} />
+          ))}
+        </>
       ) : (
         <>
           {offers.length > 0 && (
             <>
               <Text style={styles.sectionTitle}>ERBJUDER</Text>
-              {offers.map(resource => (
-                <Card key={resource.id} style={styles.resourceCard}>
-                  <Card.Content>
-                    <Text style={styles.resourceTitle}>{resource.title}</Text>
-                    <Text style={styles.resourceDesc}>{resource.description}</Text>
-                  </Card.Content>
-                </Card>
-              ))}
+                {offers.map(resource => (
+                  <Card key={resource.id} style={styles.resourceCard}>
+                    <Card.Content>
+                      <StatusBadge status={resource.status} />
+                      <Text style={styles.resourceTitle}>{resource.title}</Text>
+                      <Text style={styles.categoryLabel}>{getCategoryLabel(resource.category)}</Text>
+                      <Text style={styles.resourceDesc}>{resource.description}</Text>
+                    </Card.Content>
+                  </Card>
+                ))}
             </>
           )}
 
           {needs.length > 0 && (
             <>
               <Text style={styles.sectionTitle}>BEHÖVER</Text>
-              {needs.map(resource => (
-                <Card key={resource.id} style={styles.resourceCard}>
-                  <Card.Content>
-                    <Text style={styles.resourceTitle}>{resource.title}</Text>
-                    <Text style={styles.resourceDesc}>{resource.description}</Text>
-                  </Card.Content>
-                </Card>
-              ))}
+                {needs.map(resource => (
+                  <Card key={resource.id} style={styles.resourceCard}>
+                    <Card.Content>
+                      <StatusBadge status={resource.status} />
+                      <Text style={styles.resourceTitle}>{resource.title}</Text>
+                      <Text style={styles.resourceDesc}>{resource.description}</Text>
+                    </Card.Content>
+                  </Card>
+                ))}
             </>
           )}
 
@@ -170,6 +181,11 @@ const styles = StyleSheet.create({
   resourceDesc: {
     fontSize: 14,
     color: '#666'
+  },
+  categoryLabel: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 4
   },
   emptyCard: {
     marginTop: 32,

@@ -6,6 +6,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 import { db, auth } from '../config/firebase';
 import { User } from '../types';
+import { SkeletonCard } from '../components/SkeletonCard';
 
 export default function HomeScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -51,8 +52,11 @@ async function onRefresh() {
 
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2D5016" />
+      <View style={styles.container}>
+        <Text style={styles.header}>🏘️ GRANNAR</Text>
+        {[1, 2, 3, 4, 5].map(i => (
+          <SkeletonCard key={i} />
+        ))}
       </View>
     );
   }

@@ -7,11 +7,48 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 ## [Unreleased]
 
 ### Planerat
-- Validering av Hearts-saldo (förhindra överskridande)
 - Offline-stöd med lokal databas
 - BankID-integration
 - Bluetooth granndiscovery
 - Push-notifikationer
+
+## [0.4.0] - 2026-01-02
+
+### Tillagt
+- **Saldovalidering**: Förhindrar att skicka fler Hearts än man har
+  - Klient-validering: Inaktiverad knapp och varningsmeddelande
+  - Server-validering: Cloud Function kontrollerar saldo innan transaktion
+  - Återställer transaktion om otillräckligt saldo vid bekräftelse
+- **Förhindra dubbletter**: Kan inte skicka flera obekräftade transaktioner till samma person
+  - Kontrollerar om väntande transaktion finns
+  - Visar varning och inaktiverar skicka-knapp
+  - Förhindrar oavsiktlig spam
+- **Skeleton screens**: Professionella laddningsindikatorer
+  - Platshållare-kort istället för enkla spinners
+  - Visar förväntad layout medan data laddas
+  - Implementerat i alla huvudskärmar (Home, NeighborDetail, HeartsHistory)
+- **Statusmärken**: Visuella indikatorer för resursstatus
+  - 🟢 Öppen (grön) - resurs tillgänglig
+  - 🟡 Matchad (orange) - någon har tagit resursen
+  - ⚪ Slutförd (grå) - utbyte genomfört
+  - 🔴 Avbruten (röd) - resurs avbruten
+  - Kategorilabels med emojis (Värme 🔥 istället för "värme")
+
+### Förbättrat
+- **Auto-uppdatering av data**:
+  - Pull-to-refresh på HomeScreen (uppdatera grannlista)
+  - Automatisk omladdning när skärmar kommer i fokus
+  - Saldon alltid aktuella efter transaktioner
+- **Kategorivisning**: Formaterade namn istället för rå databasvärden
+  - Helper-funktioner för kategori-mappning
+  - Konsekvent visning över alla skärmar
+
+### Tekniskt
+- SkeletonCard-komponent för återanvändning
+- StatusBadge-komponent med färgkodning
+- categoryHelpers för centraliserad kategori-mappning
+- useFocusEffect hook för automatisk datareload
+- RefreshControl på FlatList för pull-to-refresh
 
 ## [0.3.0] - 2025-12-31
 

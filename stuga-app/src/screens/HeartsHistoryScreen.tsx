@@ -5,6 +5,7 @@ import { Text, Card, ActivityIndicator, Divider, Button } from 'react-native-pap
 import { collection, query, where, getDocs, or, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { HeartsTransaction } from '../types';
+import { SkeletonCard } from '../components/SkeletonCard';
 
 export default function HeartsHistoryScreen() {
   const [transactions, setTransactions] = useState<HeartsTransaction[]>([]);
@@ -76,8 +77,19 @@ export default function HeartsHistoryScreen() {
   }
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2D5016" />
+      <View style={styles.container}>
+        <Card style={styles.balanceCard}>
+          <Card.Content>
+            <View style={styles.skeletonBalance}>
+              <View style={styles.skeletonLine} />
+              <View style={[styles.skeletonLine, styles.wide]} />
+            </View>
+          </Card.Content>
+        </Card>
+        <Text style={styles.sectionTitle}>TRANSAKTIONER</Text>
+        {[1, 2, 3].map(i => (
+          <SkeletonCard key={i} />
+        ))}
       </View>
     );
   }
@@ -273,5 +285,17 @@ const styles = StyleSheet.create({
     color: '#BBB',
     textAlign: 'center',
     paddingHorizontal: 32
+  },
+  skeletonBalance: {
+    gap: 8
+  },
+  skeletonLine: {
+    height: 16,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 4
+  },
+  wide: {
+    height: 24,
+    width: '50%'
   }
 });

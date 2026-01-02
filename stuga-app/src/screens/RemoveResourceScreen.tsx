@@ -4,6 +4,8 @@ import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { Resource } from '../types';
+import { getCategoryLabel } from '../lib/categoryHelpers';
+import { StatusBadge } from '../components/StatusBadge';
 
 export default function RemoveResourceScreen({ navigation }: any) {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -89,29 +91,30 @@ export default function RemoveResourceScreen({ navigation }: any) {
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Välj resurs att ta bort</Text>
       
-      {resources.map(resource => (
-        <Card key={resource.id} style={styles.card}>
-          <Card.Content>
-            <Text style={styles.title}>{resource.title}</Text>
-            <Text style={styles.category}>
-              {resource.type === 'offer' ? '📤 Erbjuder' : '📥 Behöver'} · {resource.category}
-            </Text>
-            {resource.description && (
-              <Text style={styles.description}>{resource.description}</Text>
-            )}
-          </Card.Content>
-          <Card.Actions>
-            <Button
-              mode="contained"
-              onPress={() => handleDelete(resource)}
-              buttonColor="#C1121F"
-              textColor="#fff"
-            >
-              Ta bort
-            </Button>
-          </Card.Actions>
-        </Card>
-      ))}
+        {resources.map(resource => (
+          <Card key={resource.id} style={styles.card}>
+            <Card.Content>
+              <StatusBadge status={resource.status} />
+              <Text style={styles.title}>{resource.title}</Text>
+                <Text style={styles.category}>
+                  {resource.type === 'offer' ? '📤 Erbjuder' : '📥 Behöver'} · {getCategoryLabel(resource.category)}
+                </Text>
+              {resource.description && (
+                <Text style={styles.description}>{resource.description}</Text>
+              )}
+            </Card.Content>
+            <Card.Actions>
+              <Button
+                mode="contained"
+                onPress={() => handleDelete(resource)}
+                buttonColor="#C1121F"
+                textColor="#fff"
+              >
+                Ta bort
+              </Button>
+            </Card.Actions>
+          </Card>
+        ))}
     </ScrollView>
   );
 }
