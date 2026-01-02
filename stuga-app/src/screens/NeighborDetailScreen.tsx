@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -13,9 +14,11 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
   const isMe = currentUser?.uid === neighbor.user_id;
 
 
-  useEffect(() => {
-    loadNeighborResources();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadNeighborResources();
+    }, [])
+  );
 
   async function loadNeighborResources() {
     try {

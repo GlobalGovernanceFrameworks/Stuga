@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
+import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Text, Card, ActivityIndicator, FAB } from 'react-native-paper';
 import { collection, getDocs } from 'firebase/firestore';
@@ -11,6 +11,7 @@ export default function HomeScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const [neighbors, setNeighbors] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     authenticateAndLoad();
@@ -39,8 +40,14 @@ export default function HomeScreen({ navigation }: any) {
       console.error('Error loading neighbors:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false); // Add this
     }
   }
+
+async function onRefresh() {
+  setRefreshing(true);
+  await loadNeighbors();
+}
 
   if (loading) {
     return (
@@ -75,6 +82,13 @@ export default function HomeScreen({ navigation }: any) {
         <FlatList
           data={neighbors}
           keyExtractor={item => item.id}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#2D5016']}
+            />
+          }
           renderItem={({ item }) => (
             <Card 
               style={styles.card}

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Text, Card, ActivityIndicator, Divider, Button } from 'react-native-paper';
 import { collection, query, where, getDocs, or, updateDoc } from 'firebase/firestore';
@@ -11,9 +12,11 @@ export default function HeartsHistoryScreen() {
   const [loading, setLoading] = useState(true);
   const [myBalance, setMyBalance] = useState(0);
 
-  useEffect(() => {
-    loadTransactions();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadTransactions();
+    }, [])
+  );
 
   async function loadTransactions() {
     try {

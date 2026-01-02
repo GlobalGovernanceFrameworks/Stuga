@@ -19,12 +19,33 @@ exports.updateHeartsBalance = onDocumentUpdated('hearts_transactions/{txId}', as
         .where('user_id', '==', after.from_user)
         .get();
       
-      if (!sendersSnapshot.empty) {
-        const senderRef = sendersSnapshot.docs[0].ref;
-        batch.update(senderRef, {
-          hearts_balance: admin.firestore.FieldValue.increment(-after.amount)
-        });
+      if (sendersSnapshot.empty) {
+        console.error('❌ Sender not found:', after.from_user);
+        return;
       }
+
+      const senderDoc = sendersSnapshot.docs[0];
+      const senderData = senderDoc.data();
+      const senderRef = senderDoc.ref;
+
+      // VALIDATION: Check sender has sufficient balance
+      if (senderData.hearts_balance < after.amount) {
+        console.error(`❌ Insufficient balance: ${senderData.name} has ${senderData.hearts_balance}, needs ${after.amount}`);
+        
+        // Mark transaction as failed
+        const txRef = admin.firestore().doc(`hearts_transactions/${event.params.txId}`);
+        await txRef.update({
+          confirmed_by_receiver: false, // Revert confirmation
+          error: 'Insufficient balance'
+        });
+        
+        return; // Abort transaction
+      }
+
+      // Deduct from sender
+      batch.update(senderRef, {
+        hearts_balance: admin.firestore.FieldValue.increment(-after.amount)
+      });
       
       // Find receiver document
       const receiversSnapshot = await admin.firestore()

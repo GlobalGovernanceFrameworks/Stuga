@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Text, Card, Button, TextInput, SegmentedButtons } from 'react-native-paper';
-import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, query, where, getDocs } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 
 const QUICK_AMOUNTS = [25, 50, 100];
@@ -14,9 +14,11 @@ export default function SendHeartsScreen({ route, navigation }: any) {
   const [myBalance, setMyBalance] = useState(0);
   const [sending, setSending] = useState(false);
   const [useCustom, setUseCustom] = useState(false);
+  const [hasPending, setHasPending] = useState(false);
 
   useEffect(() => {
     loadMyBalance();
+    checkPendingTransactions();
   }, []);
 
   async function loadMyBalance() {
@@ -30,6 +32,25 @@ export default function SendHeartsScreen({ route, navigation }: any) {
       }
     } catch (error) {
       console.error('Error loading balance:', error);
+    }
+  }
+
+  async function checkPendingTransactions() {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const q = query(
+        collection(db, 'hearts_transactions'),
+        where('from_user', '==', user.uid),
+        where('to_user', '==', neighbor.user_id),
+        where('confirmed_by_receiver', '==', false)
+      );
+
+      const snapshot = await getDocs(q);
+      setHasPending(!snapshot.empty);
+    } catch (error) {
+      console.error('Error checking pending transactions:', error);
     }
   }
 
@@ -143,6 +164,16 @@ export default function SendHeartsScreen({ route, navigation }: any) {
                 Efter: {newBalance} Hearts
               </Text>
             )}
+            {finalAmount > myBalance && (
+              <Text style={styles.errorText}>
+                ⚠️ Du har inte tillräckligt många Hearts
+              </Text>
+            )}
+            {hasPending && (
+              <Text style={styles.warningText}>
+                ⏳ Du har redan en obekräftad transaktion till {neighbor.name.split(' ')[0]}
+              </Text>
+            )}
           </View>
         </Card.Content>
       </Card>
@@ -151,7 +182,7 @@ export default function SendHeartsScreen({ route, navigation }: any) {
         mode="contained"
         onPress={handleSend}
         loading={sending}
-        disabled={sending || finalAmount <= 0 || finalAmount > myBalance}
+        disabled={sending || finalAmount <= 0 || finalAmount > myBalance || hasPending}
         style={styles.sendButton}
         buttonColor="#FF6B35"
       >
@@ -219,6 +250,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#2D5016',
     marginBottom: 4
+  },
+  warningText: {
+    fontSize: 14,
+    color: '#FFA500',
+    fontWeight: 'bold',
+    marginTop: 8
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#C1121F',
+    fontWeight: 'bold',
+    marginTop: 8
   },
   negative: {
     color: '#C1121F'
