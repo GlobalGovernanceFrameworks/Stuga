@@ -155,7 +155,9 @@ graph TB
   confirmed_by_sender: boolean (default: true),
   confirmed_by_receiver: boolean (default: false),
   created_at: timestamp,
-  completed_at: timestamp | null
+  completed_at: timestamp | null,
+  public_ledger: boolean (default: true), // Social accountability - visible to neighbors
+  location_geohash: string // Where transaction occurred - proves "local" economic velocity
 }
 
 // mesh_nodes collection (for Bluetooth discovery)
@@ -172,6 +174,24 @@ graph TB
   }
 }
 ```
+
+**Design Rationale for Key Fields:**
+
+**`public_ledger` (social accountability):**
+- Default: `true` (transactions visible to all neighbors)
+- Purpose: Social pressure prevents gaming ("Why does Björn have 1M Hearts?")
+- Privacy option: Users can set to `false` for sensitive transactions
+- Bridges trust gap until crypto layer (CivicBase) ready
+- **Future data value:** Enables analysis of care economy patterns for love-ledger research
+
+**`location_geohash` (local economic velocity):**
+- Captures approximate location where transaction occurred
+- Proves economic activity is genuinely "local" (not remote gaming)
+- Uses geohash (e.g., `u382`) for privacy (50-100m precision)
+- **Future data value:** Demonstrates bioregional economic patterns for GGF analysis
+- Example: "95% of Hearts transactions within 500m radius" proves neighbor-to-neighbor exchange
+
+These fields add minimal complexity to MVP while generating data that validates (or challenges) the broader care economy thesis. If Hearts fail to motivate mutual aid, we learn that early. If they succeed, we have empirical evidence for scaling.
 
 **Firestore Security Rules:**
 
