@@ -12,7 +12,7 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Bluetooth granndiscovery
 - Push-notifikationer
 
-## [0.4.1] - 2025-12-31
+## [0.4.1] - 2025-01-02
 
 ### Utveckling/Testing
 - **Email/lösenord testanvändare**: Möjliggör konsistent testanvändare på flera enheter
@@ -22,10 +22,19 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
   - Gör demonstrationer enklare på olika datorer/telefoner
   - Användbara för pilotutveckling och demos
 
+### Buggfixar
+- **HeartsHistoryScreen scroll-problem**: Kan nu scrolla hela vägen ner
+  - "Bekräfta mottagning"-knapp hamnade bakom navigationsknappar
+  - Lagt till SafeAreaInsets padding (bottom + 80px)
+  - Kan nu bekräfta transaktioner utan problem
+- **Saknad import**: Lade till `doc` från Firestore
+  - Åtgärdade "Property 'doc' doesn't exist"-fel vid bekräftelse
+
 ### Tekniskt
 - Firebase Email/Password authentication aktiverad
 - signInWithEmailAndPassword med fallback till anonymous
 - Samma Hearts-saldo och transaktionshistorik på alla enheter
+- useSafeAreaInsets i HeartsHistoryScreen för korrekt scrollning
 
 ## [0.4.0] - 2026-01-02
 

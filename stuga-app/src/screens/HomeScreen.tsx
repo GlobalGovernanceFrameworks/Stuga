@@ -18,7 +18,7 @@ export default function HomeScreen({ navigation }: any) {
     authenticateAndLoad();
   }, []);
 
-  const USE_TEST_ACCOUNT = true; // Toggle this for demos vs development
+  const USE_TEST_ACCOUNT = false; // Toggle this for demos vs development
 
   async function authenticateAndLoad() {
     try {

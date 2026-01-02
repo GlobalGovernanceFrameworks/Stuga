@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Text, Card, ActivityIndicator, Divider, Button } from 'react-native-paper';
-import { collection, query, where, getDocs, or, updateDoc } from 'firebase/firestore';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { collection, query, where, getDocs, or, updateDoc, doc } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { HeartsTransaction } from '../types';
 import { SkeletonCard } from '../components/SkeletonCard';
@@ -12,6 +13,8 @@ export default function HeartsHistoryScreen() {
   const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [myBalance, setMyBalance] = useState(0);
+
+  const insets = useSafeAreaInsets();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -113,7 +116,10 @@ export default function HeartsHistoryScreen() {
   const received = transactions.filter(tx => tx.to_user === auth.currentUser?.uid);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+    >
       <Card style={styles.balanceCard}>
         <Card.Content>
           <Text style={styles.balanceTitle}>Ditt saldo</Text>
