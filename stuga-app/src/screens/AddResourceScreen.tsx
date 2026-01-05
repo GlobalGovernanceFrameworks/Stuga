@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Text, TextInput, Button, SegmentedButtons, Card } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, addDoc } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
+import { useNetworkState } from '../hooks/useNetworkState';
+import { queueResourceCreate } from '../lib/database';
 
 const CATEGORIES = [
   { value: 'mat', label: 'Mat 🥪', icon: 'food' },
@@ -16,6 +19,8 @@ const CATEGORIES = [
 ];
 
 export default function AddResourceScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
+  const { isOffline } = useNetworkState();
   const [type, setType] = useState<'offer' | 'need'>('offer');
   const [category, setCategory] = useState('');
   const [title, setTitle] = useState('');
@@ -23,17 +28,20 @@ export default function AddResourceScreen({ navigation }: any) {
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
-    if (!category || !title.trim()) {
-      alert('Välj kategori och ange titel');
+    if (!category) {
+      alert('Välj en kategori');
+      return;
+    }
+    if (!title.trim()) {
+      alert('Ange en titel');
       return;
     }
 
-    setSaving(true);
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
 
-      await addDoc(collection(db, 'resources'), {
+      const resource = {
         user_id: user.uid,
         type,
         category,
@@ -44,19 +52,40 @@ export default function AddResourceScreen({ navigation }: any) {
         hearts_value: null,
         created_at: Date.now(),
         updated_at: Date.now()
-      });
+      };
+
+      if (isOffline) {
+        // Queue for later when offline
+        queueResourceCreate(resource);
+        alert(`📦 Offline: Resursen köad!\n\n"${title}" kommer läggas till när du är online igen.`);
+      } else {
+        // Save immediately when online
+        await addDoc(collection(db, 'resources'), resource);
+        alert('✅ Resurs tillagd!');
+      }
 
       navigation.goBack();
     } catch (error) {
       console.error('Error saving resource:', error);
       alert('Kunde inte spara resurs');
-    } finally {
-      setSaving(false);
     }
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+    >
+      {isOffline && (
+        <Card style={styles.offlineCard}>
+          <Card.Content>
+            <Text style={styles.offlineText}>
+              📡 Offline-läge: Resursen kommer köas och läggas till när du är online
+            </Text>
+          </Card.Content>
+        </Card>
+      )}
+
       <Card style={styles.card}>
         <Card.Content>
           <Text style={styles.label}>Jag...</Text>
@@ -125,6 +154,16 @@ export default function AddResourceScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  offlineCard: {
+    marginBottom: 16,
+    backgroundColor: '#FFF4E6'
+  },
+  offlineText: {
+    fontSize: 14,
+    color: '#FF6B35',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
   container: {
     flex: 1,
     backgroundColor: '#F5F3F0',

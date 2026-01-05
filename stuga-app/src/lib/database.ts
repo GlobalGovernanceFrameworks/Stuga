@@ -64,6 +64,32 @@ export function cleanupSyncedTransactions() {
   );
 }
 
+// Queue offline resource creation
+export function queueResourceCreate(data: any): string {
+  const id = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  db.runSync(
+    'INSERT INTO pending_transactions (id, type, data, created_at) VALUES (?, ?, ?, ?)',
+    [id, 'resource_create', JSON.stringify(data), Date.now()]
+  );
+  
+  console.log('💾 Queued resource creation:', id);
+  return id;
+}
+
+// Queue offline resource deletion
+export function queueResourceDelete(resourceId: string): string {
+  const id = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  db.runSync(
+    'INSERT INTO pending_transactions (id, type, data, created_at) VALUES (?, ?, ?, ?)',
+    [id, 'resource_delete', JSON.stringify({ resourceId }), Date.now()]
+  );
+  
+  console.log('💾 Queued resource deletion:', id);
+  return id;
+}
+
 // Sync pending transactions to Firestore
 export async function syncPendingTransactions(firestore: any): Promise<number> {
   const pending = getPendingTransactions();
@@ -84,10 +110,21 @@ export async function syncPendingTransactions(firestore: any): Promise<number> {
         await addDoc(collection(firestore, 'hearts_transactions'), data);
         markTransactionSynced(item.id);
         synced++;
-        console.log('✅ Synced transaction:', item.id);
+        console.log('✅ Synced Hearts transaction:', item.id);
+      } else if (item.type === 'resource_create') {
+        await addDoc(collection(firestore, 'resources'), data);
+        markTransactionSynced(item.id);
+        synced++;
+        console.log('✅ Synced resource creation:', item.id);
+      } else if (item.type === 'resource_delete') {
+        const { deleteDoc, doc } = await import('firebase/firestore');
+        await deleteDoc(doc(firestore, 'resources', data.resourceId));
+        markTransactionSynced(item.id);
+        synced++;
+        console.log('✅ Synced resource deletion:', item.id);
       }
     } catch (error) {
-      console.error('❌ Failed to sync transaction:', item.id, error);
+      console.error('❌ Failed to sync:', item.id, error);
       // Don't mark as synced if failed - will retry later
     }
   }

@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { Resource } from '../types';
+import { useNetworkState } from '../hooks/useNetworkState';
+import { queueResourceDelete } from '../lib/database';
 import { getCategoryLabel } from '../lib/categoryHelpers';
 import { StatusBadge } from '../components/StatusBadge';
 
 export default function RemoveResourceScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
+  const { isOffline } = useNetworkState();
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,10 +44,10 @@ export default function RemoveResourceScreen({ navigation }: any) {
     }
   }
 
-  async function handleDelete(resource: Resource) {
+  async function handleDelete(resource: any) {
     Alert.alert(
-      'Ta bort resurs',
-      `Är du säker på att du vill ta bort "${resource.title}"?`,
+      'Ta bort resurs?',
+      `Vill du ta bort "${resource.title}"?`,
       [
         { text: 'Avbryt', style: 'cancel' },
         {
@@ -50,11 +55,19 @@ export default function RemoveResourceScreen({ navigation }: any) {
           style: 'destructive',
           onPress: async () => {
             try {
-              await deleteDoc(doc(db, 'resources', resource.id));
-              setResources(resources.filter(r => r.id !== resource.id));
+              if (isOffline) {
+                // Queue deletion for later
+                queueResourceDelete(resource.id);
+                alert(`📦 Offline: Borttagning köad!\n\n"${resource.title}" kommer tas bort när du är online igen.`);
+              } else {
+                // Delete immediately when online
+                await deleteDoc(doc(db, 'resources', resource.id));
+                alert('✅ Resurs borttagen!');
+              }
+              loadMyResources(); // Refresh list
             } catch (error) {
               console.error('Error deleting resource:', error);
-              Alert.alert('Fel', 'Kunde inte ta bort resursen');
+              alert('Kunde inte ta bort resurs');
             }
           }
         }
@@ -88,7 +101,19 @@ export default function RemoveResourceScreen({ navigation }: any) {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+    >
+      {isOffline && (
+        <Card style={styles.offlineCard}>
+          <Card.Content>
+            <Text style={styles.offlineText}>
+              📡 Offline-läge: Borttagningar kommer köas och genomföras när du är online
+            </Text>
+          </Card.Content>
+        </Card>
+      )}
       <Text style={styles.header}>Välj resurs att ta bort</Text>
       
         {resources.map(resource => (
@@ -120,6 +145,16 @@ export default function RemoveResourceScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  offlineCard: {
+    marginBottom: 16,
+    backgroundColor: '#FFF4E6'
+  },
+  offlineText: {
+    fontSize: 14,
+    color: '#FF6B35',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
   container: {
     flex: 1,
     backgroundColor: '#F5F3F0',

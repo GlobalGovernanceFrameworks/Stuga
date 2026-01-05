@@ -7,9 +7,9 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 ## [Unreleased]
 
 ### Planerat
-- BankID-integration
-- Bluetooth granndiscovery
-- Push-notifikationer
+- BankID-integration för produktionsanvändare
+- Bluetooth mesh networking för närhetskommunikation
+- Push-notifikationer via FCM
 
 ## [0.5.0] - 2025-01-05
 
@@ -18,31 +18,36 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
   - SQLite-databas för lokal lagring av väntande transaktioner
   - Automatisk initialisering av databas vid appstart
   - Queuing-system för Hearts-transaktioner när offline
-  - Transaktioner sparas lokalt och skickas när anslutning återvänder
+  - **Queuing-system för resurser**: Skapa och ta bort resurser offline
+  - Transaktioner och resurser sparas lokalt och skickas när anslutning återvänder
   
 - **Nätverksdetektering**: Realtidsövervakning av internetanslutning
   - useNetworkState hook med @react-native-community/netinfo
   - Visar offline-indikator i header (📡 Offline) på alla skärmar
   - Offline-kort på HomeScreen visar antal väntande transaktioner
+  - **Offline-kort på AddResourceScreen och RemoveResourceScreen**
   - SendHeartsScreen visar orange varning när offline
   
-- **Automatisk synkronisering**: Skickar köade transaktioner när online
+- **Automatisk synkronisering**: Skickar köade transaktioner och resurser när online
   - useOfflineSync hook hanterar sync-logik
   - Detekterar när anslutning återkommer
   - Synkroniserar automatiskt alla väntande transaktioner
+  - **Synkroniserar automatiskt skapande och borttagning av resurser**
   - Visar synkroniseringsstatus med grön indikator
   - Uppdaterar väntande antal efter lyckad sync
   
 - **Manuell synkronisering**: Synka-knapp för användarinitierad sync
-  - "Synka (N)"-knapp visas när väntande transaktioner finns
-  - Visar antal väntande transaktioner
+  - "Synka (N)"-knapp visas när väntande transaktioner/resurser finns
+  - Visar antal väntande operationer (Hearts + resurser)
   - Inaktiverad när offline eller redan synkar
   - Loading-indikator under pågående synkronisering
   - useFocusEffect uppdaterar antal när man navigerar tillbaka
   
 - **Förbättrad offline-upplevelse**:
-  - Tydliga meddelanden när transaktioner köas
-  - Visual feedback för offline-läge
+  - Tydliga meddelanden när transaktioner/resurser köas
+  - **"📦 Offline: Resursen köad!" vid resursskapande**
+  - **"📦 Offline: Borttagning köad!" vid resursborttagning**
+  - Visual feedback för offline-läge på alla relevanta skärmar
   - Konsollloggar för debugging (✅ synced, 💾 queued, 🔄 syncing)
   - Städfunktion för gamla synkade transaktioner (7 dagar)
 
@@ -50,20 +55,22 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - **Navigation header**: Persistent offline-indikator i alla vyer
 - **HomeScreen**: Hearts och Synka-knappar i eget rad över FAB-knappar
 - **SendHeartsScreen**: Orange offline-kort varnar innan man skickar
+- **AddResourceScreen**: Safe area padding för scrollning, spara-knapp alltid synlig
+- **RemoveResourceScreen**: Safe area padding för scrollning, ta bort-knappar alltid synliga
 
 ### Tekniskt
 - expo-sqlite för lokal databas
 - @react-native-community/netinfo för nätverksdetektering
 - pending_transactions tabell (id, type, data, created_at, synced)
-- Database helpers: queueHeartsTransaction, syncPendingTransactions, getPendingCount
+- **Tre transaktionstyper**: hearts_transaction, resource_create, resource_delete
+- Database helpers: 
+  - queueHeartsTransaction, queueResourceCreate, queueResourceDelete
+  - syncPendingTransactions (hanterar alla tre typer)
+  - getPendingCount, markTransactionSynced, cleanupSyncedTransactions
 - Hooks: useNetworkState, useOfflineSync
 - Auto-cleanup av synkade transaktioner (>7 dagar)
 - HeaderRight komponent i AppNavigator
-
-### Nästa steg
-- BankID-integration för produktionsanvändare
-- Bluetooth mesh networking för närhetskommunikation
-- Push-notifikationer via FCM
+- useSafeAreaInsets för korrekt scrollning i alla formulär
 
 ## [0.4.1] - 2025-01-02
 
