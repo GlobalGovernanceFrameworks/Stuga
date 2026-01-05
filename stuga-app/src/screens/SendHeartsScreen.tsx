@@ -3,11 +3,16 @@ import { View, ScrollView, StyleSheet } from 'react-native';
 import { Text, Card, Button, TextInput, SegmentedButtons } from 'react-native-paper';
 import { collection, addDoc, doc, getDoc, query, where, getDocs } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
+import { useNetworkState } from '../hooks/useNetworkState';
+import { useOfflineSync } from '../hooks/useOfflineSync';
+import { queueHeartsTransaction } from '../lib/database';
 
 const QUICK_AMOUNTS = [25, 50, 100];
 
 export default function SendHeartsScreen({ route, navigation }: any) {
   const { neighbor } = route.params;
+  const { isOffline } = useNetworkState();
+  const { updatePendingCount } = useOfflineSync();
   const [amount, setAmount] = useState(50);
   const [customAmount, setCustomAmount] = useState('');
   const [reason, setReason] = useState('');
@@ -72,7 +77,7 @@ export default function SendHeartsScreen({ route, navigation }: any) {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
 
-      await addDoc(collection(db, 'hearts_transactions'), {
+      const transactionData = {
         from_user: user.uid,
         to_user: neighbor.user_id,
         amount: finalAmount,
@@ -82,10 +87,19 @@ export default function SendHeartsScreen({ route, navigation }: any) {
         confirmed_by_receiver: false,
         created_at: Date.now(),
         completed_at: null
-      });
+      };
 
-      // Show success
-      alert(`✅ Skickade ${finalAmount} Hearts till ${neighbor.name}!\n\nBekräftelse kommer när ${neighbor.name.split(' ')[0]} är online.`);
+      if (isOffline) {
+        // Queue for later when offline
+        const queueId = queueHeartsTransaction(transactionData);
+        updatePendingCount();
+        alert(`📦 Offline: Transaktionen köad!\n\n${finalAmount} Hearts till ${neighbor.name} kommer skickas när du är online igen.`);
+      } else {
+        // Send immediately when online
+        await addDoc(collection(db, 'hearts_transactions'), transactionData);
+        alert(`✅ Skickade ${finalAmount} Hearts till ${neighbor.name}!\n\nBekräftelse kommer när ${neighbor.name.split(' ')[0]} är online.`);
+      }
+
       navigation.goBack();
     } catch (error) {
       console.error('Error sending Hearts:', error);
@@ -100,6 +114,16 @@ export default function SendHeartsScreen({ route, navigation }: any) {
 
   return (
     <ScrollView style={styles.container}>
+      {isOffline && (
+        <Card style={styles.offlineCard}>
+          <Card.Content>
+            <Text style={styles.offlineText}>
+              📡 Offline-läge: Transaktionen kommer köas och skickas när du är online
+            </Text>
+          </Card.Content>
+        </Card>
+      )}
+
       <Card style={styles.card}>
         <Card.Content>
           <Text style={styles.title}>Skicka Hearts till:</Text>
@@ -193,6 +217,16 @@ export default function SendHeartsScreen({ route, navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  offlineCard: {
+    marginBottom: 16,
+    backgroundColor: '#FFF4E6'
+  },
+  offlineText: {
+    fontSize: 14,
+    color: '#FF6B35',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
   container: {
     flex: 1,
     backgroundColor: '#F5F3F0',

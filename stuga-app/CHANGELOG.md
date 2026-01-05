@@ -7,10 +7,63 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 ## [Unreleased]
 
 ### Planerat
-- Offline-stöd med lokal databas
 - BankID-integration
 - Bluetooth granndiscovery
 - Push-notifikationer
+
+## [0.5.0] - 2025-01-05
+
+### Tillagt
+- **Offline-stöd med SQLite**: Köa transaktioner när internet saknas
+  - SQLite-databas för lokal lagring av väntande transaktioner
+  - Automatisk initialisering av databas vid appstart
+  - Queuing-system för Hearts-transaktioner när offline
+  - Transaktioner sparas lokalt och skickas när anslutning återvänder
+  
+- **Nätverksdetektering**: Realtidsövervakning av internetanslutning
+  - useNetworkState hook med @react-native-community/netinfo
+  - Visar offline-indikator i header (📡 Offline) på alla skärmar
+  - Offline-kort på HomeScreen visar antal väntande transaktioner
+  - SendHeartsScreen visar orange varning när offline
+  
+- **Automatisk synkronisering**: Skickar köade transaktioner när online
+  - useOfflineSync hook hanterar sync-logik
+  - Detekterar när anslutning återkommer
+  - Synkroniserar automatiskt alla väntande transaktioner
+  - Visar synkroniseringsstatus med grön indikator
+  - Uppdaterar väntande antal efter lyckad sync
+  
+- **Manuell synkronisering**: Synka-knapp för användarinitierad sync
+  - "Synka (N)"-knapp visas när väntande transaktioner finns
+  - Visar antal väntande transaktioner
+  - Inaktiverad när offline eller redan synkar
+  - Loading-indikator under pågående synkronisering
+  - useFocusEffect uppdaterar antal när man navigerar tillbaka
+  
+- **Förbättrad offline-upplevelse**:
+  - Tydliga meddelanden när transaktioner köas
+  - Visual feedback för offline-läge
+  - Konsollloggar för debugging (✅ synced, 💾 queued, 🔄 syncing)
+  - Städfunktion för gamla synkade transaktioner (7 dagar)
+
+### Förbättrat
+- **Navigation header**: Persistent offline-indikator i alla vyer
+- **HomeScreen**: Hearts och Synka-knappar i eget rad över FAB-knappar
+- **SendHeartsScreen**: Orange offline-kort varnar innan man skickar
+
+### Tekniskt
+- expo-sqlite för lokal databas
+- @react-native-community/netinfo för nätverksdetektering
+- pending_transactions tabell (id, type, data, created_at, synced)
+- Database helpers: queueHeartsTransaction, syncPendingTransactions, getPendingCount
+- Hooks: useNetworkState, useOfflineSync
+- Auto-cleanup av synkade transaktioner (>7 dagar)
+- HeaderRight komponent i AppNavigator
+
+### Nästa steg
+- BankID-integration för produktionsanvändare
+- Bluetooth mesh networking för närhetskommunikation
+- Push-notifikationer via FCM
 
 ## [0.4.1] - 2025-01-02
 

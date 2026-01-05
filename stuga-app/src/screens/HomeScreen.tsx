@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Text, Card, ActivityIndicator, FAB } from 'react-native-paper';
 import { collection, getDocs } from 'firebase/firestore';
@@ -7,9 +8,13 @@ import { signInAnonymously, signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../config/firebase';
 import { User } from '../types';
 import { SkeletonCard } from '../components/SkeletonCard';
+import { useOfflineSync } from '../hooks/useOfflineSync';
+import { useNetworkState } from '../hooks/useNetworkState';
 
 export default function HomeScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
+  const { isConnected, isOffline } = useNetworkState();
+  const { syncing, pendingCount, performSync, updatePendingCount } = useOfflineSync();
   const [neighbors, setNeighbors] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -17,6 +22,12 @@ export default function HomeScreen({ navigation }: any) {
   useEffect(() => {
     authenticateAndLoad();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      updatePendingCount();
+    }, [])
+  );
 
   const USE_TEST_ACCOUNT = false; // Toggle this for demos vs development
 
@@ -70,6 +81,26 @@ async function onRefresh() {
 
   return (
     <View style={styles.container}>
+      {isOffline && (
+        <Card style={styles.offlineCard}>
+          <Card.Content>
+            <Text style={styles.offlineText}>
+              📡 Offline-läge {pendingCount > 0 && `(${pendingCount} väntande)`}
+            </Text>
+          </Card.Content>
+        </Card>
+      )}
+      
+      {syncing && (
+        <Card style={styles.syncCard}>
+          <Card.Content>
+            <Text style={styles.syncText}>
+              🔄 Synkroniserar {pendingCount} transaktioner...
+            </Text>
+          </Card.Content>
+        </Card>
+      )}
+
       <Text style={styles.header}>🏘️ GRANNAR ({neighbors.length})</Text>
 
       {neighbors.length === 0 ? (
@@ -114,16 +145,34 @@ async function onRefresh() {
         />
       )}
 
-      <View style={[styles.heartsButton, { bottom: insets.bottom + 96 }]}>
+      <View style={[styles.buttonRow, { bottom: insets.bottom + 96 }]}>
         <Button
           mode="outlined"
           icon="heart"
           onPress={() => navigation.navigate('HeartsHistory')}
-          style={{ borderColor: '#2D5016' }}
+          style={styles.buttonHalf}
+          contentStyle={styles.buttonContent}
+          labelStyle={styles.buttonLabel}
           textColor="#2D5016"
         >
-          Visa Hearts Historik
+          Hearts
         </Button>
+        
+        {pendingCount > 0 && (
+          <Button
+            mode="outlined"
+            icon="sync"
+            onPress={performSync}
+            loading={syncing}
+            disabled={syncing || isOffline}
+            style={styles.buttonHalf}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+            textColor="#FF6B35"
+          >
+            Synka ({pendingCount})
+          </Button>
+        )}
       </View>
       <View style={[styles.fabContainer, { bottom: insets.bottom + 16 }]}>
         <Button
@@ -155,6 +204,26 @@ async function onRefresh() {
 }
 
 const styles = StyleSheet.create({
+  offlineCard: {
+    marginBottom: 12,
+    backgroundColor: '#FFF4E6'
+  },
+  offlineText: {
+    fontSize: 14,
+    color: '#FF6B35',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  syncCard: {
+    marginBottom: 12,
+    backgroundColor: '#E1F5DD'
+  },
+  syncText: {
+    fontSize: 14,
+    color: '#2D5016',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
   container: {
     flex: 1,
     backgroundColor: '#F5F3F0',
@@ -206,12 +275,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666'
   },
-  heartsButton: {
+  buttonRow: {
     position: 'absolute',
     left: 16,
     right: 16,
-    // bottom: removed, set dynamically above
+    flexDirection: 'row',
+    gap: 8,
     zIndex: 1
+  },
+  buttonHalf: {
+    flex: 1,
+    borderColor: '#2D5016'
+  },
+  buttonContent: {
+    paddingVertical: 4
+  },
+  buttonLabel: {
+    fontSize: 12
   },
   fabContainer: {
     position: 'absolute',

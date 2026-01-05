@@ -1,6 +1,8 @@
 import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useNetworkState } from '../hooks/useNetworkState';
 import HomeScreen from '../screens/HomeScreen';
 import NeighborDetailScreen from '../screens/NeighborDetailScreen';
 import AddResourceScreen from '../screens/AddResourceScreen';
@@ -10,6 +12,18 @@ import HeartsHistoryScreen from '../screens/HeartsHistoryScreen';
 
 const Stack = createNativeStackNavigator();
 
+function HeaderRight() {
+  const { isOffline } = useNetworkState();
+  
+  if (!isOffline) return null;
+  
+  return (
+    <View style={styles.headerRight}>
+      <Text style={styles.offlineIndicator}>📡 Offline</Text>
+    </View>
+  );
+}
+
 export default function AppNavigator() {
   return (
     <NavigationContainer>
@@ -17,7 +31,8 @@ export default function AppNavigator() {
         screenOptions={{
           headerStyle: { backgroundColor: '#2D5016' },
           headerTintColor: '#fff',
-          headerTitleStyle: { fontWeight: 'bold' }
+          headerTitleStyle: { fontWeight: 'bold' },
+          headerRight: () => <HeaderRight />
         }}
       >
         <Stack.Screen 
@@ -54,3 +69,14 @@ export default function AppNavigator() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  headerRight: {
+    marginRight: 12
+  },
+  offlineIndicator: {
+    color: '#FFA500',
+    fontSize: 12,
+    fontWeight: 'bold'
+  }
+});
