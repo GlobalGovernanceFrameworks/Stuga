@@ -7,9 +7,62 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 ## [Unreleased]
 
 ### Planerat
+- Bluetooth mesh networking (använd platsdata för räckviddsberäkning)
 - BankID-integration för produktionsanvändare
-- Bluetooth mesh networking för närhetskommunikation
 - Push-notifikationer via FCM
+- Förbättrad platshistorik och tracking
+
+## [0.6.0] - 2026-01-07
+
+### Tillagt
+- **Platsbaserade funktioner**: GPS-spårning och grannfiltrering
+  - Begär platstillstånd vid första användning
+  - Hämtar användarens GPS-koordinater automatiskt
+  - Avrundar plats till ~50m för integritetsskydd
+  - Uppdaterar plats i Firestore med noggrannhet och tidsstämpel
+  - Visar avståndsberäkning till varje granne (t.ex. "120m")
+  - Kompassriktning med 8 väderstreck (↑ ↗️ → ↘️ ↓ ↙️ ← ↖️)
+  
+- **Radiusfiltrering**: Visa endast grannar inom 500m
+  - RADIUS_METERS konstant (500m standard)
+  - Filtrerar automatiskt grannar utanför radie
+  - Sorterar grannar efter avstånd (närmaste först)
+  - Header visar antal inom radie: "GRANNAR (2 inom 500m)"
+  - Beräknar avstånd för varje granne vid laddning
+  
+- **Platsuppdatering**: Dra för att uppdatera plats
+  - Pull-to-refresh uppdaterar både plats och grannlista
+  - Omfiltrerar och sorterar efter ny position
+  - Användbart när man rör sig i området
+
+### Förbättrat
+- **Grannkort**: Visar avstånd och riktning högst upp
+  - Flexbox layout med name till vänster, distance/direction till höger
+  - Liten fetstil text (12px) för avståndsinfo
+  - Uppdateras automatiskt när plats ändras
+  
+- **Testdata**: Spridda testanvändare i Upplands Väsby
+  - Anna Svensson: ~450m norr
+  - Sven Andersson: ~250m väst
+  - Maria Johansson: ~90m syd
+  - Script för att uppdatera platser: updateTestLocations.ts
+
+### Tekniskt
+- expo-location för GPS-funktionalitet
+- Location.Accuracy.Balanced (balans mellan noggrannhet/batteri)
+- Haversine-formel för avståndsberäkning (i meter)
+- roundLocationForPrivacy() avrundar till 3 decimaler (~111m precision)
+- calculateDistance() beräknar avstånd mellan koordinater
+- getDirection() konverterar bearing till 8 kompassriktningar
+- formatDistance() visar meter (<1000m) eller kilometer
+- Location helpers i src/lib/locationHelpers.ts
+- Firebase Admin SDK script för testdatauppdatering
+
+### Säkerhet & Integritet
+- Plats avrundad till ~50m (inte exakt adress)
+- Användare ser endast andra Stuga-användare inom 500m
+- Platsinformation lagras med accuracy-metadata
+- Kräver explicit användartillstånd för plats
 
 ## [0.5.0] - 2025-01-05
 

@@ -3,7 +3,8 @@ import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Text, Card, ActivityIndicator, FAB } from 'react-native-paper';
-import { collection, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, collection, getDocs } from 'firebase/firestore';
+import { requestLocationPermission, getCurrentLocation, roundLocationForPrivacy, calculateDistance, formatDistance, getDirection } from '../lib/locationHelpers';
 import { signInAnonymously, signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../config/firebase';
 import { User } from '../types';
@@ -16,6 +17,7 @@ export default function HomeScreen({ navigation }: any) {
   const { isConnected, isOffline } = useNetworkState();
   const { syncing, pendingCount, performSync, updatePendingCount } = useOfflineSync();
   const [neighbors, setNeighbors] = useState<User[]>([]);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -40,12 +42,51 @@ export default function HomeScreen({ navigation }: any) {
         const userCredential = await signInAnonymously(auth);
         console.log('🔑 Your anonymous UID:', userCredential.user.uid);
       }
+      await requestAndUpdateLocation(); // Add this
       await loadNeighbors();
     } catch (error) {
       console.error('Error:', error);
       setLoading(false);
     }
   }
+
+  async function requestAndUpdateLocation() {
+    const hasPermission = await requestLocationPermission();
+    if (!hasPermission) {
+      console.warn('Location permission not granted');
+      return;
+    }
+
+    const location = await getCurrentLocation();
+    if (!location) {
+      console.warn('Could not get location');
+      return;
+    }
+
+    const rounded = roundLocationForPrivacy(location.lat, location.lon);
+    setUserLocation(rounded);
+
+    // Update location in Firestore
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          location: {
+            lat: rounded.lat,
+            lon: rounded.lon,
+            accuracy: Math.round(location.accuracy),
+            updated_at: Date.now()
+          }
+        });
+        console.log('📍 Location updated:', rounded);
+      } catch (error) {
+        console.error('Error updating location:', error);
+      }
+    }
+  }
+
+  const RADIUS_METERS = 500; // Default radius
 
   async function loadNeighbors() {
     try {
@@ -54,24 +95,50 @@ export default function HomeScreen({ navigation }: any) {
         id: doc.id,
         ...doc.data()
       })) as User[];
-      setNeighbors(users);
+      
+      // Filter by radius and sort by distance if we have user location
+      if (userLocation) {
+        const filtered = users
+          .map(user => {
+            if (!user.location) return null;
+            
+            const distance = calculateDistance(
+              userLocation.lat,
+              userLocation.lon,
+              user.location.lat,
+              user.location.lon
+            );
+            
+            return { ...user, distance };
+          })
+          .filter(user => user !== null && user.distance <= RADIUS_METERS)
+          .sort((a, b) => a!.distance - b!.distance);
+        
+        setNeighbors(filtered as User[]);
+      } else {
+        // No location yet, show all
+        setNeighbors(users);
+      }
     } catch (error) {
       console.error('Error loading neighbors:', error);
     } finally {
       setLoading(false);
-      setRefreshing(false); // Add this
+      setRefreshing(false);
     }
   }
 
-async function onRefresh() {
-  setRefreshing(true);
-  await loadNeighbors();
-}
+  async function onRefresh() {
+    setRefreshing(true);
+    await requestAndUpdateLocation(); // Update location on refresh
+    await loadNeighbors();
+  }
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <Text style={styles.header}>🏘️ GRANNAR</Text>
+        <Text style={styles.header}>
+          🏘️ GRANNAR {userLocation ? `(${neighbors.length} inom ${RADIUS_METERS}m)` : `(${neighbors.length})`}
+        </Text>
         {[1, 2, 3, 4, 5].map(i => (
           <SkeletonCard key={i} />
         ))}
@@ -131,17 +198,44 @@ async function onRefresh() {
               colors={['#2D5016']}
             />
           }
-          renderItem={({ item }) => (
-            <Card 
-              style={styles.card}
-              onPress={() => navigation.navigate('NeighborDetail', { neighbor: item })}
-            >
-              <Card.Content>
-                <Text style={styles.name}>🟢 {item.name}</Text>
-                <Text style={styles.hearts}>🔥 {item.hearts_balance} Hearts</Text>
-              </Card.Content>
-            </Card>
-          )}
+          renderItem={({ item }) => {
+            // Use pre-calculated distance if available, otherwise calculate
+            let distance = null;
+            let direction = null;
+            
+            if (userLocation && item.location) {
+              const distanceMeters = (item as any).distance || calculateDistance(
+                userLocation.lat,
+                userLocation.lon,
+                item.location.lat,
+                item.location.lon
+              );
+              distance = formatDistance(distanceMeters);
+              direction = getDirection(
+                userLocation.lat,
+                userLocation.lon,
+                item.location.lat,
+                item.location.lon
+              );
+            }
+
+            return (
+              <Card 
+                style={styles.card}
+                onPress={() => navigation.navigate('NeighborDetail', { neighbor: item })}
+              >
+                <Card.Content>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.name}>🟢 {item.name}</Text>
+                    {distance && (
+                      <Text style={styles.distance}>{distance} {direction}</Text>
+                    )}
+                  </View>
+                  <Text style={styles.hearts}>🔥 {item.hearts_balance} Hearts</Text>
+                </Card.Content>
+              </Card>
+            );
+          }}
         />
       )}
 
@@ -306,5 +400,15 @@ const styles = StyleSheet.create({
   },
   fabContent: {
     paddingVertical: 8
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  distance: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: 'bold'
   }
 });
