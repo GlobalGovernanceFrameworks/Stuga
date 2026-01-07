@@ -80,7 +80,7 @@ export function getDirection(lat1: number, lon1: number, lat2: number, lon2: num
   const normalized = (bearing + 360) % 360;
 
   // Convert to 8-direction compass
-  const directions = ['↑', '↗️', '→', '↘️', '↓', '↙️', '←', '↖️'];
+  const directions = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
   const index = Math.round(normalized / 45) % 8;
   return directions[index];
 }
