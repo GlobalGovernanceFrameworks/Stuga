@@ -29,8 +29,8 @@ async function seedTestData() {
       bankid_verified: true,
       created_at: Date.now(),
       location: {
-        lat: 59.5186,
-        lon: 17.9448,
+        lat: 59.522012,
+        lon: 17.914383,
         accuracy: 50,
         updated_at: Date.now()
       },
@@ -44,8 +44,8 @@ async function seedTestData() {
       bankid_verified: true,
       created_at: Date.now(),
       location: {
-        lat: 59.5190,
-        lon: 17.9450,
+        lat: 59.517326,
+        lon: 17.910821,
         accuracy: 50,
         updated_at: Date.now()
       },
@@ -59,14 +59,29 @@ async function seedTestData() {
       bankid_verified: true,
       created_at: Date.now(),
       location: {
-        lat: 59.5195,
-        lon: 17.9455,
+        lat: 59.517208,
+        lon: 17.914544,
         accuracy: 50,
         updated_at: Date.now()
       },
       hearts_balance: 320,
       availability_status: 'available',
       bluetooth_id: 'bt-maria-789'
+    },
+    {
+      user_id: 'test-lars-101',
+      name: 'Lars Bergström',
+      bankid_verified: true,
+      created_at: Date.now(),
+      location: {
+        lat: 59.5180,
+        lon: 17.9420,
+        accuracy: 50,
+        updated_at: Date.now()
+      },
+      hearts_balance: 150,
+      availability_status: 'available',
+      bluetooth_id: 'bt-lars-101'
     }
   ];
 
@@ -94,14 +109,15 @@ async function seedTestData() {
   });
   console.log('✅ Created test user for anonymous auth');
 
-  // Create test resources
+  // Create test resources - Crisis-relevant and realistic
   const resources = [
+    // Anna's resources
     {
       user_id: 'test-anna-123',
       type: 'offer',
       category: 'värme',
-      title: 'Generator, 5kW',
-      description: 'Diesel, kan köra 8h/dag. Vi har eldvärme själva.',
+      title: 'Generator, 5kW Honda',
+      description: 'Diesel. Kan köra 8-10 timmar per dag. Vi har ved själva så generatorn är tillgänglig.',
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
@@ -111,9 +127,22 @@ async function seedTestData() {
     {
       user_id: 'test-anna-123',
       type: 'offer',
-      category: 'värme',
-      title: 'Ved, ca 0.5 m³',
-      description: 'Sög träd förra veckan, kan dela med 2-3 familjer',
+      category: 'första_hjälpen',
+      title: 'Första hjälpen-utbildning',
+      description: 'Jobbat som sjuksköterska i 15 år. Kan hjälpa till vid akuta situationer.',
+      status: 'open',
+      matched_with_user: null,
+      hearts_value: null,
+      created_at: Date.now(),
+      updated_at: Date.now()
+    },
+    // Sven's resources
+    {
+      user_id: 'test-sven-456',
+      type: 'offer',
+      category: 'mat',
+      title: 'Campingkök och gasolflaskor',
+      description: '2 st gasolflaskor (fulla) och Primus spiskök. Kan dela eller laga mat åt flera familjer.',
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
@@ -124,8 +153,21 @@ async function seedTestData() {
       user_id: 'test-sven-456',
       type: 'need',
       category: 'mat',
-      title: 'Mat för 2-3 dagar',
-      description: 'Familj på 4 personer behöver matvaror',
+      title: 'Torrvaror och konserver',
+      description: 'Familj på 4 personer. Har vatten men behöver hållbar mat för 3-5 dagar.',
+      status: 'open',
+      matched_with_user: null,
+      hearts_value: null,
+      created_at: Date.now(),
+      updated_at: Date.now()
+    },
+    // Maria's resources
+    {
+      user_id: 'test-maria-789',
+      type: 'offer',
+      category: 'annat',
+      title: 'Batteriradio och ficklampor',
+      description: 'FM/AM-radio med kurbel, samt 3 kraftiga ficklampor med extra batterier.',
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
@@ -135,9 +177,34 @@ async function seedTestData() {
     {
       user_id: 'test-maria-789',
       type: 'offer',
-      category: 'kunskap',
-      title: 'Matlagning',
-      description: 'Kan laga mat för större grupper',
+      category: 'boende',
+      title: 'Vedspis och plats att värma sig',
+      description: 'Stort vardagsrum med vedspis. Kan ta emot 8-10 personer om det blir riktigt kallt.',
+      status: 'open',
+      matched_with_user: null,
+      hearts_value: null,
+      created_at: Date.now(),
+      updated_at: Date.now()
+    },
+    // Lars's resources
+    {
+      user_id: 'test-lars-101',
+      type: 'offer',
+      category: 'verktyg',
+      title: 'Elverktyg och förlängningssladdar',
+      description: 'Borrmaskin, motorsåg, 3x50m förlängningssladdar. Kan också hjälpa till med mindre reparationer.',
+      status: 'open',
+      matched_with_user: null,
+      hearts_value: null,
+      created_at: Date.now(),
+      updated_at: Date.now()
+    },
+    {
+      user_id: 'test-lars-101',
+      type: 'offer',
+      category: 'transport',
+      title: 'Fyrhjulsdrift och släp',
+      description: 'Volvo XC90 och trailer. Kan hjälpa till med transporter även i dåligt väglag.',
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
@@ -151,23 +218,45 @@ async function seedTestData() {
     console.log(`✅ Created resource: ${resource.title}`);
   }
 
-  // Create test Hearts transaction
-  const transaction = {
-    from_user: 'test-sven-456',
-    to_user: 'test-anna-123',
-    amount: 50,
-    reason: 'Tack för veden!',
-    related_resource: null,
-    confirmed_by_sender: true,
-    confirmed_by_receiver: true,
-    created_at: Date.now() - 86400000, // Yesterday
-    completed_at: Date.now() - 86400000
-  };
+  // Create test Hearts transactions - show the system in use
+  const transactions = [
+    {
+      from_user: 'test-sven-456',
+      to_user: 'test-anna-123',
+      amount: 50,
+      reason: 'Tack för hjälpen med första hjälpen!',
+      related_resource: null,
+      confirmed_by_sender: true,
+      confirmed_by_receiver: true,
+      created_at: Date.now() - 86400000, // Yesterday
+      completed_at: Date.now() - 86400000
+    },
+    {
+      from_user: 'test-maria-789',
+      to_user: 'test-lars-101',
+      amount: 30,
+      reason: 'Tack för transporten!',
+      related_resource: null,
+      confirmed_by_sender: true,
+      confirmed_by_receiver: true,
+      created_at: Date.now() - 172800000, // 2 days ago
+      completed_at: Date.now() - 172800000
+    }
+  ];
 
-  await db.collection('hearts_transactions').add(transaction);
-  console.log('✅ Created Hearts transaction');
+  for (const transaction of transactions) {
+    await db.collection('hearts_transactions').add(transaction);
+    console.log(`✅ Created Hearts transaction: ${transaction.reason}`);
+  }
 
-  console.log('\n🎉 Test data seeded successfully!\n');
+  console.log('\n🎉 Test data seeded successfully!');
+  console.log('\nDemo-ready resources created:');
+  console.log('  - Generator och första hjälpen (Anna)');
+  console.log('  - Campingkök och matbehov (Sven)');
+  console.log('  - Radio och vedspis (Maria)');
+  console.log('  - Verktyg och fyrhjulsdrift (Lars)');
+  console.log('\n4 neighbors within 500m, ready for demo!\n');
+  
   process.exit(0);
 }
 

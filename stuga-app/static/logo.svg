@@ -1,0 +1,20 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="58" fill="#F5F3F0" stroke="#2D5016" stroke-width="4"/>
+  
+  <!-- Three simple houses representing neighborhood -->
+  <!-- Left house -->
+  <path d="M 30 70 L 30 55 L 40 45 L 50 55 L 50 70 Z" fill="#2D5016"/>
+  <rect x="35" y="60" width="10" height="10" fill="#F5F3F0"/>
+  
+  <!-- Center house (slightly larger) -->
+  <path d="M 50 75 L 50 55 L 60 42 L 70 55 L 70 75 Z" fill="#2D5016"/>
+  <rect x="55" y="62" width="10" height="13" fill="#F5F3F0"/>
+  
+  <!-- Right house -->
+  <path d="M 70 70 L 70 55 L 80 45 L 90 55 L 90 70 Z" fill="#2D5016"/>
+  <rect x="75" y="60" width="10" height="10" fill="#F5F3F0"/>
+  
+  <!-- Optional: Small heart above center house -->
+  <path d="M 60 38 C 58 36 55 36 54 38 C 53 40 54 42 60 46 C 66 42 67 40 66 38 C 65 36 62 36 60 38 Z" fill="#FF6B35"/>
+</svg>

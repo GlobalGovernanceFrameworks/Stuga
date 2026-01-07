@@ -95,10 +95,17 @@ export default function HomeScreen({ navigation }: any) {
         id: doc.id,
         ...doc.data()
       })) as User[];
+
+      // Filter out current user AND any "Testanvändare" users
+      const currentUser = auth.currentUser;
+      const filteredUsers = users.filter(user => 
+        user.id !== currentUser?.uid &&  // Filter current user
+        !user.name.startsWith('Testanvändare')  // Filter any test user names
+      );
       
       // Filter by radius and sort by distance if we have user location
       if (userLocation) {
-        const filtered = users
+        const filtered = filteredUsers
           .map(user => {
             if (!user.location) return null;
             
@@ -117,7 +124,7 @@ export default function HomeScreen({ navigation }: any) {
         setNeighbors(filtered as User[]);
       } else {
         // No location yet, show all
-        setNeighbors(users);
+        setNeighbors(filteredUsers);
       }
     } catch (error) {
       console.error('Error loading neighbors:', error);

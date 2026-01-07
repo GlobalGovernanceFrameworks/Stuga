@@ -7,6 +7,7 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 ## [Unreleased]
 
 ### Planerat
+- Spela in demofilm för Upplands Väsby kommun (2 minuter)
 - Bluetooth mesh networking (använd platsdata för räckviddsberäkning)
 - BankID-integration för produktionsanvändare
 - Push-notifikationer via FCM
@@ -47,6 +48,21 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
   - Maria Johansson: ~90m syd
   - Script för att uppdatera platser: updateTestLocations.ts
 
+- **Demo-förberedelser för Upplands Väsby kommun**:
+  - Förbättrade testdata med realistiska krisberedskapsresurser
+  - Lagt till fjärde testgranne (Lars Bergström) för bättre demonstration
+  - Realistiska resursbeskrivningar (Generator Honda 5kW, Första hjälpen från sjuksköterska, etc.)
+  - Lagt till app-logotyp, ikon och splash screen
+  - KeyboardAvoidingView i AddResourceScreen (tangentbord döljer inte längre input)
+  - Filtrerar bort "Testanvändare"-konton från grannlistan automatiskt
+  - App nu redo för demonstration till Tf säkerhetschef Francisca Samuelsson
+
+- **Testresurser uppdaterade**:
+  - Anna: Generator Honda 5kW, Första hjälpen-utbildning (sjuksköterska)
+  - Sven: Campingkök med gasolflaskor, Behöver torrvaror/konserver
+  - Maria: Batteriradio med ficklampor, Vedspis med plats för 8-10 personer
+  - Lars: Elverktyg och förlängningssladdar, Volvo XC90 med släp
+
 ### Tekniskt
 - expo-location för GPS-funktionalitet
 - Location.Accuracy.Balanced (balans mellan noggrannhet/batteri)
@@ -57,6 +73,11 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - formatDistance() visar meter (<1000m) eller kilometer
 - Location helpers i src/lib/locationHelpers.ts
 - Firebase Admin SDK script för testdatauppdatering
+- KeyboardAvoidingView i AddResourceScreen för bättre UX
+- Automatisk filtrering av testanvändare (startsWith 'Testanvändare')
+- App-ikon: 1200x1200px logotyp med gröna stugor
+- Splash screen: Logotyp på forest green bakgrund (#2D5016)
+- Uppdaterad seedTestData.ts med realistiska krisberedskapsscenarier
 
 ### Säkerhet & Integritet
 - Plats avrundad till ~50m (inte exakt adress)

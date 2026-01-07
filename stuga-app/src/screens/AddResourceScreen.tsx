@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, Button, SegmentedButtons, Card } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, addDoc } from 'firebase/firestore';
@@ -72,84 +72,89 @@ export default function AddResourceScreen({ navigation }: any) {
   }
 
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {isOffline && (
-        <Card style={styles.offlineCard}>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+      >
+        {isOffline && (
+          <Card style={styles.offlineCard}>
+            <Card.Content>
+              <Text style={styles.offlineText}>
+                📡 Offline-läge: Resursen kommer köas och läggas till när du är online
+              </Text>
+            </Card.Content>
+          </Card>
+        )}
+
+        <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.offlineText}>
-              📡 Offline-läge: Resursen kommer köas och läggas till när du är online
-            </Text>
+            <Text style={styles.label}>Jag...</Text>
+            <SegmentedButtons
+              value={type}
+              onValueChange={(value) => setType(value as 'offer' | 'need')}
+              buttons={[
+                { value: 'offer', label: 'Erbjuder' },
+                { value: 'need', label: 'Behöver' }
+              ]}
+              style={styles.segmented}
+            />
+
+            <Text style={styles.label}>Kategori</Text>
+            <View style={styles.categories}>
+              {CATEGORIES.map(cat => (
+                <Button
+                  key={cat.value}
+                  mode={category === cat.value ? 'contained' : 'outlined'}
+                  onPress={() => setCategory(cat.value)}
+                  style={styles.categoryButton}
+                  buttonColor={category === cat.value ? '#2D5016' : undefined}
+                >
+                  {cat.label}
+                </Button>
+              ))}
+            </View>
+
+            <Text style={styles.label}>Titel</Text>
+            <TextInput
+              value={title}
+              onChangeText={setTitle}
+              placeholder="T.ex. Generator, 5kW"
+              mode="outlined"
+              style={styles.input}
+              maxLength={100}
+            />
+
+            <Text style={styles.label}>Beskrivning</Text>
+            <TextInput
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Detaljer om resursen..."
+              mode="outlined"
+              multiline
+              numberOfLines={4}
+              style={styles.input}
+              maxLength={500}
+            />
+            <Text style={styles.charCount}>{description.length}/500</Text>
           </Card.Content>
         </Card>
-      )}
 
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text style={styles.label}>Jag...</Text>
-          <SegmentedButtons
-            value={type}
-            onValueChange={(value) => setType(value as 'offer' | 'need')}
-            buttons={[
-              { value: 'offer', label: 'Erbjuder' },
-              { value: 'need', label: 'Behöver' }
-            ]}
-            style={styles.segmented}
-          />
-
-          <Text style={styles.label}>Kategori</Text>
-          <View style={styles.categories}>
-            {CATEGORIES.map(cat => (
-              <Button
-                key={cat.value}
-                mode={category === cat.value ? 'contained' : 'outlined'}
-                onPress={() => setCategory(cat.value)}
-                style={styles.categoryButton}
-                buttonColor={category === cat.value ? '#2D5016' : undefined}
-              >
-                {cat.label}
-              </Button>
-            ))}
-          </View>
-
-          <Text style={styles.label}>Titel</Text>
-          <TextInput
-            value={title}
-            onChangeText={setTitle}
-            placeholder="T.ex. Generator, 5kW"
-            mode="outlined"
-            style={styles.input}
-            maxLength={100}
-          />
-
-          <Text style={styles.label}>Beskrivning</Text>
-          <TextInput
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Detaljer om resursen..."
-            mode="outlined"
-            multiline
-            numberOfLines={4}
-            style={styles.input}
-            maxLength={500}
-          />
-          <Text style={styles.charCount}>{description.length}/500</Text>
-        </Card.Content>
-      </Card>
-
-      <Button
-        mode="contained"
-        onPress={handleSave}
-        loading={saving}
-        disabled={saving || !category || !title.trim()}
-        style={styles.saveButton}
-        buttonColor="#2D5016"
-      >
-        Spara resurs
-      </Button>
-    </ScrollView>
+        <Button
+          mode="contained"
+          onPress={handleSave}
+          loading={saving}
+          disabled={saving || !category || !title.trim()}
+          style={styles.saveButton}
+          buttonColor="#2D5016"
+        >
+          Spara resurs
+        </Button>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
