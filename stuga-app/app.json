@@ -23,10 +23,29 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2D5016"
       },
+      "permissions": [
+        "BLUETOOTH",
+        "BLUETOOTH_ADMIN",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_SCAN",
+        "BLUETOOTH_ADVERTISE",
+        "ACCESS_FINE_LOCATION"
+      ],
       "package": "org.globalgovernanceframeworks.stuga"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "modes": ["peripheral", "central"],
+          "bluetoothAlwaysUsageDescription": "Stuga använder Bluetooth för att hitta grannar även när internet är nere.",
+          "bluetoothPeripheralUsageDescription": "Stuga använder Bluetooth för att dela din närvaro med grannar i närheten."
+        }
+      ]
+    ]
   }
 }

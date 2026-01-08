@@ -8,10 +8,83 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 
 ### Planerat
 - Spela in demofilm för Upplands Väsby kommun (2 minuter)
-- Bluetooth mesh networking (använd platsdata för räckviddsberäkning)
+- Testa Bluetooth-upptäckt med två enheter
 - BankID-integration för produktionsanvändare
 - Push-notifikationer via FCM
 - Förbättrad platshistorik och tracking
+
+## [0.7.0] - 2026-01-08
+
+### Tillagt
+- **Profilskärm**: Visa användarstatistik och historik
+  - Visar Hearts-saldo, namn och medlemsdatum
+  - Statistikrutnät: Hearts skickade/mottagna, resurser postade, grannar hjälpta
+  - Senaste aktivitet: Visar 5 senaste transaktioner med tidsstämplar
+  - Profilknapp (👤) i HomeScreen-headern
+  - Utloggningsknapp
+  - Pull-to-refresh för att uppdatera stats
+
+- **Toast-notifikationer**: Snackbar för feedback
+  - Använder React Native Paper's Snackbar-komponent
+  - Icke-blockerande framgångsmeddelanden (✓ Resurs tillagd!, ✓ Hearts skickade!)
+  - Offline-info meddelanden (📦 Köas för senare synk)
+  - Auto-dismiss efter 3-5 sekunder beroende på meddelandetyp
+  - Implementerat i AddResourceScreen, SendHeartsScreen, RemoveResourceScreen, HomeScreen
+  - Bevarar alert() för valideringsfel och bekräftelsedialoger
+
+- **Bluetooth mesh-nätverk (grundläggande)**: Förberedelser för offline-kommunikation
+  - BluetoothMesh-klass med react-native-ble-plx
+  - useBluetooth hook för Bluetooth-hantering
+  - Närhetsdetektion via RSSI-signal
+  - RSSI-till-avstånd konvertering för uppskattad räckvidd
+  - UI-integration förberedd (kommenterad, väntar på testtelefon)
+  - NOTERING: Kräver EAS development build (fungerar ej i Expo Go)
+  - Suspenderad tills andra testtelefon finns tillgänglig
+
+### Förbättrat
+- **Alert vs Snackbar-strategi**: Konsekvent användarfeedback
+  - Valideringsfel → alert() (blockerande, kräver åtgärd)
+  - Bekräftelsedialoger → Alert.alert() med knappar
+  - Framgångsmeddelanden → Snackbar (icke-blockerande)
+  - Offline-info → Snackbar (informativ, ej blockerande)
+  - Kritiska fel → alert() (blockerande)
+
+- **Användarprofillogik**: Rättad "grannar hjälpta"-räkning
+  - Tidigare: Räknade Hearts SKICKADE (fel - betyder "grannar jag tackat")
+  - Nu: Räknar Hearts MOTTAGNA (korrekt - betyder "grannar jag hjälpt")
+  - Logik: Om någon skickar mig Hearts = jag hjälpte dem
+
+- **Användardokument-skapande**: Automatisk profil vid första inloggning
+  - Ändrat från updateDoc() till setDoc() med merge: true
+  - Skapar användardokument automatiskt om det inte finns
+  - Fixar "No document to update"-fel vid anonym inloggning
+  - Initialt saldo: 100 Hearts
+  - Standardnamn: "Testanvändare (Du)" för dev, email för testanvändare
+
+- **Toast-varaktigheter**: Längre visningstider för läsbarhet
+  - Framgångsmeddelanden: 4 sekunder (var 3)
+  - Offline-info: 5 sekunder (var 4)
+  - Data uppdaterad: 3 sekunder (var 2)
+  - Ger användare tid att läsa meddelanden
+
+### Tekniskt
+- useSnackbar hook: Återanvändbar toast-hantering
+- SafeAreaView-wrappers: Korrekt JSX-struktur för Snackbar-placering
+- react-native-ble-plx: Bluetooth Low Energy-bibliotek (v3.1+)
+- app.json: Bluetooth-permissions och plugin-konfiguration
+- Firestore setDoc med merge: Skapa-eller-uppdatera-mönster
+- RSSI-algoritm: Haversine-baserad avståndsberäkning från signalstyrka
+
+### Buggfixar
+- Fixat "No document to update"-fel vid användarens första inloggning
+- Fixat JSX-struktur i alla skärmar med Snackbar (krävde SafeAreaView-wrapper)
+- Fixat "grannar hjälpta" räknade skickade istället för mottagna Hearts
+
+### Känt
+- Bluetooth mesh-funktionalitet kommenterad i väntan på:
+  - Andra testtelefon (mors gamla telefon)
+  - EAS development build (Expo Go stöder ej Bluetooth native modules)
+- För att aktivera Bluetooth: Kör `eas build --profile development --platform android`
 
 ## [0.6.0] - 2026-01-07
 

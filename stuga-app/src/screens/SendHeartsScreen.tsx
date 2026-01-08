@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import { Text, Card, Button, TextInput, SegmentedButtons } from 'react-native-paper';
+import { Text, Card, Button, TextInput, SegmentedButtons, Snackbar } from 'react-native-paper';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, addDoc, doc, getDoc, query, where, getDocs } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { useNetworkState } from '../hooks/useNetworkState';
 import { useOfflineSync } from '../hooks/useOfflineSync';
+import { useSnackbar } from '../hooks/useSnackbar';
 import { queueHeartsTransaction } from '../lib/database';
 
 const QUICK_AMOUNTS = [25, 50, 100];
 
 export default function SendHeartsScreen({ route, navigation }: any) {
   const { neighbor } = route.params;
+  const insets = useSafeAreaInsets();
   const { isOffline } = useNetworkState();
   const { updatePendingCount } = useOfflineSync();
+  const { visible, message, duration, showSnackbar, hideSnackbar } = useSnackbar();
   const [amount, setAmount] = useState(50);
   const [customAmount, setCustomAmount] = useState('');
   const [reason, setReason] = useState('');
@@ -62,21 +66,21 @@ export default function SendHeartsScreen({ route, navigation }: any) {
   async function handleSend() {
     const finalAmount = useCustom ? parseInt(customAmount) : amount;
     
+    // Validation errors → Keep as alerts (blocking)
     if (!finalAmount || finalAmount <= 0) {
       alert('Ange ett giltigt belopp');
       return;
     }
-
     if (finalAmount > myBalance) {
       alert('Du har inte tillräckligt många Hearts');
       return;
     }
-
+    
     setSending(true);
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
-
+      
       const transactionData = {
         from_user: user.uid,
         to_user: neighbor.user_id,
@@ -88,21 +92,26 @@ export default function SendHeartsScreen({ route, navigation }: any) {
         created_at: Date.now(),
         completed_at: null
       };
-
+      
       if (isOffline) {
-        // Queue for later when offline
+        // Offline → Snackbar (informational, not blocking)
         const queueId = queueHeartsTransaction(transactionData);
         updatePendingCount();
-        alert(`📦 Offline: Transaktionen köad!\n\n${finalAmount} Hearts till ${neighbor.name} kommer skickas när du är online igen.`);
+        showSnackbar(`📦 ${finalAmount} Hearts till ${neighbor.name} köas (skickas vid nästa sync)`, 5000);
       } else {
-        // Send immediately when online
+        // Online success → Snackbar (non-blocking)
         await addDoc(collection(db, 'hearts_transactions'), transactionData);
-        alert(`✅ Skickade ${finalAmount} Hearts till ${neighbor.name}!\n\nBekräftelse kommer när ${neighbor.name.split(' ')[0]} är online.`);
+        showSnackbar(`✓ ${finalAmount} Hearts skickade till ${neighbor.name}!`, 5000);
       }
-
-      navigation.goBack();
+      
+      // Navigate back after short delay
+      setTimeout(() => {
+        navigation.goBack();
+      }, 500);
+      
     } catch (error) {
       console.error('Error sending Hearts:', error);
+      // Critical error → Alert (blocking)
       alert('Kunde inte skicka Hearts');
     } finally {
       setSending(false);
@@ -113,106 +122,123 @@ export default function SendHeartsScreen({ route, navigation }: any) {
   const newBalance = myBalance - finalAmount;
 
   return (
-    <ScrollView style={styles.container}>
-      {isOffline && (
-        <Card style={styles.offlineCard}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F3F0' }}>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+      >
+        {isOffline && (
+          <Card style={styles.offlineCard}>
+            <Card.Content>
+              <Text style={styles.offlineText}>
+                📡 Offline-läge: Transaktionen kommer köas och skickas när du är online
+              </Text>
+            </Card.Content>
+          </Card>
+        )}
+
+        <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.offlineText}>
-              📡 Offline-läge: Transaktionen kommer köas och skickas när du är online
-            </Text>
+            <Text style={styles.title}>Skicka Hearts till:</Text>
+            <Text style={styles.name}>{neighbor.name}</Text>
+            <Text style={styles.info}>🔥 Deras saldo: {neighbor.hearts_balance} Hearts</Text>
           </Card.Content>
         </Card>
-      )}
 
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text style={styles.title}>Skicka Hearts till:</Text>
-          <Text style={styles.name}>{neighbor.name}</Text>
-          <Text style={styles.info}>🔥 Deras saldo: {neighbor.hearts_balance} Hearts</Text>
-        </Card.Content>
-      </Card>
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text style={styles.label}>Hur mycket?</Text>
+            
+            {!useCustom ? (
+              <View style={styles.quickButtons}>
+                {QUICK_AMOUNTS.map(amt => (
+                  <Button
+                    key={amt}
+                    mode={amount === amt ? 'contained' : 'outlined'}
+                    onPress={() => setAmount(amt)}
+                    style={styles.quickButton}
+                    buttonColor={amount === amt ? '#2D5016' : undefined}
+                  >
+                    {amt} Hearts
+                  </Button>
+                ))}
+              </View>
+            ) : (
+              <TextInput
+                value={customAmount}
+                onChangeText={setCustomAmount}
+                placeholder="Ange antal Hearts"
+                keyboardType="numeric"
+                mode="outlined"
+                style={styles.input}
+              />
+            )}
 
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text style={styles.label}>Hur mycket?</Text>
-          
-          {!useCustom ? (
-            <View style={styles.quickButtons}>
-              {QUICK_AMOUNTS.map(amt => (
-                <Button
-                  key={amt}
-                  mode={amount === amt ? 'contained' : 'outlined'}
-                  onPress={() => setAmount(amt)}
-                  style={styles.quickButton}
-                  buttonColor={amount === amt ? '#2D5016' : undefined}
-                >
-                  {amt} Hearts
-                </Button>
-              ))}
-            </View>
-          ) : (
+            <Button
+              mode="text"
+              onPress={() => setUseCustom(!useCustom)}
+              style={styles.toggleButton}
+            >
+              {useCustom ? '← Tillbaka till snabbval' : 'Annat belopp →'}
+            </Button>
+
+            <Text style={styles.label}>Varför? (valfritt)</Text>
             <TextInput
-              value={customAmount}
-              onChangeText={setCustomAmount}
-              placeholder="Ange antal Hearts"
-              keyboardType="numeric"
+              value={reason}
+              onChangeText={setReason}
+              placeholder="T.ex. Tack för veden!"
               mode="outlined"
+              multiline
+              numberOfLines={3}
               style={styles.input}
+              maxLength={200}
             />
-          )}
 
-          <Button
-            mode="text"
-            onPress={() => setUseCustom(!useCustom)}
-            style={styles.toggleButton}
-          >
-            {useCustom ? '← Tillbaka till snabbval' : 'Annat belopp →'}
-          </Button>
+            <View style={styles.balanceBox}>
+              <Text style={styles.balanceLabel}>🔥 Ditt saldo: {myBalance} Hearts</Text>
+              {finalAmount > 0 && (
+                <Text style={[styles.balanceLabel, newBalance < 0 && styles.negative]}>
+                  Efter: {newBalance} Hearts
+                </Text>
+              )}
+              {finalAmount > myBalance && (
+                <Text style={styles.errorText}>
+                  ⚠️ Du har inte tillräckligt många Hearts
+                </Text>
+              )}
+              {hasPending && (
+                <Text style={styles.warningText}>
+                  ⏳ Du har redan en obekräftad transaktion till {neighbor.name.split(' ')[0]}
+                </Text>
+              )}
+            </View>
+          </Card.Content>
+        </Card>
 
-          <Text style={styles.label}>Varför? (valfritt)</Text>
-          <TextInput
-            value={reason}
-            onChangeText={setReason}
-            placeholder="T.ex. Tack för veden!"
-            mode="outlined"
-            multiline
-            numberOfLines={3}
-            style={styles.input}
-            maxLength={200}
-          />
-
-          <View style={styles.balanceBox}>
-            <Text style={styles.balanceLabel}>🔥 Ditt saldo: {myBalance} Hearts</Text>
-            {finalAmount > 0 && (
-              <Text style={[styles.balanceLabel, newBalance < 0 && styles.negative]}>
-                Efter: {newBalance} Hearts
-              </Text>
-            )}
-            {finalAmount > myBalance && (
-              <Text style={styles.errorText}>
-                ⚠️ Du har inte tillräckligt många Hearts
-              </Text>
-            )}
-            {hasPending && (
-              <Text style={styles.warningText}>
-                ⏳ Du har redan en obekräftad transaktion till {neighbor.name.split(' ')[0]}
-              </Text>
-            )}
-          </View>
-        </Card.Content>
-      </Card>
-
-      <Button
-        mode="contained"
-        onPress={handleSend}
-        loading={sending}
-        disabled={sending || finalAmount <= 0 || finalAmount > myBalance || hasPending}
-        style={styles.sendButton}
-        buttonColor="#FF6B35"
+        <Button
+          mode="contained"
+          onPress={handleSend}
+          loading={sending}
+          disabled={sending || finalAmount <= 0 || finalAmount > myBalance || hasPending}
+          style={styles.sendButton}
+          buttonColor="#FF6B35"
+        >
+          Skicka {finalAmount > 0 ? `${finalAmount} Hearts` : 'Hearts'}
+        </Button>
+      </ScrollView>
+      <Snackbar
+        visible={visible}
+        onDismiss={hideSnackbar}
+        duration={duration}
+        action={{
+          label: 'OK',
+          onPress: hideSnackbar,
+        }}
+        style={{ backgroundColor: '#2D5016' }}
       >
-        Skicka {finalAmount > 0 ? `${finalAmount} Hearts` : 'Hearts'}
-      </Button>
-    </ScrollView>
+        {message}
+      </Snackbar>
+    </SafeAreaView>
   );
 }
 
@@ -229,7 +255,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#F5F3F0',
     padding: 16
   },
   card: {
