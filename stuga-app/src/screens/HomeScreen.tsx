@@ -163,24 +163,37 @@ export default function HomeScreen({ navigation }: any) {
   function HeaderSection({ 
     neighborCount, 
     showRadius, 
-    onProfilePress 
+    onProfilePress,
+    onResourcesPress
   }: { 
     neighborCount: number; 
     showRadius: boolean; 
     onProfilePress: () => void;
+    onResourcesPress: () => void;
   }) {
     return (
       <View style={styles.headerRow}>
         <Text style={styles.headerText}>
-          🏘️ GRANNAR ({neighborCount}{showRadius ? ` inom ${RADIUS_METERS}m` : ''})
+          😏️ GRANNAR ({neighborCount}{showRadius ? ` inom ${RADIUS_METERS}m` : ''})
         </Text>
-        <Button 
-          mode="text" 
-          onPress={onProfilePress}
-          style={styles.profileButton}
-        >
-          👤
-        </Button>
+        <View style={styles.headerButtons}>
+          <Button 
+            mode="text" 
+            onPress={onResourcesPress}
+            icon="view-list"
+            textColor="#2D5016"
+            compact
+          >
+            Resurser
+          </Button>
+          <Button 
+            mode="text" 
+            onPress={onProfilePress}
+            compact
+          >
+            👤
+          </Button>
+        </View>
       </View>
     );
   }
@@ -239,6 +252,7 @@ export default function HomeScreen({ navigation }: any) {
           neighborCount={neighbors.length}
           showRadius={!!userLocation}
           onProfilePress={() => navigation.navigate('Profile' as never)}
+          onResourcesPress={() => navigation.navigate('Resources' as never)}
         />
 
         {neighbors.length === 0 ? (
@@ -439,6 +453,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8
   },
   headerRow: {
     flexDirection: 'row',

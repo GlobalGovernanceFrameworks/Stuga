@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { Linking, Alert, View, ScrollView, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
@@ -15,6 +16,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
   const { neighbor } = route.params;
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
+  const insets = useSafeAreaInsets();
   const currentUser = auth.currentUser;
   const isMe = currentUser?.uid === neighbor.user_id;
 
@@ -44,11 +46,42 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
     }
   }
 
+  function handleSendSMS() {
+    // Check if phone number exists
+    if (!neighbor.phone_number) {
+      Alert.alert(
+        'Telefonnummer saknas',
+        `${neighbor.name.split(' ')[0]} har inte delat sitt telefonnummer än.`,
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    // Open SMS app with pre-filled number
+    const smsUrl = `sms:${neighbor.phone_number}`;
+    
+    Linking.canOpenURL(smsUrl)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(smsUrl);
+        } else {
+          Alert.alert('Fel', 'Kunde inte öppna SMS-appen');
+        }
+      })
+      .catch((err) => {
+        console.error('SMS error:', err);
+        Alert.alert('Fel', 'Kunde inte öppna SMS-appen');
+      });
+  }
+
   const offers = resources.filter(r => r.type === 'offer' && !isExpired(r.expires_at));
   const needs = resources.filter(r => r.type === 'need' && !isExpired(r.expires_at));
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+    >
       <Card style={styles.card}>
         <Card.Content>
           <Text style={styles.name}>{neighbor.name}</Text>
@@ -126,8 +159,10 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
             mode="contained" 
             style={styles.button}
             buttonColor="#FF6B35"
+            onPress={() => handleSendSMS()}
+            icon="message-text"
           >
-            💬 Kontakta {neighbor.name.split(' ')[0]}
+            Skicka SMS
           </Button>
         )}
         {!isMe && (
@@ -136,8 +171,9 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
             style={styles.button}
             buttonColor="#2D5016"
             onPress={() => navigation.navigate('SendHearts', { neighbor })}
+            icon="heart"
           >
-            💖 Skicka Hearts
+            Skicka Hearts
           </Button>
         )}
       </View>

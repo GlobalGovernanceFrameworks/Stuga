@@ -230,6 +230,15 @@ export default function MyResourcesScreen({ navigation }: any) {
                     {!isCompleted ? (
                       <>
                         <Button
+                          mode="outlined"
+                          onPress={() => navigation.navigate('EditResource', { resource })}
+                          style={styles.actionButton}
+                          textColor="#2D5016"
+                          icon="pencil"
+                        >
+                          Redigera
+                        </Button>
+                        <Button
                           mode="contained"
                           onPress={() => handleMarkFulfilled(resource)}
                           style={styles.actionButton}

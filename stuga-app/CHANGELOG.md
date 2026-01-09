@@ -13,6 +13,65 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Push-notifikationer via FCM
 - Förbättrad platshistorik och tracking
 
+## [0.9.0] - 2026-01-09
+
+### Tillagt
+- **Redigera resurser**: Komplett redigeringsfunktionalitet för befintliga resurser
+  - Förifyllda fält med befintlig data
+  - Möjlighet att ändra titel, beskrivning, kategori och typ
+  - Kan lägga till eller ta bort utgångsdatum
+  - "Redigera"-knapp i Mina resurser-skärmen
+  - Valfri redigeringsknapp i NeighborDetail för egna resurser
+- **Resurs-browsing**: Ny "Resurser"-skärm för resurs-centrerad upptäckt
+  - Sökfält för snabb filtrering av resurser
+  - Kategori-filter med horisontell scroll (Mat, Värme, Verktyg, etc.)
+  - Erbjuder/Behöver-toggle för att filtrera resurstyp
+  - Smart sortering: brådskande resurser först, sedan avstånd
+  - Visar ägare, avstånd och riktning för varje resurs
+  - Klicka på resurs för att se ägarens profil
+  - Räknare visar antal filtrerade resurser
+- **SMS-kontakt**: Funktionell kommunikation mellan grannar
+  - "Skicka SMS"-knapp ersätter tidigare placeholder
+  - Öppnar enhetens SMS-app med förifyllt nummer
+  - Graceful fallback om telefonnummer saknas
+  - Fungerar på både iOS och Android
+  - Perfekt för krisberedskap (SMS fungerar även när mobildata är överbelastad)
+- **Telefonnummer i testdata**: Test-användare har nu telefonnummer
+
+### Förbättrat
+- **Komplett CRUD**: Nu finns Create, Read, Update och Delete för resurser
+- **Resurssökning**: Användare kan söka i titel, beskrivning och ägarnamn
+- **Filtrering**: Tre nivåer av filtrering (sök, kategori, typ) kan kombineras
+- **Tom-state meddelanden**: Tydliga meddelanden när inga resurser matchar filter
+
+### Tekniskt
+- Ny komponent: `EditResourceScreen` (~300 rader) - Resursredigering med förifyllda fält
+- Ny komponent: `ResourcesScreen` (~350 rader) - Resurs-browsing med avancerad filtrering
+- Uppdaterad: `NeighborDetailScreen` - SMS-funktionalitet med React Native Linking API
+- Uppdaterad: `MyResourcesScreen` - "Redigera"-knapp för öppna resurser
+- Uppdaterad: `HomeScreen` - "Resurser"-knapp i header för snabb åtkomst
+- Uppdaterad: `AppNavigator` - Nya rutter för EditResource och Resources
+- Uppdaterad: `User`-type - Lagt till valfritt `phone_number`-fält
+- Uppdaterad: Testdata - Telefonnummer för alla test-användare
+
+### Buggfixar
+- **Safe area på Android**: NeighborDetailScreen scrollar nu tillräckligt långt så att knappar inte hamnar under Android navigation bar
+- **Kategori-chipsspacing**: Fixad layout för kategori-filter (explicit marginRight istället för gap)
+
+### Användargränssnitt
+- Sökfält med tydlig placeholder i ResourcesScreen
+- Segmenterade knappar för Alla/Erbjuder/Behöver
+- Horisontell scroll för kategorier (9 kategorier)
+- Ikoner för resurstyp: 📤 Erbjuder, 📥 Behöver
+- Brådskanhets-badge och tidsräknare på varje resurs
+- Avstånd och kompassriktning visas för varje resurs
+
+### Krisberedskap
+- **SMS-infrastruktur**: Utnyttjar befintligt SMS-nätverk som fungerar även vid överbelastning
+- **Resurssökning**: Snabb upptäckt av kritiska resurser ("generator", "mat", etc.)
+- **Brådskanhetsprioritet**: Akuta behov visas först automatiskt
+- **Avståndsbaserad sortering**: Närmaste hjälp visas först inom samma brådskanshetsnivå
+
 ## [0.8.0] - 2026-01-09
 
 ### Tillagt

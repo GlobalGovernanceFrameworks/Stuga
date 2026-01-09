@@ -6,11 +6,13 @@ import { useNetworkState } from '../hooks/useNetworkState';
 import HomeScreen from '../screens/HomeScreen';
 import NeighborDetailScreen from '../screens/NeighborDetailScreen';
 import AddResourceScreen from '../screens/AddResourceScreen';
+import EditResourceScreen from '../screens/EditResourceScreen';
 import RemoveResourceScreen from '../screens/RemoveResourceScreen';
 import SendHeartsScreen from '../screens/SendHeartsScreen';
 import HeartsHistoryScreen from '../screens/HeartsHistoryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import MyResourcesScreen from '../screens/MyResourcesScreen';
+import ResourcesScreen from '../screens/ResourcesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -53,6 +55,11 @@ export default function AppNavigator() {
           options={{ title: 'Lägg till resurs' }}
         />
         <Stack.Screen 
+          name="EditResource" 
+          component={EditResourceScreen}
+          options={{ title: 'Redigera resurs' }}
+        />
+        <Stack.Screen 
           name="RemoveResource" 
           component={RemoveResourceScreen}
           options={{ title: 'Ta bort resurs' }}
@@ -76,6 +83,11 @@ export default function AppNavigator() {
           name="MyResources" 
           component={MyResourcesScreen}
           options={{ title: 'Mina resurser' }}
+        />
+        <Stack.Screen 
+          name="Resources" 
+          component={ResourcesScreen}
+          options={{ title: 'Alla resurser' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

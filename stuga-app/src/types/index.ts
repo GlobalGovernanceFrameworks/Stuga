@@ -3,6 +3,7 @@ export interface User {
   id: string;
   user_id: string;              // BankID personnummer (hashed)
   name: string;
+  phone_number?: string;
   bankid_verified: boolean;
   created_at: number;            // timestamp
   location: {
