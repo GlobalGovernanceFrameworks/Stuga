@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { Text, TextInput, Button, SegmentedButtons, Card, Snackbar } from 'react-native-paper';
+import { Text, TextInput, Button, SegmentedButtons, Card, Snackbar, Switch } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, addDoc } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { useNetworkState } from '../hooks/useNetworkState';
 import { useSnackbar } from '../hooks/useSnackbar';
 import { queueResourceCreate } from '../lib/database';
+import { getExpiryOptions, calculateExpiryTimestamp } from '../lib/expiryHelpers';
 
 const CATEGORIES = [
   { value: 'mat', label: 'Mat 🥪', icon: 'food' },
@@ -28,6 +29,9 @@ export default function AddResourceScreen({ navigation }: any) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
+  const [hasExpiry, setHasExpiry] = useState(false);
+  const [selectedHours, setSelectedHours] = useState(24); // Default 24 hours
+  const [customDate, setCustomDate] = useState('');
 
   async function handleSave() {
     // Validation errors → Keep alert (blocking)
@@ -44,7 +48,7 @@ export default function AddResourceScreen({ navigation }: any) {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
       
-      const resource = {
+      const resource: any = {
         user_id: user.uid,
         type,
         category,
@@ -56,6 +60,11 @@ export default function AddResourceScreen({ navigation }: any) {
         created_at: Date.now(),
         updated_at: Date.now()
       };
+      
+      // Add expiry if enabled
+      if (hasExpiry && selectedHours > 0) {
+        resource.expires_at = calculateExpiryTimestamp(selectedHours);
+      }
       
       if (isOffline) {
         // Offline queue → Snackbar (informational)
@@ -149,6 +158,53 @@ export default function AddResourceScreen({ navigation }: any) {
                 maxLength={500}
               />
               <Text style={styles.charCount}>{description.length}/500</Text>
+
+              {/* Expiry section */}
+              <View style={styles.expirySection}>
+                <View style={styles.expiryHeader}>
+                  <Text style={styles.label}>Utgångsdatum</Text>
+                  <Switch
+                    value={hasExpiry}
+                    onValueChange={setHasExpiry}
+                    color="#2D5016"
+                  />
+                </View>
+                
+                {hasExpiry && (
+                  <View style={styles.expiryOptions}>
+                    <Text style={styles.expiryHint}>
+                      ⏱️ När är resursen inte längre tillgänglig?
+                    </Text>
+                    <View style={styles.quickButtons}>
+                      {[
+                        { label: '6 tim', hours: 6 },
+                        { label: '24 tim', hours: 24 },
+                        { label: '3 dagar', hours: 72 },
+                        { label: '1 vecka', hours: 168 }
+                      ].map(option => (
+                        <Button
+                          key={option.hours}
+                          mode={selectedHours === option.hours ? 'contained' : 'outlined'}
+                          onPress={() => setSelectedHours(option.hours)}
+                          style={styles.quickButton}
+                          buttonColor={selectedHours === option.hours ? '#2D5016' : undefined}
+                          compact
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </View>
+                    <Text style={styles.expiryPreview}>
+                      Utgår: {new Date(calculateExpiryTimestamp(selectedHours)).toLocaleString('sv-SE', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </Text>
+                  </View>
+                )}
+              </View>
             </Card.Content>
           </Card>
 
@@ -226,6 +282,42 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999',
     marginTop: 4
+  },
+  expirySection: {
+    marginTop: 8
+  },
+  expiryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8
+  },
+  expiryOptions: {
+    marginTop: 8
+  },
+  expiryHint: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12
+  },
+  quickButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12
+  },
+  quickButton: {
+    flex: 1,
+    minWidth: '20%'
+  },
+  expiryPreview: {
+    fontSize: 14,
+    color: '#2D5016',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    padding: 8,
+    backgroundColor: '#E8F5E9',
+    borderRadius: 8
   },
   saveButton: {
     marginVertical: 16

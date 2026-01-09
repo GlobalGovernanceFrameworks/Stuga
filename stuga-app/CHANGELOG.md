@@ -13,6 +13,94 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Push-notifikationer via FCM
 - Förbättrad platshistorik och tracking
 
+## [0.8.0] - 2026-01-09
+
+### Tillagt
+- **Resursbrådskande karaktär**: Visuella indikatorer för tidskänsliga resurser
+  - Valfritt utgångsdatum när resurser läggs till
+  - Snabbval: 6 timmar, 24 timmar, 3 dagar, 1 vecka
+  - Live-förhandsgranskning av utgångstid
+  - Fyra nivåer av brådskande karaktär:
+    - 🔴 Brådskande (< 24 timmar) - Röd
+    - 🟡 Snart utgången (< 7 dagar) - Orange
+    - 🟢 Tillgänglig (> 7 dagar) - Grön
+    - ⚪ Utgången - Filtreras automatiskt bort
+  - UrgencyBadge-komponent visar ikon + tid kvar
+  - Tidsvisning: "6 tim kvar", "Utgår imorgon", "3 dagar kvar"
+  
+- **Resurshantering**: Komplett livscykelhantering för resurser
+  - Ny "Mina resurser"-skärm ersätter enkel Ta bort-skärm
+  - Tre filtervyer: Öppna (aktiva), Slutförda, Alla
+  - Live-räkning per filter: "Öppna (3)", "Slutförda (2)"
+  - Markera som slutförd: "Slutförd"-knapp → status='completed' + genomstruken text
+  - Återöppna resurser: "Återöppna"-knapp återställer till 'open'-status
+  - Ta bort resurser: bekräftelse krävs för permanent borttagning
+  - Visuella tillstånd: slutförd (gråtonad), utgången (orange ram)
+  - Sorterat efter created_at (nyaste först)
+
+- **Testdata med brådskande karaktär**: Demo-redo scenarier
+  - seedTestDataWithUrgency.ts skapar resurser med utgångstider
+  - addUrgencyToTestData.ts lägger till utgångstider till befintliga resurser
+  - Visar alla nivåer:
+    - 🔴 BRÅDSKANDE: Torrvaror (6h), Första hjälpen (12h)
+    - 🟡 SNART: Campingkök (2d), Vedspis (3d)
+    - 🟢 TILLGÄNGLIG: Generator (1v), Fyrhjulsdrift (2v)
+    - ⚪ INGEN UTGÅNG: Batteriradio, Elverktyg
+
+### Förbättrat
+- **Navigation**: Hemskärm uppdaterad
+  - Ersatt [Ta bort]-knapp med [Mina resurser]
+  - Grön färg (#6BCF7F) för positiv handling
+  - Ikon ändrad till 'view-list'
+  - MyResources-rutt tillagd i AppNavigator
+
+- **Smart filtrering**: Utgångna resurser hanteras intelligent
+  - "Öppna"-filter döljer utgångna (även om status='open')
+  - "Slutförda"-filter visar slutföringshistorik
+  - "Alla"-filter visar komplett resurslivscykel
+  - Tomma tillstånd anpassade per filter
+
+### Tekniskt
+- expiryHelpers.ts: Brådskande karaktärs-logik, tidsformatering
+  - calculateExpiryTimestamp() skapar utgångstidpunkt från timmar
+  - isExpired() kontrollerar om resurs har gått ut
+  - getUrgencyInfo() returnerar nivå, färg, ikon, tid kvar
+  - formatTimeRemaining() visar läsbar tid
+  - getExpiryOptions() tillhandahåller UI-val
+- UrgencyBadge-komponent: Visuell brådskande karaktärsindikator
+- MyResourcesScreen: Fullständig resurshantering (350 rader)
+- Firebase-konfiguration: Memory cache istället för persistent
+  - localCache: { kind: 'memory' } i initializeFirestore()
+  - Eliminerar "BloomFilter error"-varning
+  - Ingen funktionalitetsförlust (SQLite hanterar offline)
+  - Enklare arkitektur (en offline-cache istället för dubbel)
+
+### Buggfixar
+- **Firebase BloomFilter-varning**: Åtgärdad
+  - Konflikt mellan Firestore persistent cache och SQLite offline-kö
+  - Ändrat till memory cache undviker konflikt
+  - Varning eliminerad
+
+### Känt
+- Utgångna resurser visas fortfarande i "Alla"-filter med orange ram
+- Perfekt för krisberedskapsdemos: tidskänslig koordination matchar verkliga scenarier
+
+---
+
+**Filer skapade:**
+- src/lib/expiryHelpers.ts
+- src/components/UrgencyBadge.tsx
+- src/screens/MyResourcesScreen.tsx
+- src/scripts/seedTestDataWithUrgency.ts
+- src/scripts/addUrgencyToTestData.ts
+
+**Filer modifierade:**
+- src/screens/AddResourceScreen.tsx
+- src/screens/NeighborDetailScreen.tsx
+- src/screens/HomeScreen.tsx
+- src/navigation/AppNavigator.tsx
+- src/config/firebase.ts
+
 ## [0.7.0] - 2026-01-08
 
 ### Tillagt

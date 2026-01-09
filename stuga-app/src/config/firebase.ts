@@ -19,9 +19,14 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore for React Native (no IndexedDB on mobile)
+// Initialize Firestore for React Native
+// Note: Using local cache disabled to avoid BloomFilter errors
+// We handle offline via SQLite instead
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
+  localCache: { 
+    kind: 'memory'  // Use memory cache instead of persistent cache
+  }
 });
 
 // Initialize Auth with AsyncStorage persistence

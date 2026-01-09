@@ -8,6 +8,8 @@ import { Resource } from '../types';
 import { getCategoryLabel } from '../lib/categoryHelpers';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { StatusBadge } from '../components/StatusBadge';
+import { UrgencyBadge } from '../components/UrgencyBadge';
+import { isExpired } from '../lib/expiryHelpers';
 
 export default function NeighborDetailScreen({ route, navigation }: any) {
   const { neighbor } = route.params;
@@ -42,8 +44,8 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
     }
   }
 
-  const offers = resources.filter(r => r.type === 'offer');
-  const needs = resources.filter(r => r.type === 'need');
+  const offers = resources.filter(r => r.type === 'offer' && !isExpired(r.expires_at));
+  const needs = resources.filter(r => r.type === 'need' && !isExpired(r.expires_at));
 
   return (
     <ScrollView style={styles.container}>
@@ -73,6 +75,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
                   <Card key={resource.id} style={styles.resourceCard}>
                     <Card.Content>
                       <StatusBadge status={resource.status} />
+                      <UrgencyBadge expiresAt={resource.expires_at} showTimeRemaining />
                       <Text style={styles.resourceTitle}>{resource.title}</Text>
                       <Text style={styles.categoryLabel}>{getCategoryLabel(resource.category)}</Text>
                       <Text style={styles.resourceDesc}>{resource.description}</Text>
@@ -89,6 +92,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
                   <Card key={resource.id} style={styles.resourceCard}>
                     <Card.Content>
                       <StatusBadge status={resource.status} />
+                      <UrgencyBadge expiresAt={resource.expires_at} showTimeRemaining />
                       <Text style={styles.resourceTitle}>{resource.title}</Text>
                       <Text style={styles.resourceDesc}>{resource.description}</Text>
                     </Card.Content>
@@ -101,7 +105,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
             <Card style={styles.emptyCard}>
               <Card.Content style={styles.emptyContent}>
                 <Text style={styles.emptyIcon}>📦</Text>
-                <Text style={styles.emptyTitle}>Inga resurser än</Text>
+                <Text style={styles.emptyTitle}>Inga resurser Ã¤n</Text>
                 <Text style={styles.emptyText}>
                   {neighbor.name.split(' ')[0]} har inte lagt till några resurser ännu.
                 </Text>

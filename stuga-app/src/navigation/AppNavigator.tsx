@@ -10,6 +10,7 @@ import RemoveResourceScreen from '../screens/RemoveResourceScreen';
 import SendHeartsScreen from '../screens/SendHeartsScreen';
 import HeartsHistoryScreen from '../screens/HeartsHistoryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import MyResourcesScreen from '../screens/MyResourcesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -70,6 +71,11 @@ export default function AppNavigator() {
           name="Profile" 
           component={ProfileScreen}
           options={{ title: 'Min profil' }}
+        />
+        <Stack.Screen 
+          name="MyResources" 
+          component={MyResourcesScreen}
+          options={{ title: 'Mina resurser' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

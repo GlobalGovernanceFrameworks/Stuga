@@ -378,14 +378,14 @@ export default function HomeScreen({ navigation }: any) {
           
           <Button
             mode="contained"
-            icon="delete"
-            onPress={() => navigation.navigate('RemoveResource')}
+            icon="view-list"
+            onPress={() => navigation.navigate('MyResources')}
             style={styles.fabButton}
-            buttonColor="#C1121F"
+            buttonColor="#6BCF7F"
             textColor="#fff"
             contentStyle={styles.fabContent}
           >
-            Ta bort
+            Mina resurser
           </Button>
         </View>
       </View>
