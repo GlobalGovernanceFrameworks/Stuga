@@ -44,5 +44,24 @@ service cloud.firestore {
       allow write: if isAuthenticated() &&
                       request.resource.data.user_id == request.auth.uid;
     }
+
+    // Contact requests - user can read their own, create new, and respond to received
+    match /contact_requests/{requestId} {
+      // Read: Can read if you're involved (sender or receiver)
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.from_user || 
+         request.auth.uid == resource.data.to_user);
+      
+      // Create: Can create if you're the sender
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.from_user &&
+        request.resource.data.status == 'pending';
+      
+      // Update: Can update if you're the receiver (to accept/decline)
+      allow update: if request.auth != null && 
+        request.auth.uid == resource.data.to_user &&
+        (request.resource.data.status == 'accepted' || 
+         request.resource.data.status == 'declined');
+    }
   }
 }

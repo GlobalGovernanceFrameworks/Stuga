@@ -40,4 +40,3 @@ Which of these 3 critical features do you want to build right now?
 
 * **Result:** Low barrier to entry; trust is earned progressively, not demanded upfront.
 
-**Pick one.** We will write the code/logic immediately.

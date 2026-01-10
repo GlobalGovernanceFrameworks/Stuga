@@ -4,7 +4,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Text, Card, ActivityIndicator, FAB, Snackbar } from 'react-native-paper';
 import { doc, updateDoc, collection, getDocs, setDoc } from 'firebase/firestore';
-import { requestLocationPermission, getCurrentLocation, roundLocationForPrivacy, calculateDistance, formatDistance, getDirection } from '../lib/locationHelpers';
+import { getBlockedUsers } from '../lib/blockHelpers';
+import { requestLocationPermission, getCurrentLocation, roundLocationForPrivacy, calculateDistance, formatDistance, getDirection, formatDistanceFuzzy } from '../lib/locationHelpers';
 import { db, auth } from '../config/firebase';
 import { User } from '../types';
 import { SkeletonCard } from '../components/SkeletonCard';
@@ -25,6 +26,7 @@ export default function HomeScreen({ navigation }: any) {
   const { visible, message, duration, showSnackbar, hideSnackbar } = useSnackbar();
   const { expoPushToken } = useNotifications();
 
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
   const [neighbors, setNeighbors] = useState<User[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,8 +69,12 @@ export default function HomeScreen({ navigation }: any) {
   async function authenticateAndLoad() {
     try {
       // User is already authenticated in App.tsx
-      await requestAndUpdateLocation();
-      await loadNeighbors();
+
+      // Get location FIRST
+      const location = await requestAndUpdateLocation();
+      
+      // Then load neighbors with that location
+      await loadNeighbors(location);
     } catch (error) {
       console.error('Error:', error);
       setLoading(false);
@@ -79,25 +85,24 @@ export default function HomeScreen({ navigation }: any) {
     const hasPermission = await requestLocationPermission();
     if (!hasPermission) {
       console.warn('Location permission not granted');
-      return;
+      return null; // NEW - return null if no permission
     }
 
     const location = await getCurrentLocation();
     if (!location) {
       console.warn('Could not get location');
-      return;
+      return null; // NEW - return null if no location
     }
 
     const rounded = roundLocationForPrivacy(location.lat, location.lon);
-    setUserLocation(rounded);
+    setUserLocation(rounded); // This updates state
 
-    // Update ONLY location in Firestore (don't overwrite other fields!)
+    // Update location in Firestore
     const user = auth.currentUser;
     if (user) {
       try {
         const userRef = doc(db, 'users', user.uid);
         
-        // Only update location field, not entire document
         await updateDoc(userRef, {
           location: {
             lat: rounded.lat,
@@ -112,46 +117,76 @@ export default function HomeScreen({ navigation }: any) {
         console.error('Error updating location:', error);
       }
     }
+    
+    return rounded; // NEW - return the location
   }
 
   const RADIUS_METERS = 500; // Default radius
 
-  async function loadNeighbors() {
+  async function loadNeighbors(forceLocation?: { lat: number; lon: number } | null) {
     try {
+      const currentUser = auth.currentUser;
+      
+      // Get blocked users
+      const blocked = await getBlockedUsers(currentUser?.uid || '');
+      console.log('🚫 Blocked user IDs:', blocked);
+      setBlockedUsers(blocked);
+      
       const snapshot = await getDocs(collection(db, 'users'));
       const users = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as User[];
 
-      // Filter out current user AND any "Testanvändare" users
-      const currentUser = auth.currentUser;
+      console.log('👥 Total users from Firestore:', users.length);
+
+      // Filter out current user, test users, AND blocked users
       const filteredUsers = users.filter(user => 
-        user.id !== currentUser?.uid &&  // Filter current user
-        !user.name.startsWith('Testanvändare')  // Filter any test user names
+        user.id !== currentUser?.uid &&
+        !user.name.startsWith('Testanvändare') &&
+        !blocked.includes(user.user_id)
       );
       
-      // Filter by radius and sort by distance if we have user location
-      if (userLocation) {
+      console.log('✅ Filtered users to show:', filteredUsers.length);
+      
+      // Use provided location OR state location
+      const locationToUse = forceLocation !== undefined ? forceLocation : userLocation;
+      
+      // Filter by radius and sort by distance if we have location
+      if (locationToUse) {
+        console.log('📍 Using location:', locationToUse);
+        console.log('📏 RADIUS_METERS:', RADIUS_METERS);
+        
         const filtered = filteredUsers
           .map(user => {
-            if (!user.location) return null;
+            if (!user.location) {
+              console.log(`⚠️  ${user.name} has NO LOCATION DATA`);
+              return null;
+            }
             
             const distance = calculateDistance(
-              userLocation.lat,
-              userLocation.lon,
+              locationToUse.lat,
+              locationToUse.lon,
               user.location.lat,
               user.location.lon
             );
+            
+            console.log(`📏 Distance to ${user.name}: ${Math.round(distance)}m`, {
+              userLoc: user.location,
+              distance: Math.round(distance),
+              withinRadius: distance <= RADIUS_METERS
+            });
             
             return { ...user, distance };
           })
           .filter(user => user !== null && user.distance <= RADIUS_METERS)
           .sort((a, b) => a!.distance - b!.distance);
         
+        console.log('✅ After distance filter:', filtered.length, 'users');
         setNeighbors(filtered as User[]);
       } else {
-        // No location yet, show all
+        // No location available - show all (fallback)
+        console.log('⚠️  No location available, showing all users');
         setNeighbors(filteredUsers);
       }
     } catch (error) {
@@ -164,8 +199,8 @@ export default function HomeScreen({ navigation }: any) {
 
   async function onRefresh() {
     setRefreshing(true);
-    await requestAndUpdateLocation(); // Update location on refresh
-    await loadNeighbors();
+    const location = await requestAndUpdateLocation();
+    await loadNeighbors(location); // Pass fresh location
     setRefreshing(false);
     showSnackbar('✓ Data uppdaterad', 3000);
   }
@@ -327,11 +362,11 @@ export default function HomeScreen({ navigation }: any) {
                   <Card.Content>
                     <View style={styles.cardHeader}>
                       <View style={styles.nameRow}>
-                        <Text style={styles.name}>🟢 {item.name}</Text>
+                        <Text style={styles.name}>🟢 {item.display_name || item.name}</Text>
                         {viaBluetooth && <Text style={styles.btIcon}>📶</Text>}
                       </View>
                       {distance && (
-                        <Text style={styles.distance}>{distance} {direction}</Text>
+                        <Text style={styles.distance}>{formatDistanceFuzzy(item.distance)}</Text>
                       )}
                     </View>
                     <Text style={styles.hearts}>🔥 {item.hearts_balance} Hearts</Text>

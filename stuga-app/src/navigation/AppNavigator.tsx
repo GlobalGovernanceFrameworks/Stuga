@@ -13,6 +13,8 @@ import HeartsHistoryScreen from '../screens/HeartsHistoryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import MyResourcesScreen from '../screens/MyResourcesScreen';
 import ResourcesScreen from '../screens/ResourcesScreen';
+import ContactRequestsScreen from '../screens/ContactRequestsScreen';
+import BlockedUsersScreen from '../screens/BlockedUsersScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -88,6 +90,16 @@ export default function AppNavigator({ navigationRef }: { navigationRef?: any })
           name="Resources" 
           component={ResourcesScreen}
           options={{ title: 'Alla resurser' }}
+        />
+        <Stack.Screen 
+          name="ContactRequests" 
+          component={ContactRequestsScreen}
+          options={{ title: 'Kontaktförfrågningar' }}
+        />
+        <Stack.Screen 
+          name="BlockedUsers" 
+          component={BlockedUsersScreen}
+          options={{ title: 'Blockerade användare' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

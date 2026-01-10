@@ -84,3 +84,19 @@ export function getDirection(lat1: number, lon1: number, lat2: number, lon2: num
   const index = Math.round(normalized / 45) % 8;
   return directions[index];
 }
+
+// Format distance with fuzzy ranges (prevents triangulation)
+export function formatDistanceFuzzy(meters: number): string {
+  if (meters < 100) return 'Mycket nära';
+  if (meters < 250) return 'Nära';
+  if (meters < 500) return 'Inom gångavstånd';
+  return 'I området';
+}
+
+// Get fuzzy distance category for sorting
+export function getFuzzyDistanceCategory(meters: number): number {
+  if (meters < 100) return 0;
+  if (meters < 250) return 1;
+  if (meters < 500) return 2;
+  return 3;
+}

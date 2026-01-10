@@ -1,11 +1,12 @@
 // User type
 export interface User {
   id: string;
-  user_id: string;              // BankID personnummer (hashed)
-  name: string;
+  user_id: string;
+  name: string;                    // Real name (private)
+  display_name?: string;           
   phone_number?: string;
   bankid_verified: boolean;
-  created_at: number;            // timestamp
+  created_at: number;
   location: {
     lat: number;
     lon: number;
@@ -17,6 +18,11 @@ export interface User {
   bluetooth_id?: string;
   fcm_token?: string;
   registration_completed?: boolean;
+  privacy_settings?: {
+    exact_distance: boolean;
+    show_hearts: boolean;
+  };
+  blocked_users?: string[];
 }
 
 // Resource type
@@ -61,4 +67,15 @@ export interface MeshNode {
     platform: 'ios' | 'android';
     app_version: string;
   };
+}
+
+// Contact request type
+export interface ContactRequest {
+  id: string;
+  from_user: string;
+  to_user: string;
+  status: 'pending' | 'accepted' | 'declined';
+  created_at: number;
+  responded_at?: number;
+  message?: string; // Optional message with request
 }

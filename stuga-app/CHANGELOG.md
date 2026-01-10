@@ -7,9 +7,166 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 ## [Unreleased]
 
 ### Planerat
+- Skapa development build för full notifikationsfunktionalitet
+- Spela in demofilm för Upplands Väsby kommun (2 minuter)
 - Testa Bluetooth-upptäckt med två enheter
+- Testa med verkliga användare i Upplands Väsby
+- Samla feedback från kommunkontakt och pilotanvändare
+- Iterera baserat på verklig användning
+- Förbered för expansion till fler områden
 - Förbättrad platshistorik och tracking
 - BankID-integration för produktionsanvändare
+
+## [1.1.0] - 2026-01-10
+
+🔒 **Säkerhets- och integritetsuppdatering!** Komplett progressiv disclosure, kontaktförfrågningar och skydd mot missbruk.
+
+### Tillagt
+- **Burner Profiles (Visningsnamn)**: Progressiv avslöjande av identitet
+  - Separata fält för riktigt namn och visningsnamn vid registrering
+  - Auto-genererade namn (Granne #XXXX) som standard om inget anges
+  - Riktigt namn visas bara efter accepterad kontakt
+  - Display name visas överallt före kontakt (listor, resurser, profiler)
+  - Möjlighet att välja eget visningsnamn eller använda auto-genererat
+- **Contact Request System**: Samtycke krävs före kontakt
+  - "Begär kontakt"-knapp istället för direkt SMS-tillgång
+  - Notifikationssystem för väntande förfrågningar
+  - ContactRequestsScreen för att hantera inkommande förfrågningar
+  - Acceptera/Avböj-funktionalitet med bekräftelsedialoger
+  - Telefonnummer och riktigt namn avslöjas endast efter acceptans
+  - Status-tracking: none, pending_sent, pending_received, accepted, declined
+  - Firestore collection: contact_requests med säkerhetsregler
+- **Fuzzy Distance**: Dölj exakt position för anti-triangulering
+  - Fyra kategorier istället för exakta meter: "Mycket nära", "Nära", "Inom gångavstånd", "I området"
+  - Tar bort kompassriktningar (↗ ← ↓) helt
+  - Privacy-inställning för att tillåta exakt avstånd efter accepterad kontakt
+  - Förhindrar stalking genom triangulering
+- **Block User**: Säkerhetsventil för oönskade användare
+  - Blockera-knapp i grannprofil
+  - Blockerade användare filtreras från alla listor (Home, Resources)
+  - BlockedUsersScreen för att hantera blockerade
+  - Avblockera-funktionalitet
+  - blocked_users array i user-dokument
+  - Blockering är envägskommunikation (blockerad vet inte)
+- **Profil-redigering**: Uppdatera namn, visningsnamn och telefonnummer
+  - Edit-läge i ProfileScreen med toggle
+  - Validering av namn (required) och telefonnummer (svenskt format)
+  - Checkbox för att välja auto-genererat namn explicit
+  - Dynamisk helper-text baserat på val
+  - Avbryt-funktion som återställer värden
+  - Spara till Firestore med bekräftelse
+
+### Förbättrat
+- **Konsekvent distansfiltrering**: Grannar filtreras på avstånd från första laddningen
+  - Hämtar location före laddning av grannar
+  - Eliminerar inkonsekvent beteende (alla vid start, filtrerade efter refresh)
+  - Konsekvent UX oavsett initial load eller refresh
+- **Firebase Security Rules**: Säkra regler för contact_requests-kollektionen
+  - Read: Endast involverade parter (from_user eller to_user)
+  - Create: Endast avsändare kan skapa förfrågan
+  - Update: Endast mottagare kan acceptera/avböja
+  - Förhindrar spoofing och obehörig åtkomst
+- **Privacy by Design**: Minimal datadelning som standard
+  - Display name först, riktigt namn efter samtycke
+  - Fuzzy distance som standard, exact efter samtycke
+  - Telefonnummer dolt tills kontakt accepterad
+  - Användaren har kontroll över disclosure-nivå
+
+### Tekniskt
+- Ny komponent: `ContactRequestsScreen` (~200 rader) - Hantera väntande förfrågningar
+- Ny komponent: `BlockedUsersScreen` (~150 rader) - Hantera blockerade användare
+- Ny helper: `contactHelpers.ts` - Contact request CRUD-operationer
+- Ny helper: `blockHelpers.ts` - Block/unblock-funktionalitet
+- Ny helper: `displayHelpers.ts` - Display name vs real name helpers
+- Uppdaterad: `RegistrationScreen` - Två namn-fält, display name-generering
+- Uppdaterad: `NeighborDetailScreen` - Contact request-flöde, block-knapp
+- Uppdaterad: `ProfileScreen` - Edit-läge, checkbox för auto-genererat namn
+- Uppdaterad: `HomeScreen` - Konsekvent distansfiltrering, blockfiltrering
+- Uppdaterad: `ResourcesScreen` - Display names, blockfiltrering
+- Uppdaterad: `locationHelpers.ts` - Fuzzy distance-funktioner
+- Uppdaterad: `User`-type - display_name, privacy_settings, blocked_users
+- Ny collection: `contact_requests` - Förfrågningar mellan användare
+- Firebase rules: contact_requests-regler för säker åtkomst
+
+### Buggfixar
+- **Navigation error i ProfileScreen**: Lagt till navigation prop för routing
+- **Contact accept/decline TODO**: Implementerat med request ID-tracking
+- **Inconsistent distance filtering**: Location hämtas före grannladdning
+  - Initial load visar nu samma resultat som refresh
+  - Eliminerar "alla visas först, sen filtreras"-bug
+- **Edit field styling**: Tydliga labels ovanför fält istället för floating labels
+  - Bättre läsbarhet på mörk grön bakgrund
+  - Vita labels (#FFF) och ljusgrå helper-text (#E0E0E0)
+- **Checkbox styling**: Vit bakgrund på checkbox för synlighet mot grön bakgrund
+- **Phone number validation**: Accepterar både bindestreck och mellanslag
+- **Name overwrite bug**: Använder updateDoc istället av setDoc för location
+
+### Användargränssnitt
+- Progressiv disclosure-pattern: Discovery → Reputation → Request → Consent → Contact
+- Contact request-knappar: "Begär kontakt", "Väntar på svar...", "Acceptera/Avböj", "Skicka SMS"
+- Fuzzy distance-kategorier visuellt tydliga utan exakta meter
+- Block-knapp diskret placerad i grannprofil
+- Edit-formulär med tydliga labels, helper-text och checkbox för auto-generering
+- Bekräftelsedialoger för destructive actions (block, decline contact)
+- Privacy settings-sektion i profil med tydliga förklaringar
+
+### Säkerhet & Integritet
+- **Purple (Tribal Trust) infrastructure**: Komplett consent-baserad arkitektur
+  - Graduated trust: Progressiv avslöjande baserat på relation
+  - Consent mechanisms: Explicit godkännande före kontakt
+  - Reputation before contact: Se trustworthiness innan exponera data
+  - Fuzzy proximity: Förhindra exakt positionering
+  - Reciprocal disclosure: Båda parter måste samtycka
+- **Anti-stalking skydd**: Kombinationen fuzzy distance + contact requests
+  - Omöjligt att triangulera exakt position
+  - Omöjligt att kontakta utan samtycke
+  - Blockering filtrerar helt från alla vyer
+- **Privacy controls**: Användaren styr disclosure-nivå
+  - Kan välja anonymt display name
+  - Kan neka kontaktförfrågningar
+  - Kan blockera oönskade användare
+  - Privacy settings för exact distance (opt-in)
+
+### Krisberedskap
+- **SMS-kontakt efter samtycke**: Fungerar vid överbelastning men kräver tillstånd
+- **Fuzzy distance bibehållen**: Även i kris, privacy-by-design
+- **Blockering fungerar offline**: SQLite-baserad filtrering
+- **Samtycke fungerar offline**: Queued contact requests synkas vid återanslutning
+
+### Bioregional vision
+- **Trust infrastructure**: Purple-nivå färdigbyggd
+  - Foundation för Red (leadership) och Blue (governance) nivåer
+  - Progressive disclosure möjliggör säker skalning
+  - Consent mechanisms gör systemet self-governing
+
+### Pilot-redo förbättringar
+- ✅ Skydd mot missbruk (stalking, harassment)
+- ✅ GDPR-kompatibel design (minimal data, user control)
+- ✅ Professionell användarupplevelse
+- ✅ Francisca kan säkert demonstrera för kommun
+- ✅ Verkliga användare kan känna sig trygga
+
+### Firebase-konfiguration
+- Nya security rules för contact_requests-kollektionen
+- Deployment: `firebase deploy --only firestore:rules`
+- Testning: Rules fungerar korrekt för privacy protection
+
+### Nästa steg
+- Reputation system (Purple - trust signals)
+- Availability tracking (Purple - presence)
+- Demo polish för presentation
+- Real-world pilot testing i Upplands Väsby
+
+---
+
+## Sammanfattning v1.1.0
+
+**Från:** Pilot-klar app med grundläggande funktioner  
+**Till:** Säker app med komplett privacy infrastructure
+
+**Impact:** Nu säker nog för verklig pilot med okända användare. Vår kontakt hos kommunen kan demonstrera robust integritetsskydd för Upplands Väsby kommun.
+
+**Key features:** Progressive disclosure, consent-based contact, anti-stalking protection, user control.
 
 ## [1.0.0] - 2026-01-10
 
@@ -128,14 +285,6 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Development build rekommenderas för full funktionalitet
 - Expo Go stöder lokal notifikationstestning
 - Firebase Cloud Functions valfritt för produktion
-
-### Nästa steg
-- Skapa development build för full notifikationsfunktionalitet
-- Spela in demofilm för Upplands Väsby kommun (2 minuter)
-- Testa med verkliga användare i Upplands Väsby
-- Samla feedback från kommunkontakt och pilotanvändare
-- Iterera baserat på verklig användning
-- Förbered för expansion till fler områden
 
 ## [0.9.0] - 2026-01-09
 

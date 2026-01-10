@@ -16,6 +16,7 @@ const PILOT_AREA = {
 export default function RegistrationScreen({ onRegistrationComplete }: { onRegistrationComplete: () => void }) {
   const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -93,11 +94,15 @@ export default function RegistrationScreen({ onRegistrationComplete }: { onRegis
         return;
       }
 
+      // Generate default display name if not provided
+      const finalDisplayName = displayName.trim() || `Granne #${Math.floor(1000 + Math.random() * 9000)}`;
+
       // Save user to Firestore
       await setDoc(doc(db, 'users', user.uid), {
         user_id: user.uid,
         name: name.trim(),
-        phone_number: phoneNumber.replace(/[\s-]/g, ''), // Remove spaces AND dashes
+        display_name: finalDisplayName,
+        phone_number: phoneNumber.replace(/[\s-]/g, ''),
         bankid_verified: false,
         created_at: Date.now(),
         location: {
@@ -106,9 +111,14 @@ export default function RegistrationScreen({ onRegistrationComplete }: { onRegis
           accuracy: Math.round(location.accuracy),
           updated_at: Date.now()
         },
-        hearts_balance: 100, // Starting balance
+        hearts_balance: 100,
         availability_status: 'available',
-        registration_completed: true
+        registration_completed: true,
+        privacy_settings: { 
+          exact_distance: false,
+          show_hearts: true
+        },
+        blocked_users: [] 
       });
 
       console.log('✅ User registered successfully');
@@ -156,6 +166,24 @@ export default function RegistrationScreen({ onRegistrationComplete }: { onRegis
                 autoComplete="name"
                 maxLength={50}
               />
+              <Text style={styles.hint}>
+                📝 Ditt riktiga namn sparas privat och visas bara när du godkänner kontakt
+              </Text>
+
+              {/* NEW - Display name input */}
+              <Text style={styles.label}>Visningsnamn (valfritt)</Text>
+              <TextInput
+                value={displayName}
+                onChangeText={setDisplayName}
+                placeholder="Granne i Väsby, Anna S, etc."
+                mode="outlined"
+                style={styles.input}
+                autoCapitalize="words"
+                maxLength={30}
+              />
+              <Text style={styles.hint}>
+                👁️ Detta namn ser andra grannar innan ni har kontakt
+              </Text>
 
               <Text style={styles.label}>Telefonnummer</Text>
               <TextInput

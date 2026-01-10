@@ -3,10 +3,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Linking, Alert, View, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, Card, Button, ActivityIndicator } from 'react-native-paper';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, or } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { Resource } from '../types';
+import { blockUser, isUserBlocked } from '../lib/blockHelpers';
 import { getCategoryLabel } from '../lib/categoryHelpers';
+import { acceptContactRequest, declineContactRequest, getContactStatus, sendContactRequest } from '../lib/contactHelpers';
+import { getDisplayName, getRealName } from '../lib/displayHelpers';
+import { calculateDistance, formatDistance, formatDistanceFuzzy } from '../lib/locationHelpers';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { UrgencyBadge } from '../components/UrgencyBadge';
@@ -15,7 +19,13 @@ import { isExpired } from '../lib/expiryHelpers';
 export default function NeighborDetailScreen({ route, navigation }: any) {
   const { neighbor } = route.params;
   const [resources, setResources] = useState<Resource[]>([]);
+  const [contactStatus, setContactStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'accepted' | 'declined'>('none');
+  const [pendingRequestId, setPendingRequestId] = useState<string | null>(null);
+  const [checkingContact, setCheckingContact] = useState(true);
+  const [isBlocked, setIsBlocked] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const insets = useSafeAreaInsets();
   const currentUser = auth.currentUser;
   const isMe = currentUser?.uid === neighbor.user_id;
@@ -24,8 +34,182 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
   useFocusEffect(
     React.useCallback(() => {
       loadNeighborResources();
+      checkContactStatus();
+      loadDistance();
+      checkBlockStatus();
     }, [])
   );
+
+  async function checkBlockStatus() {
+    if (isMe) return;
+    
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+
+      const blocked = await isUserBlocked(currentUser.uid, neighbor.user_id);
+      setIsBlocked(blocked);
+    } catch (error) {
+      console.error('Error checking block status:', error);
+    }
+  }
+
+  async function handleBlockUser() {
+    Alert.alert(
+      'Blockera användare',
+      `Är du säker på att du vill blockera ${getDisplayName(neighbor)}?`,
+      [
+        { text: 'Avbryt', style: 'cancel' },
+        {
+          text: 'Blockera',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const currentUser = auth.currentUser;
+              if (!currentUser) return;
+
+              console.log('🚫 About to block:', {
+                neighborDocId: neighbor.id,
+                neighborUserId: neighbor.user_id,
+                willBlock: neighbor.user_id // ← VILKEN ANVÄNDER VI?
+              });
+
+              await blockUser(currentUser.uid, neighbor.user_id);
+              setIsBlocked(true);
+              
+              Alert.alert(
+                'Blockerad',
+                `${getDisplayName(neighbor)} är nu blockerad.`,
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => navigation.goBack()
+                  }
+                ]
+              );
+            } catch (error) {
+              Alert.alert('Fel', 'Kunde inte blockera användare');
+            }
+          }
+        }
+      ]
+    );
+  }
+
+  async function handleUnblockUser() {
+    Alert.alert(
+      'Avblockera användare',
+      `Vill du avblockera ${getDisplayName(neighbor)}?`,
+      [
+        { text: 'Avbryt', style: 'cancel' },
+        {
+          text: 'Avblockera',
+          onPress: async () => {
+            try {
+              const currentUser = auth.currentUser;
+              if (!currentUser) return;
+
+              await unblockUser(currentUser.uid, neighbor.user_id);
+              setIsBlocked(false);
+              
+              Alert.alert('Avblockerad', `${getDisplayName(neighbor)} är nu avblockerad.`);
+            } catch (error) {
+              Alert.alert('Fel', 'Kunde inte avblockera användare');
+            }
+          }
+        }
+      ]
+    );
+  }
+
+  async function checkContactStatus() {
+    if (isMe) {
+      setCheckingContact(false);
+      return;
+    }
+    
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+
+      // Check for any existing contact request
+      const q = query(
+        collection(db, 'contact_requests'),
+        or(
+          where('from_user', '==', currentUser.uid),
+          where('to_user', '==', currentUser.uid)
+        )
+      );
+
+      const snapshot = await getDocs(q);
+      
+      // Find request involving both users
+      const requestDoc = snapshot.docs.find(doc => {
+        const data = doc.data();
+        return (
+          (data.from_user === currentUser.uid && data.to_user === neighbor.user_id) ||
+          (data.from_user === neighbor.user_id && data.to_user === currentUser.uid)
+        );
+      });
+
+      if (!requestDoc) {
+        setContactStatus('none');
+        setPendingRequestId(null);
+        setCheckingContact(false);
+        return;
+      }
+
+      const data = requestDoc.data();
+      const requestId = requestDoc.id;
+      
+      // Save request ID
+      setPendingRequestId(requestId);
+      
+      if (data.status === 'accepted') {
+        setContactStatus('accepted');
+      } else if (data.status === 'declined') {
+        setContactStatus('declined');
+      } else if (data.from_user === currentUser.uid) {
+        setContactStatus('pending_sent');
+      } else {
+        setContactStatus('pending_received');
+      }
+      
+    } catch (error) {
+      console.error('Error checking contact status:', error);
+    } finally {
+      setCheckingContact(false);
+    }
+  }
+
+  async function loadDistance() {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser || !neighbor.location) return;
+
+      // Get current user's location
+      const userDoc = await getDocs(
+        query(collection(db, 'users'), where('user_id', '==', currentUser.uid))
+      );
+      
+      if (userDoc.empty) return;
+      const userData = userDoc.docs[0].data();
+      if (!userData.location) return;
+
+      setUserLocation(userData.location);
+
+      const dist = calculateDistance(
+        userData.location.lat,
+        userData.location.lon,
+        neighbor.location.lat,
+        neighbor.location.lon
+      );
+      
+      setDistance(dist);
+    } catch (error) {
+      console.error('Error loading distance:', error);
+    }
+  }
 
   async function loadNeighborResources() {
     try {
@@ -46,18 +230,108 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
     }
   }
 
+  async function handleRequestContact() {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+
+      Alert.alert(
+        'Begär kontakt',
+        `Vill du begära kontakt med ${getDisplayName(neighbor)}? De kommer se din profil och kan välja att acceptera eller avböja.`,
+        [
+          { text: 'Avbryt', style: 'cancel' },
+          {
+            text: 'Skicka förfrågan',
+            onPress: async () => {
+              try {
+                await sendContactRequest(currentUser.uid, neighbor.user_id);
+                setContactStatus('pending_sent');
+                Alert.alert('Skickat!', 'Din kontaktförfrågan har skickats.');
+              } catch (error) {
+                Alert.alert('Fel', 'Kunde inte skicka kontaktförfrågan.');
+              }
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error requesting contact:', error);
+    }
+  }
+
+  async function handleAcceptContact() {
+    if (!pendingRequestId) {
+      Alert.alert('Fel', 'Ingen förfrågan hittades');
+      return;
+    }
+
+    Alert.alert(
+      'Acceptera kontakt',
+      `Vill du acceptera kontakt med ${getDisplayName(neighbor)}? De kommer kunna se ditt riktiga namn och telefonnummer.`,
+      [
+        { text: 'Avbryt', style: 'cancel' },
+        {
+          text: 'Acceptera',
+          onPress: async () => {
+            try {
+              await acceptContactRequest(pendingRequestId);
+              setContactStatus('accepted');
+              Alert.alert(
+                'Kontakt accepterad!',
+                `Du och ${getDisplayName(neighbor)} kan nu kontakta varandra.`
+              );
+            } catch (error) {
+              console.error('Error accepting contact:', error);
+              Alert.alert('Fel', 'Kunde inte acceptera kontakt');
+            }
+          }
+        }
+      ]
+    );
+  }
+
+  async function handleDeclineContact() {
+    if (!pendingRequestId) {
+      Alert.alert('Fel', 'Ingen förfrågan hittades');
+      return;
+    }
+
+    Alert.alert(
+      'Avböj kontakt',
+      `Vill du avböja kontaktförfrågan från ${getDisplayName(neighbor)}?`,
+      [
+        { text: 'Avbryt', style: 'cancel' },
+        {
+          text: 'Avböj',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await declineContactRequest(pendingRequestId);
+              setContactStatus('declined');
+              Alert.alert('Avböjd', 'Kontaktförfrågan har avböjts.');
+              // Optionally navigate back
+              navigation.goBack();
+            } catch (error) {
+              console.error('Error declining contact:', error);
+              Alert.alert('Fel', 'Kunde inte avböja kontakt');
+            }
+          }
+        }
+      ]
+    );
+  }
+
   function handleSendSMS() {
-    // Check if phone number exists
+    // Existing SMS function - only callable when contact accepted
     if (!neighbor.phone_number) {
       Alert.alert(
         'Telefonnummer saknas',
-        `${neighbor.name.split(' ')[0]} har inte delat sitt telefonnummer än.`,
+        `${getRealName(neighbor)} har inte delat sitt telefonnummer än.`,
         [{ text: 'OK' }]
       );
       return;
     }
 
-    // Open SMS app with pre-filled number
     const smsUrl = `sms:${neighbor.phone_number}`;
     
     Linking.canOpenURL(smsUrl)
@@ -77,6 +351,97 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
   const offers = resources.filter(r => r.type === 'offer' && !isExpired(r.expires_at));
   const needs = resources.filter(r => r.type === 'need' && !isExpired(r.expires_at));
 
+  function renderContactButton() {
+    if (checkingContact) {
+      return (
+        <Button 
+          mode="outlined" 
+          style={styles.button}
+          disabled
+        >
+          Kontrollerar...
+        </Button>
+      );
+    }
+
+    switch (contactStatus) {
+      case 'none':
+        return (
+          <Button 
+            mode="contained" 
+            style={styles.button}
+            buttonColor="#FF6B35"
+            onPress={handleRequestContact}
+            icon="account-plus"
+          >
+            Begär kontakt
+          </Button>
+        );
+      
+      case 'pending_sent':
+        return (
+          <Button 
+            mode="outlined" 
+            style={styles.button}
+            disabled
+            icon="clock-outline"
+          >
+            Väntar på svar...
+          </Button>
+        );
+      
+      case 'pending_received':
+        return (
+          <View style={styles.pendingActions}>
+            <Button 
+              mode="contained" 
+              style={[styles.button, { flex: 1 }]}
+              buttonColor="#6BCF7F"
+              onPress={handleAcceptContact}
+              icon="check"
+            >
+              Acceptera
+            </Button>
+            <Button 
+              mode="outlined" 
+              style={[styles.button, { flex: 1 }]}
+              onPress={handleDeclineContact}
+              icon="close"
+            >
+              Avböj
+            </Button>
+          </View>
+        );
+      
+      case 'accepted':
+        return (
+          <Button 
+            mode="contained" 
+            style={styles.button}
+            buttonColor="#FF6B35"
+            onPress={handleSendSMS}
+            icon="message-text"
+          >
+            Skicka SMS
+          </Button>
+        );
+      
+      case 'declined':
+        return (
+          <Button 
+            mode="outlined" 
+            style={styles.button}
+            disabled
+          >
+            Kontakt avböjd
+          </Button>
+        );
+      
+      default:
+        return null;
+    }
+  }
+
   return (
     <ScrollView 
       style={styles.container}
@@ -84,11 +449,28 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
     >
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.name}>{neighbor.name}</Text>
+          <Text style={styles.name}>
+            {contactStatus === 'accepted' ? getRealName(neighbor) : getDisplayName(neighbor)}
+          </Text>
+
+          {distance !== null && (
+            <Text style={styles.info}>
+              📍 {contactStatus === 'accepted' && neighbor.privacy_settings?.exact_distance
+                ? formatDistance(distance)
+                : formatDistanceFuzzy(distance)
+              }
+            </Text>
+          )}
+
           <Text style={styles.info}>🔥 {neighbor.hearts_balance} Hearts</Text>
           <Text style={styles.info}>
             📍 {neighbor.availability_status === 'available' ? 'Tillgänglig' : 'Borta'}
           </Text>
+          {contactStatus === 'accepted' && (
+            <Text style={styles.contactInfo}>
+              ✓ Ni har kontakt sedan {/* TODO: format date */}
+            </Text>
+          )}
         </Card.Content>
       </Card>
 
@@ -154,27 +536,42 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
       )}
 
       <View style={styles.actions}>
-        {!isMe && (
+        {isBlocked ? (
           <Button 
-            mode="contained" 
+            mode="outlined" 
             style={styles.button}
-            buttonColor="#FF6B35"
-            onPress={() => handleSendSMS()}
-            icon="message-text"
+            onPress={handleUnblockUser}
+            icon="account-remove"
+            textColor="#666"
           >
-            Skicka SMS
+            Avblockera
           </Button>
-        )}
-        {!isMe && (
-          <Button 
-            mode="contained" 
-            style={styles.button}
-            buttonColor="#2D5016"
-            onPress={() => navigation.navigate('SendHearts', { neighbor })}
-            icon="heart"
-          >
-            Skicka Hearts
-          </Button>
+        ) : (
+          <>
+            {!isMe && renderContactButton()}
+            {!isMe && contactStatus === 'accepted' && (
+              <Button 
+                mode="contained" 
+                style={styles.button}
+                buttonColor="#2D5016"
+                onPress={() => navigation.navigate('SendHearts', { neighbor })}
+                icon="heart"
+              >
+                Skicka Hearts
+              </Button>
+            )}
+            {!isMe && (
+              <Button 
+                mode="text" 
+                style={styles.button}
+                onPress={handleBlockUser}
+                icon="block-helper"
+                textColor="#C1121F"
+              >
+                Blockera
+              </Button>
+            )}
+          </>
         )}
       </View>
     </ScrollView>
@@ -264,5 +661,16 @@ const styles = StyleSheet.create({
   },
   button: {
     marginBottom: 12
+  },
+  pendingActions: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%'
+  },
+  contactInfo: {
+    fontSize: 12,
+    color: '#6BCF7F',
+    marginTop: 8,
+    fontStyle: 'italic'
   }
 });

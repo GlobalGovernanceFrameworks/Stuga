@@ -31,13 +31,19 @@ async function seedTestData() {
     {
       user_id: 'test-anna-123',
       name: 'Anna Svensson',
+      display_name: 'Anna S',
       phone_number: '+46701234567',
       registration_completed: true,
+      privacy_settings: {
+        exact_distance: false,
+        show_hearts: true
+      },
+      blocked_users: [],
       bankid_verified: true,
       created_at: Date.now(),
       location: {
-        lat: 59.522012,
-        lon: 17.914383,
+        lat: 59.516158,
+        lon: 17.908897,
         accuracy: 50,
         updated_at: Date.now()
       },
@@ -48,8 +54,14 @@ async function seedTestData() {
     {
       user_id: 'test-sven-456',
       name: 'Sven Andersson',
+      display_name: 'Sven från Väsby',
       phone_number: '+46702345678',
       registration_completed: true,
+      privacy_settings: {
+        exact_distance: false,
+        show_hearts: true
+      },
+      blocked_users: [],
       bankid_verified: true,
       created_at: Date.now(),
       location: {
@@ -65,8 +77,14 @@ async function seedTestData() {
     {
       user_id: 'test-maria-789',
       name: 'Maria Johansson',
+      display_name: 'Maria J',
       phone_number: '+46703456789',
       registration_completed: true,
+      privacy_settings: {
+        exact_distance: false,
+        show_hearts: true
+      },
+      blocked_users: [],
       bankid_verified: true,
       created_at: Date.now(),
       location: {
@@ -82,13 +100,19 @@ async function seedTestData() {
     {
       user_id: 'test-lars-101',
       name: 'Lars Bergström',
+      display_name: 'Lasse',
       phone_number: '+46704567890', 
       registration_completed: true,
+      privacy_settings: {
+        exact_distance: false,
+        show_hearts: true
+      },
+      blocked_users: [],
       bankid_verified: true,
       created_at: Date.now(),
       location: {
-        lat: 59.5180,
-        lon: 17.9420,
+        lat: 59.516224,
+        lon: 17.914966,
         accuracy: 50,
         updated_at: Date.now()
       },

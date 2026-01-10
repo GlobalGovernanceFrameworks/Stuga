@@ -25,8 +25,8 @@ async function updateLocations() {
     {
       name: 'Anna Svensson',
       location: {
-        lat: 59.522012,
-        lon: 17.914383,
+        lat: 59.516158,
+        lon: 17.908897,
         accuracy: 50,
         updated_at: Date.now()
       }
@@ -48,6 +48,15 @@ async function updateLocations() {
         accuracy: 50,
         updated_at: Date.now()
       }
+    },
+    {
+      name: 'Lars Bergström',
+      location: {
+        lat: 59.516224,
+        lon: 17.914966,
+        accuracy: 50,
+        updated_at: Date.now()
+      },
     }
   ];
 

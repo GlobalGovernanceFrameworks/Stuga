@@ -6,7 +6,9 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { Resource, User } from '../types';
+import { getBlockedUsers } from '../lib/blockHelpers';
 import { getCategoryLabel } from '../lib/categoryHelpers';
+import { formatDistanceFuzzy } from '../lib/locationHelpers';
 import { UrgencyBadge } from '../components/UrgencyBadge';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { isExpired, getUrgencyLevel } from '../lib/expiryHelpers';
@@ -38,6 +40,7 @@ export default function ResourcesScreen({ navigation }: any) {
   const [selectedCategory, setSelectedCategory] = useState('alla');
   const [resourceType, setResourceType] = useState<'all' | 'offer' | 'need'>('all');
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -49,6 +52,10 @@ export default function ResourcesScreen({ navigation }: any) {
     try {
       const currentUser = auth.currentUser;
       if (!currentUser) return;
+
+      // Get blocked users
+      const blocked = await getBlockedUsers(currentUser.uid);
+      setBlockedUsers(blocked);
 
       // Get current user's location
       const userDoc = await getDocs(collection(db, 'users'));
@@ -72,8 +79,9 @@ export default function ResourcesScreen({ navigation }: any) {
 
       // Combine resources with owner info
       const enrichedResources: ResourceWithOwner[] = resourcesData
-        .filter(r => !isExpired(r.expires_at)) // Hide expired
-        .filter(r => r.user_id !== currentUser.uid) // Hide own resources
+        .filter(r => !isExpired(r.expires_at))
+        .filter(r => r.user_id !== currentUser.uid)
+        .filter(r => !blocked.includes(r.user_id))
         .map(resource => {
           const owner = usersData.find(u => u.user_id === resource.user_id);
           let distance;
@@ -89,7 +97,7 @@ export default function ResourcesScreen({ navigation }: any) {
 
           return {
             ...resource,
-            ownerName: owner?.name || 'Okänd användare',
+            ownerName: owner?.display_name || owner?.name || 'Okänd användare', // CHANGED
             ownerLocation: owner?.location,
             distance
           };
@@ -259,12 +267,7 @@ export default function ResourcesScreen({ navigation }: any) {
                       <Text style={styles.ownerName}>🟢 {item.ownerName}</Text>
                       {item.distance && userLocation && (
                         <Text style={styles.distance}>
-                          {formatDistance(item.distance)} {getDirection(
-                            userLocation.lat,
-                            userLocation.lon,
-                            item.ownerLocation!.lat,
-                            item.ownerLocation!.lon
-                          )}
+                          {formatDistanceFuzzy(item.distance)}
                         </Text>
                       )}
                     </View>
