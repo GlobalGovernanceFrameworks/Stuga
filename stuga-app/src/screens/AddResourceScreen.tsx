@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, Button, SegmentedButtons, Card, Snackbar, Switch } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { collection, addDoc } from 'firebase/firestore';
+import { getDocs, query, collection, where, addDoc } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { useNetworkState } from '../hooks/useNetworkState';
 import { useSnackbar } from '../hooks/useSnackbar';
 import { queueResourceCreate } from '../lib/database';
-import { getExpiryOptions, calculateExpiryTimestamp } from '../lib/expiryHelpers';
+import { scheduleLocalNotification } from '../lib/notificationHelpers';
+import { calculateDistance } from '../lib/locationHelpers';
+import { getExpiryOptions, calculateExpiryTimestamp, getUrgencyLevel, formatTimeRemaining } from '../lib/expiryHelpers';
+import { getCategoryLabel } from '../lib/categoryHelpers';
 
 const CATEGORIES = [
   { value: 'mat', label: 'Mat 🥪', icon: 'food' },
@@ -48,7 +51,7 @@ export default function AddResourceScreen({ navigation }: any) {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
       
-      const resource: any = {
+      const resource = {
         user_id: user.uid,
         type,
         category,
@@ -58,33 +61,91 @@ export default function AddResourceScreen({ navigation }: any) {
         matched_with_user: null,
         hearts_value: null,
         created_at: Date.now(),
-        updated_at: Date.now()
+        updated_at: Date.now(),
+        expires_at: hasExpiry && selectedHours > 0 
+          ? calculateExpiryTimestamp(selectedHours)
+          : null
       };
       
-      // Add expiry if enabled
-      if (hasExpiry && selectedHours > 0) {
-        resource.expires_at = calculateExpiryTimestamp(selectedHours);
-      }
-      
       if (isOffline) {
-        // Offline queue → Snackbar (informational)
         queueResourceCreate(resource);
         showSnackbar(`📦 "${title}" köas (läggs till vid nästa sync)`, 5000);
       } else {
-        // Success → Snackbar (non-blocking)
-        await addDoc(collection(db, 'resources'), resource);
+        const docRef = await addDoc(collection(db, 'resources'), resource);
+        
+        // Notify nearby neighbors if urgent
+        await notifyNearbyNeighbors({ ...resource, id: docRef.id });
+        
         showSnackbar('✓ Resurs tillagd!', 4000);
       }
       
-      // Navigate back after short delay
       setTimeout(() => {
         navigation.goBack();
       }, 500);
       
     } catch (error) {
       console.error('Error saving resource:', error);
-      // Critical error → Keep alert (blocking)
       alert('Kunde inte spara resurs');
+    }
+  }
+
+  async function notifyNearbyNeighbors(resource: any) {
+    try {
+      // Only notify for urgent resources
+      const urgency = getUrgencyLevel(resource.expires_at);
+      if (urgency !== 'urgent') {
+        console.log('ℹ️ Not urgent, skipping notifications');
+        return;
+      }
+
+      // Get current user's location
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const userDoc = await getDocs(
+        query(collection(db, 'users'), where('user_id', '==', user.uid))
+      );
+      
+      if (userDoc.empty) return;
+      const userData = userDoc.docs[0].data();
+      if (!userData.location) return;
+
+      // Get all users within 500m
+      const allUsers = await getDocs(collection(db, 'users'));
+      const nearbyUsers = allUsers.docs.filter(doc => {
+        const neighbor = doc.data();
+        if (neighbor.user_id === user.uid) return false; // Skip self
+        if (!neighbor.location) return false;
+        if (!neighbor.fcm_token) return false; // Skip users without notifications
+
+        const distance = calculateDistance(
+          userData.location.lat,
+          userData.location.lon,
+          neighbor.location.lat,
+          neighbor.location.lon
+        );
+
+        return distance <= 500; // Within 500m
+      });
+
+      console.log(`📢 Notifying ${nearbyUsers.length} nearby neighbors`);
+
+      // For MVP: Send local notification (in production, use Cloud Functions)
+      if (nearbyUsers.length > 0) {
+        const categoryLabel = getCategoryLabel(resource.category);
+        const timeRemaining = formatTimeRemaining(resource.expires_at);
+        
+        await scheduleLocalNotification(
+          `🔴 ${categoryLabel} ${resource.type === 'need' ? 'behövs' : 'erbjuds'}`,
+          `${resource.title} • ${timeRemaining}`,
+          { 
+            type: 'urgent_resource',
+            resourceId: resource.id
+          }
+        );
+      }
+    } catch (error) {
+      console.error('Error notifying neighbors:', error);
     }
   }
 

@@ -5,13 +5,13 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Button, Text, Card, ActivityIndicator, FAB, Snackbar } from 'react-native-paper';
 import { doc, updateDoc, collection, getDocs, setDoc } from 'firebase/firestore';
 import { requestLocationPermission, getCurrentLocation, roundLocationForPrivacy, calculateDistance, formatDistance, getDirection } from '../lib/locationHelpers';
-import { signInAnonymously, signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../config/firebase';
 import { User } from '../types';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { useBluetooth } from '../hooks/useBluetooth';
 import { useOfflineSync } from '../hooks/useOfflineSync';
 import { useNetworkState } from '../hooks/useNetworkState';
+import { useNotifications } from '../hooks/useNotifications';
 import { useSnackbar } from '../hooks/useSnackbar';
 
 export default function HomeScreen({ navigation }: any) {
@@ -23,15 +23,40 @@ export default function HomeScreen({ navigation }: any) {
   const btScanning = false;
   const nearbyDevices = 0;
   const { visible, message, duration, showSnackbar, hideSnackbar } = useSnackbar();
+  const { expoPushToken } = useNotifications();
 
   const [neighbors, setNeighbors] = useState<User[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Run ONCE on mount
   useEffect(() => {
     authenticateAndLoad();
   }, []);
+
+  // Run when expoPushToken changes
+  useEffect(() => {
+    if (expoPushToken && auth.currentUser) {
+      saveExpoPushToken(expoPushToken);
+    }
+  }, [expoPushToken]);
+
+  async function saveExpoPushToken(token: string) {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      await updateDoc(doc(db, 'users', user.uid), {
+        fcm_token: token,
+        fcm_token_updated_at: Date.now()
+      });
+      
+      console.log('✅ Push token saved to Firestore');
+    } catch (error) {
+      console.error('Error saving push token:', error);
+    }
+  }
 
   useFocusEffect(
     React.useCallback(() => {
@@ -39,18 +64,10 @@ export default function HomeScreen({ navigation }: any) {
     }, [])
   );
 
-  const USE_TEST_ACCOUNT = false; // Toggle this for demos vs development
-
   async function authenticateAndLoad() {
     try {
-      if (USE_TEST_ACCOUNT) {
-        await signInWithEmailAndPassword(auth, 'test@stuga.local', 'test1234');
-        console.log('🔑 Signed in as test user');
-      } else {
-        const userCredential = await signInAnonymously(auth);
-        console.log('🔑 Your anonymous UID:', userCredential.user.uid);
-      }
-      await requestAndUpdateLocation(); // Add this
+      // User is already authenticated in App.tsx
+      await requestAndUpdateLocation();
       await loadNeighbors();
     } catch (error) {
       console.error('Error:', error);
@@ -74,28 +91,21 @@ export default function HomeScreen({ navigation }: any) {
     const rounded = roundLocationForPrivacy(location.lat, location.lon);
     setUserLocation(rounded);
 
-    // Update location in Firestore
+    // Update ONLY location in Firestore (don't overwrite other fields!)
     const user = auth.currentUser;
     if (user) {
       try {
         const userRef = doc(db, 'users', user.uid);
         
-        // Use setDoc with merge instead of updateDoc
-        // This creates the document if it doesn't exist
-        await setDoc(userRef, {
-          user_id: user.uid,
-          name: user.email ? `Testanvändare (${user.email.split('@')[0]})` : 'Testanvändare (Du)',
-          bankid_verified: false,
-          created_at: Date.now(),
-          hearts_balance: 100,
-          availability_status: 'available',
+        // Only update location field, not entire document
+        await updateDoc(userRef, {
           location: {
             lat: rounded.lat,
             lon: rounded.lon,
             accuracy: Math.round(location.accuracy),
             updated_at: Date.now()
           }
-        }, { merge: true }); // merge: true only updates fields, doesn't overwrite
+        });
         
         console.log('📍 Location updated:', rounded);
       } catch (error) {

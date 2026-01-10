@@ -28,9 +28,9 @@ function HeaderRight() {
   );
 }
 
-export default function AppNavigator() {
+export default function AppNavigator({ navigationRef }: { navigationRef?: any }) {
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         screenOptions={{
           headerStyle: { backgroundColor: '#2D5016' },

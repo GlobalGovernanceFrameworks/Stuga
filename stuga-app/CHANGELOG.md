@@ -7,11 +7,135 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 ## [Unreleased]
 
 ### Planerat
-- Spela in demofilm för Upplands Väsby kommun (2 minuter)
 - Testa Bluetooth-upptäckt med två enheter
-- BankID-integration för produktionsanvändare
-- Push-notifikationer via FCM
 - Förbättrad platshistorik och tracking
+- BankID-integration för produktionsanvändare
+
+## [1.0.0] - 2026-01-10
+
+🎉 **Första pilot-redo versionen!** Komplett användarregistrering, resurshantering, och kommunikation.
+
+### Tillagt
+- **Användarregistrering**: Komplett onboarding-flöde för nya användare
+  - Namn och telefonnummer-input med validering
+  - Automatisk platsbehörighet
+  - Geografisk begränsning till Upplands Väsby kommun (10km radie)
+  - Sparar användarprofil i Firestore
+  - Persistent inloggning (skippar registrering vid återkomst)
+  - Visas automatiskt för nya användare
+- **Redigera resurser**: Komplett redigeringsfunktionalitet för befintliga resurser
+  - Förifyllda fält med befintlig data
+  - Möjlighet att ändra titel, beskrivning, kategori och typ
+  - Kan lägga till eller ta bort utgångsdatum
+  - "Redigera"-knapp i Mina resurser-skärmen
+  - Valfri redigeringsknapp i NeighborDetail för egna resurser
+- **Resurs-browsing**: Ny "Resurser"-skärm för resurs-centrerad upptäckt
+  - Sökfält för snabb filtrering av resurser
+  - Kategori-filter med horisontell scroll (Mat, Värme, Verktyg, etc.)
+  - Erbjuder/Behöver-toggle för att filtrera resurstyp
+  - Smart sortering: brådskande resurser först, sedan avstånd
+  - Visar ägare, avstånd och riktning för varje resurs
+  - Klicka på resurs för att se ägarens profil
+  - Räknare visar antal filtrerade resurser
+- **SMS-kontakt**: Funktionell kommunikation mellan grannar
+  - "Skicka SMS"-knapp ersätter tidigare placeholder
+  - Öppnar enhetens SMS-app med förifyllt nummer
+  - Graceful fallback om telefonnummer saknas
+  - Fungerar på både iOS och Android
+  - Perfekt för krisberedskap (SMS fungerar även när mobildata är överbelastad)
+- **Push-notifikationer**: Notifikationssystem för brådskande resurser
+  - Begär notifikationstillstånd vid första körningen
+  - Sparar FCM-token i Firestore
+  - Notifierar grannar inom 500m vid brådskande resurser (< 24h)
+  - Klicka på notifikation för att öppna Resources-skärmen
+  - Stöd för både lokal testning och Cloud Functions (produktion)
+  - Fungerar på fysiska enheter (kräver development build)
+- **Notification icon**: SVG-ikoner baserade på Stuga-logotypen
+  - Två varianter: tre hus och förenklad version
+  - Vit på transparent för Android Material Design
+  - Optimerad för 96x96 pixels
+
+### Förbättrat
+- **Pilot-redo onboarding**: Användare kan registrera sig själva
+- **Geografisk begränsning**: Naturlig gräns för pilot-scope (Upplands Väsby)
+- **Komplett CRUD**: Nu finns Create, Read, Update och Delete för resurser
+- **Resurssökning**: Användare kan söka i titel, beskrivning och ägarnamn
+- **Filtrering**: Tre nivåer av filtrering (sök, kategori, typ) kan kombineras
+- **Autentiseringsflöde**: Förenklad och automatiserad inloggning
+- **Platshantering**: Uppdaterar endast plats, skriver inte över användardata
+- **Telefonnummervalidering**: Stöder både mellanslag och bindestreck i format
+
+### Tekniskt
+- Ny komponent: `RegistrationScreen` (~300 rader) - Komplett användarregistrering
+- Ny komponent: `EditResourceScreen` (~300 rader) - Resursredigering med förifyllda fält
+- Ny komponent: `ResourcesScreen` (~350 rader) - Resurs-browsing med avancerad filtrering
+- Ny helper: `notificationHelpers.ts` - Notifikationsbehörighet och token-hantering
+- Ny hook: `useNotifications.ts` - Notifikationslogik och navigation
+- Uppdaterad: `App.tsx` - Registreringsflöde och notifikationsnavigation
+- Uppdaterad: `NeighborDetailScreen` - SMS-funktionalitet med React Native Linking API
+- Uppdaterad: `MyResourcesScreen` - "Redigera"-knapp för öppna resurser
+- Uppdaterad: `HomeScreen` - "Resurser"-knapp i header, förenklad autentisering, FCM-token
+- Uppdaterad: `AddResourceScreen` - Notifikationslogik för brådskande resurser
+- Uppdaterad: `AppNavigator` - Nya rutter för EditResource och Resources
+- Uppdaterad: `User`-type - Fält för phone_number, fcm_token, registration_completed
+- Cloud Functions: `notifyUrgentResource` - Push-notifikationer vid brådskande resurser
+- Cloud Functions: `notifyHeartsReceived` - Implementerad från TODO
+- Dependencies: expo-notifications för push-notifikationer
+
+### Buggfixar
+- **Safe area på Android**: NeighborDetailScreen scrollar tillräckligt så knappar inte hamnar under navigation bar
+- **Kategori-chipsspacing**: Fixad layout för kategori-filter (explicit marginRight istället för gap)
+- **Namn skrivs över**: HomeScreen använder updateDoc istället av setDoc för att bevara användarnamn
+- **Telefonnummervalidering**: Accepterar nu både mellanslag och bindestreck i telefonnummer
+- **Platsuppdatering**: Uppdaterar endast location-fält, skriver inte över andra användarfält
+
+### Användargränssnitt
+- Välkomstskärm med Stuga-branding och pilotinformation
+- Sökfält med tydlig placeholder i ResourcesScreen
+- Segmenterade knappar för Alla/Erbjuder/Behöver
+- Horisontell scroll för kategorier (9 kategorier)
+- Ikoner för resurstyp: 📤 Erbjuder, 📥 Behöver
+- Brådskanhets-badge och tidsräknare på varje resurs
+- Avstånd och kompassriktning visas för varje resurs
+- Professionell registreringsupplevelse
+
+### Krisberedskap
+- **SMS-infrastruktur**: Utnyttjar befintligt SMS-nätverk som fungerar även vid överbelastning
+- **Resurssökning**: Snabb upptäckt av kritiska resurser ("generator", "mat", etc.)
+- **Brådskanhetsprioritet**: Akuta behov visas först automatiskt
+- **Avståndsbaserad sortering**: Närmaste hjälp visas först inom samma brådskanshetsnivå
+- **Push-notifikationer**: Väcker grannar för verkliga nödsituationer
+- **Geografisk begränsning**: Säkerställer relevant grannskap
+
+### Bioregional vision
+- **Geografisk validering**: Proof of concept för bioregional governance
+- **Upplands Väsby-gräns**: Första steget mot bioregioner
+- **Skalbar arkitektur**: Lätt att expandera till fler områden eller bioregioner
+- **GGF-förberedelse**: Teknisk grund för framtida bioregional koordinering
+
+### Pilot-klar
+- ✅ Användarregistrering med självbetjäning
+- ✅ Geografisk begränsning till pilotområde
+- ✅ Komplett resurshantering (CRUD)
+- ✅ Funktionell kommunikation (SMS)
+- ✅ Resurssökning och filtrering
+- ✅ Notifikationer för brådskande situationer
+- ✅ Professionell användarupplevelse
+- ✅ Redo för verkliga användare i Upplands Väsby
+
+### Installation och setup
+- Kräver fysisk enhet för notifikationstestning
+- Development build rekommenderas för full funktionalitet
+- Expo Go stöder lokal notifikationstestning
+- Firebase Cloud Functions valfritt för produktion
+
+### Nästa steg
+- Skapa development build för full notifikationsfunktionalitet
+- Spela in demofilm för Upplands Väsby kommun (2 minuter)
+- Testa med verkliga användare i Upplands Väsby
+- Samla feedback från kommunkontakt och pilotanvändare
+- Iterera baserat på verklig användning
+- Förbered för expansion till fler områden
 
 ## [0.9.0] - 2026-01-09
 

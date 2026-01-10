@@ -18,6 +18,12 @@
       "supportsTablet": true,
       "bundleIdentifier": "org.globalgovernanceframeworks.stuga"
     },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#2D5016",
+      "androidMode": "default",
+      "androidCollapsedTitle": "Stuga"
+    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -29,7 +35,8 @@
         "BLUETOOTH_CONNECT",
         "BLUETOOTH_SCAN",
         "BLUETOOTH_ADVERTISE",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "NOTIFICATIONS"
       ],
       "package": "org.globalgovernanceframeworks.stuga"
     },

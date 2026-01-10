@@ -16,6 +16,7 @@ export interface User {
   availability_status: 'available' | 'away' | 'emergency';
   bluetooth_id?: string;
   fcm_token?: string;
+  registration_completed?: boolean;
 }
 
 // Resource type

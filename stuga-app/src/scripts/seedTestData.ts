@@ -27,6 +27,7 @@ async function seedTestData() {
       user_id: 'test-anna-123',
       name: 'Anna Svensson',
       phone_number: '+46701234567',
+      registration_completed: true,
       bankid_verified: true,
       created_at: Date.now(),
       location: {
@@ -43,6 +44,7 @@ async function seedTestData() {
       user_id: 'test-sven-456',
       name: 'Sven Andersson',
       phone_number: '+46702345678',
+      registration_completed: true,
       bankid_verified: true,
       created_at: Date.now(),
       location: {
@@ -59,6 +61,7 @@ async function seedTestData() {
       user_id: 'test-maria-789',
       name: 'Maria Johansson',
       phone_number: '+46703456789',
+      registration_completed: true,
       bankid_verified: true,
       created_at: Date.now(),
       location: {
@@ -75,6 +78,7 @@ async function seedTestData() {
       user_id: 'test-lars-101',
       name: 'Lars Bergström',
       phone_number: '+46704567890', 
+      registration_completed: true,
       bankid_verified: true,
       created_at: Date.now(),
       location: {
