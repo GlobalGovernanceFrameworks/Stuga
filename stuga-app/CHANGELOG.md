@@ -19,27 +19,44 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 
 ## [1.1.1] - 2026-01-11
 
-🐛 **Buggfix:** Korrigerat distance-visning i NeighborDetailScreen.
+🐛 **Buggfix:** Korrigerat distance-visning och user data-flöde mellan screens.
 
 ### Buggfixar
-- **NeighborDetailScreen distance-visning**: Fixat problem där "Borta" visades istället för fuzzy distance
-  - Tog bort duplicerad rad som visade availability_status ("Tillgänglig"/"Borta")
+- **NeighborDetailScreen distance-visning**: Fixat problem där ingen information visades när man kom från ResourcesScreen
+  - Tog bort duplicerad rad (507-508) som visade availability_status ("Tillgänglig"/"Borta") istället för distance
   - Tog bort redundant `calculateDistanceToNeighbor()` funktion
   - Konsoliderade distance-beräkning till en funktion (`loadDistance()`)
-  - Distance visas nu korrekt som fuzzy kategorier ("Nära", "Mycket nära", etc.)
-  - Fungerar konsekvent från både HomeScreen och ResourcesScreen
   - Tog bort duplicerad import av `formatDistanceFuzzy`
+  
+- **ResourcesScreen → NeighborDetail navigation**: Fixat incomplete data-överföring
+  - ResourcesScreen skickade bara `name` och `user_id` till NeighborDetail
+  - Orsakade att hearts_balance, location och display_name saknades
+  - Lagt till `allUsers` state för att lagra full user data
+  - Hittar och skickar nu komplett user-objekt vid navigation
+  - NeighborDetail får nu all nödvändig information från båda navigationsvägarna
 
 ### Tekniskt
 - Fixat type confusion där distance sattes som både string och number
 - Konsoliderad distance-beräkning till en enda funktion
 - Städat bort oanvända states (`loadingDistance`, `userLocation` i NeighborDetail)
 - Konsekvent användning av `formatDistanceFuzzy()` för display
+- ResourcesScreen sparar nu full user data i state för vidarebefordring
+- Navigation skickar komplett user-objekt istället för partial data
 
 ### Användarupplevelse
 - Grannprofiler visar nu alltid korrekt närhetsinformation
-- "📍 Nära" istället för förvirrande "📍 Borta"
-- Konsekvent beteende oavsett hur man navigerar till profilen
+- Hearts-saldo visas korrekt ("🔥 245 Hearts" istället för "🔥 Hearts")
+- Distance visas korrekt ("📍 Nära" istället för "📍 Borta")
+- Konsekvent beteende oavsett navigationsväg:
+  - ✅ HomeScreen → NeighborDetail
+  - ✅ ResourcesScreen → NeighborDetail
+
+### Root Cause
+Problem uppstod från två källor:
+1. **NeighborDetailScreen**: Duplicerad kod som visade fel information
+2. **ResourcesScreen**: Skickade bara minimal data istället för full user-objekt
+
+Båda problemen skapade ofullständig visning av granninformation.
 
 ## [1.1.0] - 2026-01-10
 

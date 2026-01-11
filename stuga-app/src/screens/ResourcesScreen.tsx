@@ -41,6 +41,7 @@ export default function ResourcesScreen({ navigation }: any) {
   const [resourceType, setResourceType] = useState<'all' | 'offer' | 'need'>('all');
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -76,6 +77,8 @@ export default function ResourcesScreen({ navigation }: any) {
         id: doc.id,
         ...doc.data()
       })) as User[];
+
+      setAllUsers(usersData);
 
       // Combine resources with owner info
       const enrichedResources: ResourceWithOwner[] = resourcesData
@@ -240,18 +243,18 @@ export default function ResourcesScreen({ navigation }: any) {
             keyExtractor={item => item.id}
             contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
             renderItem={({ item }) => {
-              const owner = { name: item.ownerName, user_id: item.user_id };
+              const fullUser = allUsers.find(u => u.user_id === item.user_id);
               
               return (
                 <Card 
                   style={styles.resourceCard}
-                  onPress={() => navigation.navigate('NeighborDetail', { 
-                    neighbor: { 
-                      name: item.ownerName, 
-                      user_id: item.user_id,
-                      // Pass minimal data needed for NeighborDetail
-                    } 
-                  })}
+                  onPress={() => {
+                    if (fullUser) {
+                      navigation.navigate('NeighborDetail', { 
+                        neighbor: fullUser
+                      });
+                    }
+                  }}
                 >
                   <Card.Content>
                     <View style={styles.resourceHeader}>
