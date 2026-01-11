@@ -143,7 +143,7 @@ Vem har ved? Vem kan ge tak över huvudet? Vem har medicinsk kunskap?"*
 6. **Peka på** "Begär kontakt"-knappen (men klicka INTE)
 
 ### Säg:
-*"Men vi har tänkt på säkerheten. 
+*"Vi har också tänkt på säkerheten. 
 Innan Anna kan kontakta någon måste hon begära tillstånd. 
 Grannen ser bara hennes visningsnamn först – 'Anna S' – inte fullt namn eller telefonnummer."*
 
