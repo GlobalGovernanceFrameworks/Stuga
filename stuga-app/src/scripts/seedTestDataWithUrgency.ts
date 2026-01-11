@@ -292,6 +292,36 @@ async function seedTestData() {
     }
   ];
 
+  // Create pre-accepted contact requests
+  const contactRequests = [
+    {
+      from_user: currentUID,  // You
+      to_user: 'test-anna-123',
+      status: 'accepted',
+      created_at: Date.now() - 172800000, // 2 days ago
+      responded_at: Date.now() - 172800000
+    },
+    {
+      from_user: currentUID,  // You
+      to_user: 'test-sven-456',
+      status: 'accepted',
+      created_at: Date.now() - 86400000, // Yesterday
+      responded_at: Date.now() - 86400000
+    },
+    {
+      from_user: 'test-maria-789',
+      to_user: currentUID,  // You
+      status: 'accepted',
+      created_at: Date.now() - 259200000, // 3 days ago
+      responded_at: Date.now() - 259200000
+    }
+  ];
+
+  for (const request of contactRequests) {
+    await db.collection('contact_requests').add(request);
+    console.log(`✅ Created contact request: ${request.from_user} → ${request.to_user}`);
+  }
+
   for (const transaction of transactions) {
     await db.collection('hearts_transactions').add(transaction);
     console.log(`✅ Created Hearts transaction: ${transaction.reason}`);
