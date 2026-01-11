@@ -49,7 +49,10 @@ HomeScreen med grannar (Anna, Maria, Sven)
 2. **Håll telefonen still**
 
 ### Säg:
-*"Hej Francisca. Här är Stuga – verktyget jag bygger för att göra Upplands Väsby mer resilient. Vid en kris är grannsamverkan vår viktigaste resurs. Men idag saknar vi infrastrukturen för att samordna den lokalt när internet ligger nere. Stuga löser detta."*
+*"Hej Francisca. Här är Stuga – verktyget jag bygger för att göra Upplands Väsby mer resilient. 
+Vid en kris är grannsamverkan vår viktigaste resurs. 
+Men idag saknar vi infrastrukturen för att samordna den lokalt när internet ligger nere. 
+Stuga löser detta."*
 
 ### Tips:
 - Tala långsamt och tydligt
@@ -69,7 +72,9 @@ Profil-skärmen (för att visa Väsby-begränsning)
 3. *(Du kan scrolla ner lite om du vill visa mer info)*
 
 ### Säg:
-*"När någon registrerar sig begär vi platstillstånd och verifierar att de faktiskt bor i Upplands Väsby kommun – detta är en pilot för just vårt område. Det bygger tillit att alla är faktiska grannar, inte folk från andra kommuner."*
+*"När någon registrerar sig begär vi platstillstånd och verifierar att de faktiskt bor i Upplands Väsby kommun 
+– detta är en pilot för just vårt område. 
+Det bygger tillit att alla är faktiska grannar, inte folk från andra kommuner."*
 
 ### Tips:
 - Visa profilen tydligt
@@ -100,11 +105,17 @@ Profil-skärmen (för att visa Väsby-begränsning)
 10. **Håll still 2 sekunder**
 
 ### Säg:
-*"Grannkartan visar inte bara vem som finns nära – den visar vilka resurser och behov som finns. Här kan jag söka efter 'generator'. Appen visar att Anna har en generator 5kW och är 'Nära' – inom gångavstånd. Hon erbjuder också första hjälpen-kunskap som är brådskande just nu."*
+*"Grannkartan visar inte bara vem som finns nära – 
+den visar vilka resurser och behov som finns. 
+Här kan jag söka efter 'generator'. 
+Appen visar att Anna har en generator 5kW och är 'Nära' – inom gångavstånd. 
+Hon erbjuder också första hjälpen-kunskap som är brådskande just nu."*
 
 **[2 sek paus medan du visar resurserna]**
 
-*"Detta är inte ett socialt medium för prat, utan en karta över konkret hjälp när krisen kommer. Vem har ved? Vem kan ge tak över huvudet? Vem har medicinsk kunskap?"*
+*"Detta är inte ett socialt medium för prat, 
+utan en karta över konkret hjälp när krisen kommer. 
+Vem har ved? Vem kan ge tak över huvudet? Vem har medicinsk kunskap?"*
 
 ### Tips:
 - Skriv "generator" långsamt så det syns tydligt
@@ -132,11 +143,14 @@ Profil-skärmen (för att visa Väsby-begränsning)
 6. **Peka på** "Begär kontakt"-knappen (men klicka INTE)
 
 ### Säg:
-*"Men vi har tänkt på säkerheten. Innan Anna kan kontakta någon måste hon begära tillstånd. Grannen ser bara hennes visningsnamn först – 'Anna S' – inte fullt namn eller telefonnummer."*
+*"Men vi har tänkt på säkerheten. 
+Innan Anna kan kontakta någon måste hon begära tillstånd. 
+Grannen ser bara hennes visningsnamn först – 'Anna S' – inte fullt namn eller telefonnummer."*
 
 **[Peka på "Begär kontakt"-knappen]**
 
-*"När förfrågan accepteras öppnas kontakten och de kan SMS:a varandra. Detta skyddar mot missbruk och stalking samtidigt som det bygger tillit steg för steg."*
+*"När förfrågan accepteras öppnas kontakten och de kan SMS:a varandra. 
+Detta skyddar mot missbruk och stalking samtidigt som det bygger tillit steg för steg."*
 
 ### Tips:
 - Tala långsamt när du pekar
@@ -203,7 +217,8 @@ Profil-skärmen (för att visa Väsby-begränsning)
 15. **Vänta på sync-meddelande** (borde dyka upp inom 2-3 sek)
 
 ### Säg:
-*"Så fort nätet kommer tillbaka – kanske bara för en minut – synkar allt automatiskt. Designat för intermittent infrastruktur. När nätet är nere periodvis fungerar Stuga ändå."*
+*"Så fort nätet kommer tillbaka – kanske bara för en minut – synkar allt automatiskt. 
+Designat för intermittent infrastruktur. När nätet är nere periodvis fungerar Stuga ändå."*
 
 ### Tips:
 - GE tid för varje steg att visas
@@ -229,7 +244,10 @@ Profil-skärmen (för att visa Väsby-begränsning)
 5. **Scrolla lite för att visa transaktioner**
 
 ### Säg:
-*"För att bygga kultur av ömsesidighet har vi 'Hearts' – ett tacksystem. När Sven hjälper mig snöskotta skickar jag 50 Hearts som tack. Inte pengar, bara uppskattning som stärker gemenskapen. Det skapar social skuld i positiv bemärkelse – en påminnelse om att vi hjälper varandra."*
+*"För att bygga kultur av ömsesidighet har vi 'Hearts' – ett tacksystem. 
+När Sven hjälper mig snöskotta skickar jag 50 Hearts som tack. 
+Inte pengar, bara uppskattning som stärker gemenskapen. 
+Det skapar social skuld i positiv bemärkelse – en påminnelse om att vi hjälper varandra."*
 
 ### Tips:
 - Peka eventuellt på en transaktion
@@ -248,7 +266,10 @@ HomeScreen eller ProfileScreen
 2. **Håll telefonen still och centrerad**
 
 ### Säg:
-*"Jag bygger detta med modern öppen källkod och Firebase. Målet är en skarp pilot i Upplands Väsby våren 2026. Jag söker dialog med kommunen för att se hur detta kan komplettera ert befintliga krisberedskapsarbete – inte ersätta det, utan förstärka det på grannivå."*
+*"Jag bygger detta med modern öppen källkod och Firebase. 
+Målet är en skarp pilot i Upplands Väsby våren 2026. 
+Jag söker dialog med kommunen för att se hur detta kan komplettera ert befintliga krisberedskapsarbete 
+– inte ersätta det, utan förstärka det på grannivå."*
 
 **[Paus 1 sekund]**
 
