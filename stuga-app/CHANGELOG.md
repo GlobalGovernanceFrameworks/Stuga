@@ -17,6 +17,30 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Förbättrad platshistorik och tracking
 - BankID-integration för produktionsanvändare
 
+## [1.1.1] - 2026-01-11
+
+🐛 **Buggfix:** Korrigerat distance-visning i NeighborDetailScreen.
+
+### Buggfixar
+- **NeighborDetailScreen distance-visning**: Fixat problem där "Borta" visades istället för fuzzy distance
+  - Tog bort duplicerad rad som visade availability_status ("Tillgänglig"/"Borta")
+  - Tog bort redundant `calculateDistanceToNeighbor()` funktion
+  - Konsoliderade distance-beräkning till en funktion (`loadDistance()`)
+  - Distance visas nu korrekt som fuzzy kategorier ("Nära", "Mycket nära", etc.)
+  - Fungerar konsekvent från både HomeScreen och ResourcesScreen
+  - Tog bort duplicerad import av `formatDistanceFuzzy`
+
+### Tekniskt
+- Fixat type confusion där distance sattes som både string och number
+- Konsoliderad distance-beräkning till en enda funktion
+- Städat bort oanvända states (`loadingDistance`, `userLocation` i NeighborDetail)
+- Konsekvent användning av `formatDistanceFuzzy()` för display
+
+### Användarupplevelse
+- Grannprofiler visar nu alltid korrekt närhetsinformation
+- "📍 Nära" istället för förvirrande "📍 Borta"
+- Konsekvent beteende oavsett hur man navigerar till profilen
+
 ## [1.1.0] - 2026-01-10
 
 🔒 **Säkerhets- och integritetsuppdatering!** Komplett progressiv disclosure, kontaktförfrågningar och skydd mot missbruk.

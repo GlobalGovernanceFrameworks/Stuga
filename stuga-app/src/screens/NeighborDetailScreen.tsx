@@ -10,7 +10,7 @@ import { blockUser, isUserBlocked } from '../lib/blockHelpers';
 import { getCategoryLabel } from '../lib/categoryHelpers';
 import { acceptContactRequest, declineContactRequest, getContactStatus, sendContactRequest } from '../lib/contactHelpers';
 import { getDisplayName, getRealName } from '../lib/displayHelpers';
-import { calculateDistance, formatDistance, formatDistanceFuzzy } from '../lib/locationHelpers';
+import { getCurrentLocation, calculateDistance, formatDistance, formatDistanceFuzzy } from '../lib/locationHelpers';
 import { SkeletonCard } from '../components/SkeletonCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { UrgencyBadge } from '../components/UrgencyBadge';
@@ -29,7 +29,6 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
   const insets = useSafeAreaInsets();
   const currentUser = auth.currentUser;
   const isMe = currentUser?.uid === neighbor.user_id;
-
 
   useFocusEffect(
     React.useCallback(() => {
@@ -463,9 +462,6 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
           )}
 
           <Text style={styles.info}>🔥 {neighbor.hearts_balance} Hearts</Text>
-          <Text style={styles.info}>
-            📍 {neighbor.availability_status === 'available' ? 'Tillgänglig' : 'Borta'}
-          </Text>
           {contactStatus === 'accepted' && (
             <Text style={styles.contactInfo}>
               ✓ Ni har kontakt sedan {/* TODO: format date */}
