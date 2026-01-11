@@ -108,8 +108,8 @@ Det bygger tillit att alla är faktiska grannar, inte folk från andra kommuner.
 *"Grannkartan visar inte bara vem som finns nära – 
 den visar vilka resurser och behov som finns. 
 Här kan jag söka efter 'generator'. 
-Appen visar att Anna har en generator 5kW och är 'Nära' – inom gångavstånd. 
-Hon erbjuder också första hjälpen-kunskap som är brådskande just nu."*
+Appen visar att Anna har en generator på 5kW och är 'Nära' – inom gångavstånd. 
+Hon erbjuder också första hjälpen-kunskap."*
 
 **[2 sek paus medan du visar resurserna]**
 
@@ -245,7 +245,7 @@ Designat för intermittent infrastruktur. När nätet är nere periodvis fungera
 
 ### Säg:
 *"För att bygga kultur av ömsesidighet har vi 'Hearts' – ett tacksystem. 
-När Sven hjälper mig snöskotta skickar jag 50 Hearts som tack. 
+När Sven hjälpte mig snöskotta skickade jag 50 Hearts som tack. 
 Inte pengar, bara uppskattning som stärker gemenskapen. 
 Det skapar social skuld i positiv bemärkelse – en påminnelse om att vi hjälper varandra."*
 
