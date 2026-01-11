@@ -219,7 +219,7 @@ export default function HomeScreen({ navigation }: any) {
     return (
       <View style={styles.headerRow}>
         <Text style={styles.headerText}>
-          😏️ GRANNAR ({neighborCount}{showRadius ? ` inom ${RADIUS_METERS}m` : ''})
+          🏘️ GRANNAR ({neighborCount}{showRadius ? ` inom ${RADIUS_METERS}m` : ''})
         </Text>
         <View style={styles.headerButtons}>
           <Button 
