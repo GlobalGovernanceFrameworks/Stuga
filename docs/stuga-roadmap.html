@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stuga - Utvecklingsroadmap 2026-2027</title>
+    <style>
+        @page {
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2D5016;
+        }
+        
+        .header h1 {
+            color: #2D5016;
+            font-size: 32pt;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            font-size: 14pt;
+            font-style: italic;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        
+        .section h2 {
+            color: #2D5016;
+            font-size: 20pt;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #6BCF7F;
+        }
+        
+        .section h3 {
+            color: #2D5016;
+            font-size: 16pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .version-box {
+            background: #F5F3F0;
+            border-left: 4px solid #2D5016;
+            padding: 20px;
+            margin: 20px 0;
+            page-break-inside: avoid;
+        }
+        
+        .version-box h3 {
+            margin-top: 0;
+            color: #2D5016;
+        }
+        
+        .version-box .version-title {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #2D5016;
+            margin-bottom: 10px;
+        }
+        
+        .version-box .timeline {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+        
+        .feature-list {
+            margin-left: 20px;
+        }
+        
+        .feature-list li {
+            margin-bottom: 8px;
+        }
+        
+        .feature-category {
+            font-weight: bold;
+            color: #2D5016;
+            margin-top: 10px;
+        }
+        
+        .spiral-box {
+            background: linear-gradient(135deg, #E8F4F8 0%, #FFF4E6 100%);
+            border: 2px solid #2D5016;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            page-break-inside: avoid;
+        }
+        
+        .spiral-stage {
+            display: inline-block;
+            padding: 5px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+        
+        .purple {
+            background: #D4B5F7;
+            color: #4A1970;
+        }
+        
+        .red {
+            background: #FFB3BA;
+            color: #8B0000;
+        }
+        
+        .blue {
+            background: #B3D9FF;
+            color: #003D7A;
+        }
+        
+        .orange {
+            background: #FFD4A3;
+            color: #CC5500;
+        }
+        
+        .green {
+            background: #B8E6B8;
+            color: #1B5E20;
+        }
+        
+        .timeline-visual {
+            margin: 30px 0;
+            page-break-inside: avoid;
+        }
+        
+        .timeline-item {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        
+        .timeline-date {
+            min-width: 150px;
+            font-weight: bold;
+            color: #2D5016;
+            font-size: 12pt;
+        }
+        
+        .timeline-content {
+            flex: 1;
+            padding-left: 20px;
+            border-left: 3px solid #6BCF7F;
+            padding-bottom: 10px;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #2D5016;
+            text-align: center;
+            color: #666;
+            font-size: 10pt;
+        }
+        
+        .key-principles {
+            background: #E1F5DD;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .key-principles ul {
+            margin: 10px 0;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            
+            .section {
+                page-break-after: avoid;
+            }
+            
+            .version-box, .spiral-box, .timeline-visual {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏘️ Stuga</h1>
+        <div class="subtitle">Utvecklingsroadmap 2026-2027</div>
+        <div class="subtitle" style="margin-top: 10px;">Lokal krisberedskap genom grannsamverkan</div>
+    </div>
+
+    <div class="section">
+        <h2>📍 Nuläge (v1.1.1 - Januari 2026)</h2>
+        
+        <div class="version-box">
+            <div class="version-title">Status: Pilot-redo</div>
+            <div class="timeline">Färdigställd: 11 januari 2026</div>
+            
+            <p><strong>Implementerade funktioner:</strong></p>
+            <ul class="feature-list">
+                <li><strong>Grannupptäckt:</strong> GPS-baserad upptäckt inom 500m</li>
+                <li><strong>Resursdelning:</strong> 8 kategorier (mat, värme, verktyg, transport, kunskap, boende, första hjälpen, annat)</li>
+                <li><strong>Brådskesystem:</strong> Resurser prioriteras efter utgångstid</li>
+                <li><strong>Hearts-ekonomi:</strong> Tacksägelsesystem för att bygga reciprocitet</li>
+                <li><strong>Offline-resiliens:</strong> Fungerar utan internet, synkar automatiskt</li>
+                <li><strong>Privacy-by-design:</strong>
+                    <ul>
+                        <li>Burner profiles (display names)</li>
+                        <li>Kontaktförfrågningar (samtycke krävs)</li>
+                        <li>Fuzzy distance (anti-stalking)</li>
+                        <li>Blockeringsfunktion</li>
+                    </ul>
+                </li>
+                <li><strong>Bluetooth mesh:</strong> Grundläggande implementering för peer-to-peer upptäckt</li>
+            </ul>
+            
+            <p style="margin-top: 15px;"><strong>Teknisk stack:</strong> React Native, Firebase, SQLite, Expo</p>
+            <p><strong>Geografisk begränsning:</strong> Upplands Väsby kommun</p>
+            <p><strong>Target:</strong> Liten pilot våren 2026 med 20-50 användare</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🧭 Utvecklingsfilosofi: Spiral Dynamics</h2>
+        
+        <div class="spiral-box">
+            <p>Stugas utveckling följer Spiral Dynamics-ramverket för att bygga sociala system som matchar användarnas mognad och behov:</p>
+            
+            <div style="margin: 20px 0;">
+                <div class="spiral-stage purple">🟣 PURPLE (Tribe)</div>
+                <div class="spiral-stage red">🔴 RED (Power)</div>
+                <div class="spiral-stage blue">🔵 BLUE (Order)</div>
+                <div class="spiral-stage orange">🟠 ORANGE (Achievement)</div>
+                <div class="spiral-stage green">🟢 GREEN (Community)</div>
+            </div>
+            
+            <p><strong>Aktuell fas:</strong> <span class="spiral-stage purple">PURPLE - Tribal Trust</span></p>
+            <p>Fokus på att bygga grundläggande tillit mellan grannar genom:</p>
+            <ul>
+                <li>Progressiv information disclosure (känner man varandra → mer data synligt)</li>
+                <li>Samtycke och kontroll över personlig information</li>
+                <li>Reputation genom Hearts-systemet</li>
+                <li>Små, lokala communities (grannar du kan gå till)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section" style="page-break-before: always;">
+        <h2>🗺️ Roadmap</h2>
+        
+        <div class="timeline-visual">
+            <div class="timeline-item">
+                <div class="timeline-date">V1.2<br/>Q2 2026</div>
+                <div class="timeline-content">
+                    <strong>Post-Pilot Förbättringar</strong>
+                    <p>Baserat på feedback från våren 2026-piloten</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-date">V1.5<br/>Q3 2026</div>
+                <div class="timeline-content">
+                    <strong>Purple → Red Transition</strong>
+                    <p>Introduktion av ledarskap och koordinering</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-date">V2.0<br/>Q4 2026</div>
+                <div class="timeline-content">
+                    <strong>Blue (Order) Features</strong>
+                    <p>Protokoll, roller och strukturerad krisberedskap</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-date">V2.5<br/>Q1 2027</div>
+                <div class="timeline-content">
+                    <strong>Orange (Achievement) & Green (Community)</strong>
+                    <p>Gamification, mål och holistisk community-byggande</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Version 1.2 - Post-Pilot (Q2 2026)</h2>
+        
+        <div class="version-box">
+            <div class="version-title">Purple (Tribe) - Förbättringar</div>
+            <div class="timeline">Planerad: April-Juni 2026</div>
+            
+            <p class="feature-category">📊 Förbättrad Reputation</p>
+            <ul class="feature-list">
+                <li><strong>Reliability score:</strong> Kombination av Hearts och faktisk hjälp given</li>
+                <li><strong>Completion rate:</strong> Hur ofta någon följer upp på erbjudanden</li>
+                <li><strong>Response time:</strong> Hur snabbt någon svarar på kontaktförfrågningar</li>
+                <li><strong>Badges:</strong> "Pålitlig granne", "Snabb respons", "Givmild hjälpare"</li>
+            </ul>
+            
+            <p class="feature-category">👥 Trust Circles</p>
+            <ul class="feature-list">
+                <li><strong>Gradual disclosure:</strong> Mer data synligt baserat på relation-depth</li>
+                <li><strong>Neighbor endorsements:</strong> "Anna vouches for Sven"</li>
+                <li><strong>Mutual friends:</strong> "Du och Maria har 3 gemensamma kontakter"</li>
+                <li><strong>Trust levels:</strong> Stranger → Acquaintance → Friend → Trusted</li>
+            </ul>
+            
+            <p class="feature-category">🔔 Förbättrade Notifikationer</p>
+            <ul class="feature-list">
+                <li><strong>Push notifications:</strong> Brådskande resurser, kontaktförfrågningar</li>
+                <li><strong>Customizable alerts:</strong> Välj vilka kategorier du vill få notiser om</li>
+                <li><strong>Quiet hours:</strong> Ingen störning nattetid (förutom emergencies)</li>
+            </ul>
+            
+            <p class="feature-category">📍 Förbättrad Location</p>
+            <ul class="feature-list">
+                <li><strong>Availability tracking:</strong> "Senast sedd för 2 timmar sedan"</li>
+                <li><strong>Auto-away status:</strong> Sätt som "borta" automatiskt efter X dagar inaktivitet</li>
+                <li><strong>Location history:</strong> "Anna är oftast hemma mellan 18-20"</li>
+            </ul>
+            
+            <p class="feature-category">🔍 Förbättrad Sökning</p>
+            <ul class="feature-list">
+                <li><strong>Saved searches:</strong> "Generatorer inom 200m"</li>
+                <li><strong>Filter kombinationer:</strong> Mat + Brådskande + <100m</li>
+                <li><strong>Match notifications:</strong> "Någon erbjuder det du söker!"</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section" style="page-break-before: always;">
+        <h2>Version 1.5 - Leadership & Coordination (Q3 2026)</h2>
+        
+        <div class="version-box">
+            <div class="version-title">🔴 Red (Power) - Ledarskap</div>
+            <div class="timeline">Planerad: Juli-September 2026</div>
+            
+            <p class="feature-category">👑 Block Captains (Kvarterschefer)</p>
+            <ul class="feature-list">
+                <li><strong>Designated leaders:</strong> Frivilliga som koordinerar sitt kvarter (50-100 personer)</li>
+                <li><strong>Coordination dashboard:</strong> Översikt över alla resurser och behov i sitt område</li>
+                <li><strong>Emergency broadcast:</strong> Skicka meddelande till alla i sitt kvarter</li>
+                <li><strong>Resource allocation:</strong> Hjälp till att matcha behov med erbjudanden</li>
+                <li><strong>Status reporting:</strong> Rapportera läget i sitt kvarter till kommun</li>
+            </ul>
+            
+            <p class="feature-category">🚨 Emergency Mode</p>
+            <ul class="feature-list">
+                <li><strong>Crisis declaration:</strong> Block captain aktiverar "crisis mode"</li>
+                <li><strong>Priority escalation:</strong> Alla får notis om kritiska behov</li>
+                <li><strong>Resource claiming:</strong> "Jag hanterar den här förfrågan"</li>
+                <li><strong>Status updates:</strong> Löpande uppdateringar om läget</li>
+                <li><strong>Check-in system:</strong> "Är alla okej?" med snabb respons</li>
+            </ul>
+            
+            <p class="feature-category">📊 Coordination Tools</p>
+            <ul class="feature-list">
+                <li><strong>Resource inventory:</strong> Totalt antal generatorer, ficklampor, etc. i området</li>
+                <li><strong>Gap analysis:</strong> "Vi har 5 generatorer men 12 som behöver"</li>
+                <li><strong>Distribution planning:</strong> "Generator till familj med spädbarn först"</li>
+                <li><strong>Volunteer coordination:</strong> "Vem kan köra? Vem kan laga mat?"</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section" style="page-break-before: always;">
+        <h2>Version 2.0 - Order & Structure (Q4 2026)</h2>
+        
+        <div class="version-box">
+            <div class="version-title">🔵 Blue (Order) - Protokoll & Struktur</div>
+            <div class="timeline">Planerad: Oktober-December 2026</div>
+            
+            <p class="feature-category">📋 Krisberedskapsprotokoll</p>
+            <ul class="feature-list">
+                <li><strong>Scenario checklists:</strong> "Vid strömavbrott: Gör X, Y, Z"</li>
+                <li><strong>Step-by-step guides:</strong> Första hjälpen, brand, översvämning</li>
+                <li><strong>Resource checklists:</strong> "Har du batterier? Vatten? Konserver?"</li>
+                <li><strong>Communication protocols:</strong> "Rapportera till block captain var 6:e timme"</li>
+                <li><strong>Evacuation plans:</strong> Samlingsplatser, flyktvägar</li>
+            </ul>
+            
+            <p class="feature-category">🎭 Rollassignering</p>
+            <ul class="feature-list">
+                <li><strong>Specialistkompetenser:</strong> Sjuksköterska, elektriker, brandman</li>
+                <li><strong>Crisis roles:</strong> Första hjälpen-ansvarig, kommunikationsansvarig</li>
+                <li><strong>Duty schedules:</strong> "Jag kan vara tillgänglig Må-Fre 18-22"</li>
+                <li><strong>Backup planning:</strong> "Om Anna inte kan, vem tar över?"</li>
+                <li><strong>Training coordination:</strong> "10 personer behöver HLR-utbildning"</li>
+            </ul>
+            
+            <p class="feature-category">📅 Övningar & Drills</p>
+            <ul class="feature-list">
+                <li><strong>Scheduled drills:</strong> "Övning nästa söndag kl 14:00"</li>
+                <li><strong>Scenario simulation:</strong> "Testa som att internet är nere i 24h"</li>
+                <li><strong>Performance tracking:</strong> "90% deltog, genomsnittlig responstid 12 min"</li>
+                <li><strong>After-action reports:</strong> "Vad fungerade? Vad behöver förbättras?"</li>
+                <li><strong>Continuous improvement:</strong> Uppdatera protokoll baserat på lärdomar</li>
+            </ul>
+            
+            <p class="feature-category">📊 Compliance & Reporting</p>
+            <ul class="feature-list">
+                <li><strong>Readiness scoring:</strong> "Ditt kvarter: 75% redo"</li>
+                <li><strong>Mandatory check-ins:</strong> "Alla ska registrera sin status var 30:e dag"</li>
+                <li><strong>Resource audits:</strong> "Verifiera att din generator fungerar"</li>
+                <li><strong>Training requirements:</strong> "Du behöver förnya första hjälpen-certifikat"</li>
+                <li><strong>Municipal reporting:</strong> Aggregerad data till kommunen</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section" style="page-break-before: always;">
+        <h2>Version 2.5 - Achievement & Community (Q1 2027)</h2>
+        
+        <div class="version-box">
+            <div class="version-title">🟠 Orange (Achievement) + 🟢 Green (Community)</div>
+            <div class="timeline">Planerad: Januari-Mars 2027</div>
+            
+            <p class="feature-category">🏆 Gamification (Orange)</p>
+            <ul class="feature-list">
+                <li><strong>Achievements:</strong> "Hjälpt 10 grannar", "100 Hearts given"</li>
+                <li><strong>Leaderboards:</strong> Mest hjälpsamma grannar (opt-in)</li>
+                <li><strong>Progression system:</strong> Rookie → Helper → Hero → Legend</li>
+                <li><strong>Challenges:</strong> "Ge 50 Hearts denna månad"</li>
+                <li><strong>Rewards:</strong> Badges, titlar, recognition</li>
+            </ul>
+            
+            <p class="feature-category">📈 Mål & Metrics (Orange)</p>
+            <ul class="feature-list">
+                <li><strong>Personal goals:</strong> "Jag vill hjälpa 5 grannar denna månad"</li>
+                <li><strong>Neighborhood goals:</strong> "100% av kvarteret registrerat"</li>
+                <li><strong>Progress tracking:</strong> Visualisering av framsteg</li>
+                <li><strong>Impact metrics:</strong> "Du har hjälpt 15 familjer direkt"</li>
+                <li><strong>Comparison (opt-in):</strong> "Ditt kvarter vs. andra kvarter"</li>
+            </ul>
+            
+            <p class="feature-category">🌱 Community Building (Green)</p>
+            <ul class="feature-list">
+                <li><strong>Social events:</strong> Grillkvällar, fika, workshops</li>
+                <li><strong>Skill sharing:</strong> "Lär dig första hjälpen", "Kurs i eldning"</li>
+                <li><strong>Community projects:</strong> Gemensam trädgård, verkstadsdelning</li>
+                <li><strong>Storytelling:</strong> "Så hjälpte vi varandra senaste vintern"</li>
+                <li><strong>Gratitude wall:</strong> Publika tacksägelser och positiva historier</li>
+            </ul>
+            
+            <p class="feature-category">🤝 Integration (Green)</p>
+            <ul class="feature-list">
+                <li><strong>Inclusivity features:</strong> Flerspråksstöd, tillgänglighet</li>
+                <li><strong>Elder support:</strong> Enklare UI för äldre, barnbarnskopplade konton</li>
+                <li><strong>Child safety:</strong> Föräldrars godkännande för minderåriga</li>
+                <li><strong>Diversity celebration:</strong> Kulturella evenemang, språkcaféer</li>
+                <li><strong>Conflict resolution:</strong> Medling vid konflikter mellan grannar</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section" style="page-break-before: always;">
+        <h2>🏗️ Infrastruktur-evolution: CivicBase (2027+)</h2>
+        
+        <div style="background: #E8F4F8; padding: 20px; border-left: 4px solid #0066CC; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Från Firebase till P2P-infrastruktur</h3>
+            <p><strong>Status:</strong> Strategisk vision, beroende av Vinnova/MSB-finansiering</p>
+            <p><strong>Tidslinje:</strong> Migration planerad för v2.0+ (2027)</p>
+        </div>
+        
+        <h3>Nuvarande Arkitektur (v1.x - Pilot-fas)</h3>
+        <ul class="feature-list">
+            <li><strong>Backend:</strong> Firebase (Firestore, Authentication, Cloud Functions)</li>
+            <li><strong>Offline:</strong> SQLite-baserad kö för transaktioner</li>
+            <li><strong>Sync:</strong> Firestore real-time synkronisering</li>
+            <li><strong>Rationale:</strong> 
+                <ul>
+                    <li>✅ Snabb utveckling och iteration</li>
+                    <li>✅ Låg initial kostnad</li>
+                    <li>✅ Fokus på användarbehov, inte infrastruktur</li>
+                    <li>✅ Bevisar koncept innan stor investering</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <h3>Framtida Arkitektur: CivicBase P2P Platform</h3>
+        
+        <div class="version-box" style="background: linear-gradient(135deg, #E8F4F8 0%, #E1F5DD 100%);">
+            <div class="version-title">CivicBase - Offline-First P2P Infrastructure</div>
+            <div class="timeline">Beroende på: Distributed systems expert + Vinnova/MSB finansiering</div>
+            
+            <p class="feature-category">🎯 Varför CivicBase?</p>
+            <ul class="feature-list">
+                <li><strong>Data sovereignty:</strong> All data i Sverige på svenska enheter</li>
+                <li><strong>Total offline-resiliens:</strong> Mesh networking när internet är nere</li>
+                <li><strong>Oberoende:</strong> Ingen dependency på molntjänster (AWS, Google, etc.)</li>
+                <li><strong>Totalförsvar:</strong> Uppfyller MCF:s krav på kritisk infrastruktur</li>
+                <li><strong>Privacy-by-design:</strong> Agent-centric data model, end-to-end kryptering</li>
+            </ul>
+            
+            <p class="feature-category">🔧 Teknisk Implementation</p>
+            <ul class="feature-list">
+                <li><strong>Peer-to-peer networking:</strong> libp2p (beprövad teknologi från IPFS/Filecoin)</li>
+                <li><strong>Mesh networking:</strong> Bluetooth/Wi-Fi Direct för lokal kommunikation</li>
+                <li><strong>Offline sync:</strong> Vector clocks + conflict resolution</li>
+                <li><strong>Kryptering:</strong> AES-256-GCM (data), Ed25519 (signatures)</li>
+                <li><strong>GDPR-compliant:</strong> Data minimization, user deletion, no central database</li>
+            </ul>
+            
+            <p class="feature-category">📋 Migrations-plan (v1.x → v2.0)</p>
+            <ul class="feature-list">
+                <li><strong>Fas 1:</strong> CivicBase-plattform utvecklad parallellt (Vinnova-finansierad)</li>
+                <li><strong>Fas 2:</strong> Stuga-datamodell porteras till agent-centric schema</li>
+                <li><strong>Fas 3:</strong> Gradvis migration av användare (dual-stack period)</li>
+                <li><strong>Fas 4:</strong> Firebase-backend deprecerad när alla migrerat</li>
+                <li><strong>Tidsram:</strong> 6-12 månader med distributed systems expert</li>
+            </ul>
+            
+            <p class="feature-category">💰 Budget & Förutsättningar</p>
+            <ul class="feature-list">
+                <li><strong>Distributed systems consultant:</strong> 800,000 SEK (4 månader)</li>
+                <li><strong>Security audit:</strong> 400,000 SEK (penetration testing)</li>
+                <li><strong>Lead developer time:</strong> 600,000 SEK (migration + integration)</li>
+                <li><strong>Testing & deployment:</strong> 300,000 SEK (pilot miljö, documentation)</li>
+                <li><strong>Total budget:</strong> ~2,100,000 SEK (CivicBase core + Stuga migration)</li>
+                <li><strong>Finansieringskällor:</strong> Vinnova, MSB/MCF, Region Stockholm</li>
+            </ul>
+        </div>
+        
+        <h3>Varför Inte CivicBase Från Början?</h3>
+        
+        <div style="background: #FFF4E6; padding: 20px; border-left: 4px solid #FF6B35; margin: 20px 0;">
+            <p><strong>Pragmatisk approach:</strong></p>
+            <ul>
+                <li><strong>Komplexitet:</strong> P2P mesh networking, offline reconciliation, vector clocks kräver expert-nivå kunskap</li>
+                <li><strong>Risk:</strong> Bygga avancerad infrastruktur INNAN behovet är bevisat = stor risk</li>
+                <li><strong>Timing:</strong> Firebase låter oss validera användarbehov snabbt (3 månader vs 18 månader)</li>
+                <li><strong>Finansiering:</strong> "Vi har 500 aktiva användare" ger starkare Vinnova-ansökan än "cool teknologi"</li>
+                <li><strong>Fokus:</strong> Piloten handlar om social dynamik, inte teknik-stack</li>
+            </ul>
+            
+            <p style="margin-top: 15px;"><strong>Strategi:</strong> Bevisa värdet först (Stuga på Firebase), sedan bygg rätt infrastruktur (CivicBase) med finansiering och expert-hjälp.</p>
+        </div>
+        
+        <h3>Stuga som CivicBase Reference Implementation</h3>
+        <ul class="feature-list">
+            <li><strong>Första produktions-app:</strong> Stuga blir reference implementation för CivicBase</li>
+            <li><strong>Real-world testing:</strong> Valideringsdata från faktisk pilot (inte teoretisk design)</li>
+            <li><strong>Use cases proven:</strong> Hearts currency, resource sharing, contact requests - allt testat live</li>
+            <li><strong>Municipal integration:</strong> Upplands Väsby-piloten visar hur kommuner kan använda plattformen</li>
+            <li><strong>Platform foundation:</strong> Stuga + CivicBase → mall för andra kommunala tjänster</li>
+        </ul>
+        
+        <h3>Beyond Stuga: CivicBase Ecosystem</h3>
+        
+        <div style="background: #E1F5DD; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p>När CivicBase-plattformen är färdig blir Stuga <strong>en av många</strong> applikationer som drar nytta av offline-resilient infrastruktur:</p>
+            <ul>
+                <li><strong>TAK-405:</strong> Transit wellness (Stockholm SL)</li>
+                <li><strong>DPOP:</strong> Political organizing platform</li>
+                <li><strong>DiDiS:</strong> Distributed digital identity</li>
+                <li><strong>Healthcare records:</strong> Patientjournaler med offline-kapacitet</li>
+                <li><strong>Elder care coordination:</strong> Fungerar i landsbygd med dålig uppkoppling</li>
+                <li><strong>Emergency response:</strong> Mesh networking för grannkoordinering</li>
+            </ul>
+        </div>
+        
+        <h3>Teknisk Realitet Check</h3>
+        
+        <div style="background: #FFE6E6; padding: 20px; border-left: 4px solid #C1121F; margin: 20px 0;">
+            <h4 style="margin-top: 0; color: #C1121F;">⚠️ Detta är svår teknologi</h4>
+            <p><strong>CivicBase kräver expert-nivå kompetens inom:</strong></p>
+            <ul>
+                <li>Distributed systems (P2P, consensus, CAP theorem)</li>
+                <li>Cryptographic protocols (end-to-end encryption, signing)</li>
+                <li>Conflict resolution (vector clocks, CRDTs, operational transforms)</li>
+                <li>Network engineering (NAT traversal, mesh routing, topology optimization)</li>
+                <li>Mobile development (cross-platform, battery optimization, background sync)</li>
+            </ul>
+            
+            <p style="margin-top: 15px;"><strong>Därför budgeterar vi 800K för distributed systems consultant.</strong> Detta är inte något man "lär sig på YouTube" - det är flera års specialiserad erfarenhet.</p>
+            
+            <p><strong>Ärlig bedömning:</strong> Som solo-utvecklare kan jag inte bygga CivicBase ensam på rimlig tid. Men jag kan bygga Stuga på Firebase NU, bevisa behovet, få finansiering, och sedan anställa rätt expertis för CivicBase.</p>
+        </div>
+        
+    <div class="section" style="page-break-before: always;">
+        <h2>🔮 Långsiktig Vision (2027+)</h2>
+        
+        <div class="key-principles">
+            <h3>Kärnprinciper</h3>
+            <ul>
+                <li><strong>Decentraliserad resiliens:</strong> Fungera helt utan centraliserad infrastruktur</li>
+                <li><strong>Privacy-first:</strong> Minimera data, maximera kontroll</li>
+                <li><strong>Progressive enhancement:</strong> Börja enkelt, väx med användarnas mognad</li>
+                <li><strong>Municipal coordination:</strong> Komplettera, inte ersätta, officiell krisberedskap</li>
+                <li><strong>Open source:</strong> Transparent, granskningsbar, community-driven</li>
+            </ul>
+        </div>
+        
+        <h3>Tekniska Milestolpar</h3>
+        <ul class="feature-list">
+            <li><strong>P2P Mesh Network:</strong> Fullständig Bluetooth mesh för offline-kommunikation</li>
+            <li><strong>LoRa Integration:</strong> Långdistans-kommunikation utan internet (10+ km)</li>
+            <li><strong>Satellite backup:</strong> Starlink/Iridium för remote områden</li>
+            <li><strong>Voice messages:</strong> Offline voice-to-text för äldre</li>
+            <li><strong>QR-kod sharing:</strong> Dela resurser utan app (pappersutskrift)</li>
+            <li><strong>Multi-municipality:</strong> Expandera till andra kommuner i Sverige</li>
+        </ul>
+        
+        <h3>Integration med Bredare Ekosystem</h3>
+        <ul class="feature-list">
+            <li><strong>MSB koppling:</strong> Integration med Myndigheten för samhällsskydd och beredskap</li>
+            <li><strong>SOS Alarm:</strong> Nödläge-knapp som kontaktar både grannar och SOS</li>
+            <li><strong>1177:</strong> Medicinsk rådgivning och första hjälpen-info</li>
+            <li><strong>Civilförsvarsförbundet:</strong> Utbildningar och övningar</li>
+            <li><strong>Grannsamverkan:</strong> Integration med befintliga grannsamverkansgrupper</li>
+        </ul>
+        
+        <h3>Forsknings- och Utvecklingsområden</h3>
+        <ul class="feature-list">
+            <li><strong>Care Economy:</strong> Stuga som forskningsplattform för lokal ekonomi utan pengar</li>
+            <li><strong>Trust algorithms:</strong> Automatisk detection av pålitlighet baserat på beteende</li>
+            <li><strong>Resource optimization:</strong> AI för att matcha resurser med behov optimalt</li>
+            <li><strong>Behavioral science:</strong> Nudging för ökad deltagande och reciprocitet</li>
+            <li><strong>Network theory:</strong> Förstå hur tillit sprids i sociala nätverk</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>📊 Success Metrics</h2>
+        
+        <h3>Kort Sikt - Stuga Pilot (6 månader)</h3>
+        <ul class="feature-list">
+            <li>100+ aktiva användare i Upplands Väsby</li>
+            <li>80% av användare loggar in minst 1 gång/vecka</li>
+            <li>50+ resurser delades per månad</li>
+            <li>500+ Hearts-transaktioner totalt</li>
+            <li>90% user satisfaction (survey)</li>
+            <li><strong>Målsättning:</strong> Bevisa att grannsamverkan + Hearts fungerar i praktiken</li>
+        </ul>
+        
+        <h3>Medellång Sikt - Expansion (12 månader)</h3>
+        <ul class="feature-list">
+            <li>500+ aktiva användare i Stuga</li>
+            <li>10+ block captains aktiva</li>
+            <li>Minst 1 verklig kris-situation hanterad framgångsrikt</li>
+            <li>Expansion till 2-3 angränsande kommuner</li>
+            <li>Partnership med Upplands Väsby kommun etablerat</li>
+            <li><strong>Vinnova/MSB ansökan beviljad:</strong> Finansiering för CivicBase secured</li>
+        </ul>
+        
+        <h3>Lång Sikt - CivicBase Platform (24+ månader)</h3>
+        <ul class="feature-list">
+            <li><strong>Stuga:</strong> 10,000+ användare nationellt i 20+ kommuner</li>
+            <li><strong>CivicBase:</strong> Platform färdig och säkerhetsauditerad</li>
+            <li><strong>Migration:</strong> Stuga migrerad från Firebase till CivicBase</li>
+            <li><strong>Ecosystem:</strong> 2-3 andra appar byggda på CivicBase (TAK-405, DPOP, etc.)</li>
+            <li><strong>Integration:</strong> MSB och SOS Alarm kopplingar etablerade</li>
+            <li><strong>Forskning:</strong> Vetenskapliga publikationer om care economy-data</li>
+            <li><strong>Hållbarhet:</strong> Self-sustaining community + konsultintäkter</li>
+        </ul>
+        
+        <div style="background: #E8F4F8; padding: 15px; border-radius: 5px; margin-top: 20px;">
+            <strong>Milestolpe-logik:</strong>
+            <ol style="margin-left: 20px;">
+                <li>Stuga pilot bevisar <strong>socialt behov</strong> (grannsamverkan + Hearts)</li>
+                <li>Framgångsrik pilot ger <strong>trovärdighet</strong> för Vinnova/MSB-ansökan</li>
+                <li>Vinnova-finansiering bygger <strong>CivicBase infrastruktur</strong></li>
+                <li>Stuga migreras till CivicBase som <strong>reference implementation</strong></li>
+                <li>CivicBase blir <strong>plattform</strong> för nationell skalning</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="section" style="page-break-before: always;">
+        <h2>💰 Finansiering & Hållbarhet</h2>
+        
+        <h3>Fas 1: Stuga Pilot-utveckling (2026)</h3>
+        <ul class="feature-list">
+            <li><strong>Ideellt arbete:</strong> Utveckling på fritid (Firebase håller kostnaderna låga)</li>
+            <li><strong>Upplands Väsby kommun:</strong> Partnerskap och support (ej ekonomiskt)</li>
+            <li><strong>Små bidrag:</strong> Lokalsamhället, crowdfunding om intresse finns</li>
+        </ul>
+        
+        <h3>Fas 2: Expansion & Validering (2026-2027)</h3>
+        <ul class="feature-list">
+            <li><strong>MSB/MCF bidrag:</strong> Krisberedskapsfokuserad finansiering för expansion</li>
+            <li><strong>Kommunala avtal:</strong> Service-fee från kommuner som adopterar Stuga</li>
+            <li><strong>Civilsamhället:</strong> Röda Korset, Civilförsvarsförbundet partnerships</li>
+        </ul>
+        
+        <h3>Fas 3: CivicBase Platform (2027+)</h3>
+        <ul class="feature-list">
+            <li><strong>Vinnova MCF-ansökan:</strong> 2,000,000 - 2,500,000 SEK för CivicBase-utveckling
+                <ul>
+                    <li>Distributed systems consultant: 800K</li>
+                    <li>Security audit: 400K</li>
+                    <li>Lead developer: 600K</li>
+                    <li>Testing & deployment: 300-400K</li>
+                </ul>
+            </li>
+            <li><strong>Region Stockholm:</strong> TAK-405 integration och transit wellness</li>
+            <li><strong>EU Horizon grants:</strong> Forskningsfinansiering för care economy och digital sovereignty</li>
+        </ul>
+        
+        <h3>Fas 4: Hållbar Drift (2028+)</h3>
+        <ul class="feature-list">
+            <li><strong>Open source foundation:</strong> Community-driven utveckling av CivicBase</li>
+            <li><strong>Municipal service fees:</strong> Support och implementation för andra kommuner</li>
+            <li><strong>Enterprise version:</strong> För företag och organisationer (betald)</li>
+            <li><strong>Consulting:</strong> Implementation och träning för andra regioner</li>
+        </ul>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #E1F5DD; border-radius: 5px;">
+            <strong>Finansieringsstrategi:</strong> Stuga på Firebase bevisar marknaden och sociala behov → Stark grund för Vinnova/MSB-ansökan om CivicBase-finansiering → CivicBase blir plattform för nationell skalning
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #FFF4E6; border-radius: 5px;">
+            <strong>Viktigt:</strong> Grundversionen av både Stuga och CivicBase förblir alltid gratis och open source för individer. Betalmodeller gäller bara för organisationer och avancerade enterprise-features.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🚀 Nästa Steg (Q1 2026)</h2>
+        
+        <div style="background: #FFF4E6; padding: 20px; border-left: 4px solid #FF6B35; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Januari-Mars 2026</h3>
+            <ol style="margin-left: 20px;">
+                <li><strong>Två-enhets testning:</strong> Verifiera all funktionalitet</li>
+                <li><strong>Vinnova-ansökan:</strong> Skicka in före deadline</li>
+                <li><strong>MSB-ansökan:</strong> Ansök om krisberedskapsstöd</li>
+                <li><strong>Municipal partnership:</strong> Formalisera relation med Upplands Väsby</li>
+                <li><strong>Beta-testare:</strong> Rekrytera 10-15 grannar för private beta</li>
+                <li><strong>Dokumentation:</strong> Användarguide och FAQ</li>
+            </ol>
+        </div>
+        
+        <div style="background: #E8F4F8; padding: 20px; border-left: 4px solid #0066CC; margin: 20px 0;">
+            <h3 style="margin-top: 0;">April 2026 - Pilot Launch</h3>
+            <ul style="margin-left: 20px;">
+                <li>Offentlig lansering för Upplands Väsby</li>
+                <li>Informationsmöte med kommunen</li>
+                <li>Press release och lokal mediauppmärksamhet</li>
+                <li>Onboarding sessions för block captains</li>
+                <li>Kontinuerlig support och feedback collection</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>Stuga - Lokal krisberedskap genom grannsamverkan</strong></p>
+        <p style="font-size: 11pt; color: #666; margin-top: 10px;">
+            Del av Global Governance Frameworks-initiativet<br/>
+            Framtida infrastruktur: CivicBase P2P-plattform
+        </p>
+        <p>Utvecklad av Björn Holmström | Upplands Väsby, Sverige</p>
+        <p>Kontakt: bjorn.kenneth.holmstrom@gmail.com | 079 333 94 62</p>
+        <p style="margin-top: 15px; font-size: 9pt;">
+            Dokumentet uppdaterad: 11 januari 2026<br/>
+            Version: 1.1 (inkluderar CivicBase-strategi)
+        </p>
+        <p style="margin-top: 10px; font-size: 9pt; font-style: italic; color: #999;">
+            "Resiliens byggs inte när krisen kommer—den måste vara inbyggd i vardagen."
+        </p>
+    </div>
+</body>
+</html>
