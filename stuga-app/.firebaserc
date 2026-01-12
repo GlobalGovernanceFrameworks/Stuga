@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "stuga-pilot"
+    "default": "stuga-vasby-pilot",
+    "dev": "stuga-dev",
+    "pilot": "stuga-vasby-pilot"
   }
 }

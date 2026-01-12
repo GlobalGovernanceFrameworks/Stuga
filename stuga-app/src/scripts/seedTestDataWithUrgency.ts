@@ -127,17 +127,19 @@ async function seedTestData() {
     console.log(`✅ Created user: ${user.name}`);
   }
 
-  const currentUID = '2Dx0SsdQSxTpJarSBITT2WHXRF02'; // From console logs
+  const currentUID = 'DcrMYXCmGTX9c5eATMnbG99IUUZ2'; // From console logs
 
   // Create a test user for your anonymous auth
   await db.collection('users').doc(currentUID).set({
     user_id: currentUID,
-    name: 'Testanvändare (Du)',
+    name: 'Björn Kenneth Holmström',
+    display_name: 'Björn H',
+    phone_number: '+46793339462',
     bankid_verified: false,
     created_at: Date.now(),
     location: {
-      lat: 59.5186,
-      lon: 17.9448,
+      lat: 59.517,
+      lon: 17.915,
       accuracy: 50,
       updated_at: Date.now()
     },

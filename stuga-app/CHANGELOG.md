@@ -19,6 +19,13 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 
 ## [1.1.1] - 2026-01-11
 
+### Infrastructure
+- **Ny pilotdatabas**: Migrerat till `stuga-vasby-pilot` med optimal regionplacering
+  - Firestore: europe-north2 (Stockholm)
+  - Functions: europe-north1 (Finland)
+  - ~3-4x förbättrad latency för Upplands Väsby-piloten
+  - Seedskript uppdaterade för ny databas
+
 🐛 **Buggfix:** Korrigerat distance-visning och user data-flöde mellan screens.
 
 ### Buggfixar

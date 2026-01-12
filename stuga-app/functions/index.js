@@ -1,3 +1,10 @@
+const { setGlobalOptions } = require('firebase-functions/v2');
+
+setGlobalOptions({
+  region: 'europe-north1', // Closest Functions region to Stockholm
+  maxInstances: 10
+});
+
 const { onDocumentUpdated, onDocumentCreated } = require('firebase-functions/v2/firestore');
 const admin = require('firebase-admin');
 

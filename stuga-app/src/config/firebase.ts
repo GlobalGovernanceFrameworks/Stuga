@@ -7,14 +7,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Production config (stuga-pilot)
 const PROD_CONFIG = {
-  apiKey: "AIzaSyDpP9gVi2E10e15uPJFqEcK18IJn9ucrsw",
-  authDomain: "stuga-pilot.firebaseapp.com",
-  projectId: "stuga-pilot",
-  storageBucket: "stuga-pilot.firebasestorage.app",
-  messagingSenderId: "18054475774",
-  appId: "1:18054475774:web:d97dfafa9721e41180daaf",
-  measurementId: "G-429EXJ79LQ"
+  apiKey: "AIzaSyD3AsNv8b8CYgz_WZVKvAz15EwtpUasoec",
+  authDomain: "stuga-vasby-pilot.firebaseapp.com",
+  projectId: "stuga-vasby-pilot",
+  storageBucket: "stuga-vasby-pilot.firebasestorage.app",
+  messagingSenderId: "442670929332",
+  appId: "1:442670929332:web:115fbcf5489ba489cecee1",
+  measurementId: "G-L9VJCKBLC1"
 };
+
 
 // Development config (stuga-dev)
 const DEV_CONFIG = {
@@ -56,9 +57,8 @@ export const auth = initializeAuth(app, {
 });
 
 // Initialize Functions
-// europe-north1 (Finland) for stuga-dev (closest to Stockholm)
-// europe-west1 (Belgium) for stuga-pilot (legacy)
-const FUNCTIONS_REGION = USE_DEV ? 'europe-north1' : 'europe-west1';
+// europe-north1 (Finland) for both stuga-vasby-pilot and stuga-dev  (closest to Stockholm)
+const FUNCTIONS_REGION = 'europe-north1';
 export const functions = getFunctions(app, FUNCTIONS_REGION);
 
 console.log(`⚡ Cloud Functions Region: ${FUNCTIONS_REGION}`);
