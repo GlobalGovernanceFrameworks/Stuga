@@ -1,22 +1,23 @@
+// src/screens/ProfileScreen.tsx
 import React, { useState, useEffect } from 'react';
 import { Alert, View, ScrollView, StyleSheet } from 'react-native';
-import { Text, TextInput, Card, Checkbox, Button, Divider, Switch } from 'react-native-paper';
+import { Text, TextInput, Card, Checkbox, Button, Divider, Switch, ActivityIndicator } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { auth, db } from '../config/firebase';
 import { doc, getDoc, collection, query, where, updateDoc, getDocs, orderBy, limit } from 'firebase/firestore';
 import type { User, HeartsTransaction } from '../types';
+import ReputationCard from '../components/ReputationCard';
+import { getReputation, getReputationTips, triggerReputationCalculation } from '../lib/reputationHelpers';
+import type { Reputation } from '../lib/reputationHelpers';
 
 export default function ProfileScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const [user, setUser] = useState<User | null>(null);
-  const [stats, setStats] = useState({
-    totalSent: 0,
-    totalReceived: 0,
-    resourcesPosted: 0,
-    neighborsHelped: 0
-  });
+  const [reputation, setReputation] = useState<Reputation | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<HeartsTransaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingReputation, setLoadingReputation] = useState(true);
+  const [refreshingReputation, setRefreshingReputation] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDisplayName, setEditDisplayName] = useState('');
@@ -45,17 +46,45 @@ export default function ProfileScreen({ navigation }: any) {
         setEditDisplayName(userData.display_name || '');
         setEditPhone(userData.phone_number || '');
       }
-
-      // Load stats
-      await loadStats(currentUser.uid);
       
       // Load recent transactions
       await loadRecentTransactions(currentUser.uid);
+
+      // Load reputation
+      await loadReputationData(currentUser.uid);
 
       setLoading(false);
     } catch (error) {
       console.error('Error loading profile:', error);
       setLoading(false);
+    }
+  }
+
+  async function loadReputationData(userId: string) {
+    setLoadingReputation(true);
+    try {
+      const rep = await getReputation(userId);
+      setReputation(rep);
+    } catch (error) {
+      console.error('Error loading reputation:', error);
+    } finally {
+      setLoadingReputation(false);
+    }
+  }
+
+  async function handleRefreshReputation() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+    
+    setRefreshingReputation(true);
+    try {
+      const rep = await triggerReputationCalculation(currentUser.uid);
+      setReputation(rep);
+    } catch (error) {
+      console.error('Error refreshing reputation:', error);
+      alert('Kunde inte uppdatera reputation');
+    } finally {
+      setRefreshingReputation(false);
     }
   }
 
@@ -120,51 +149,6 @@ export default function ProfileScreen({ navigation }: any) {
     setEditMode(false);
   }
 
-  async function loadStats(userId: string) {
-    try {
-      // Count Hearts sent
-      const sentQuery = query(
-        collection(db, 'hearts_transactions'),
-        where('from_user', '==', userId)
-      );
-      const sentSnapshot = await getDocs(sentQuery);
-      const totalSent = sentSnapshot.docs.reduce((sum, doc) => {
-        return sum + (doc.data().amount || 0);
-      }, 0);
-
-      // Count Hearts received
-      const receivedQuery = query(
-        collection(db, 'hearts_transactions'),
-        where('to_user', '==', userId)
-      );
-      const receivedSnapshot = await getDocs(receivedQuery);
-      const totalReceived = receivedSnapshot.docs.reduce((sum, doc) => {
-        return sum + (doc.data().amount || 0);
-      }, 0);
-
-      // Count unique neighbors helped (received Hearts from)
-      const uniqueNeighbors = new Set(
-        receivedSnapshot.docs.map(doc => doc.data().from_user)
-      );
-
-      // Count resources posted
-      const resourcesQuery = query(
-        collection(db, 'resources'),
-        where('user_id', '==', userId)
-      );
-      const resourcesSnapshot = await getDocs(resourcesQuery);
-
-      setStats({
-        totalSent,
-        totalReceived,
-        resourcesPosted: resourcesSnapshot.size,
-        neighborsHelped: uniqueNeighbors.size
-      });
-    } catch (error) {
-      console.error('Error loading stats:', error);
-    }
-  }
-
   async function loadRecentTransactions(userId: string) {
     try {
       // Get recent sent transactions
@@ -220,11 +204,14 @@ export default function ProfileScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text>Laddar profil...</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2D5016" />
+        <Text style={styles.loadingText}>Laddar profil...</Text>
       </View>
     );
   }
+
+  const tips = reputation ? getReputationTips(reputation) : [];
 
   return (
     <ScrollView 
@@ -261,79 +248,62 @@ export default function ProfileScreen({ navigation }: any) {
                   onChangeText={setEditDisplayName}
                   mode="outlined"
                   style={styles.editInput}
-                  placeholder={user?.display_name || "Granne #XXXX"}
+                  placeholder="Anna S"
                   disabled={useAutoGenerated}
                   theme={{ colors: { background: '#fff' } }}
                 />
-                
-                {/* Checkbox för auto-genererat */}
                 <View style={styles.checkboxRow}>
-                  <View style={styles.checkboxWrapper}>
-                    <Checkbox
-                      status={useAutoGenerated ? 'checked' : 'unchecked'}
-                      onPress={() => {
-                        const newValue = !useAutoGenerated;
-                        setUseAutoGenerated(newValue);
-                        if (newValue) {
-                          setEditDisplayName(''); // Clear when checking
-                        }
-                      }}
-                      color="#FFF" // White checkmark
-                      uncheckedColor="#FFF" // White border when unchecked
-                    />
-                  </View>
+                  <Checkbox
+                    status={useAutoGenerated ? 'checked' : 'unchecked'}
+                    onPress={() => setUseAutoGenerated(!useAutoGenerated)}
+                    color="#FFF"
+                    uncheckedColor="#E0E0E0"
+                  />
                   <Text style={styles.checkboxLabel}>
-                    Använd auto-genererat namn (Granne #XXXX)
+                    Generera automatiskt (t.ex. "Granne #1234")
                   </Text>
                 </View>
-                
                 <Text style={styles.helperText}>
-                  {useAutoGenerated 
-                    ? 'Ett slumpmässigt namn kommer genereras vid sparning'
-                    : user?.display_name 
-                      ? `Lämna tomt för att behålla "${user.display_name}"`
-                      : 'Lämna tomt för att behålla nuvarande namn'
-                  }
+                  Detta namn visas för alla grannar innan kontakt
                 </Text>
               </View>
-              
+
               {/* Telefonnummer */}
               <View style={styles.fieldContainer}>
-                <Text style={styles.fieldLabel}>Telefonnummer</Text>
+                <Text style={styles.fieldLabel}>Telefonnummer (valfritt)</Text>
                 <TextInput
                   value={editPhone}
                   onChangeText={setEditPhone}
                   mode="outlined"
                   style={styles.editInput}
                   keyboardType="phone-pad"
-                  placeholder="070-555 12 34"
+                  placeholder="+46701234567"
                   theme={{ colors: { background: '#fff' } }}
                 />
                 <Text style={styles.helperText}>
-                  Format: 070-123 45 67 eller +46701234567
+                  Delas bara efter godkänd kontaktförfrågan
                 </Text>
               </View>
-              
-              {/* Buttons */}
+
+              {/* Edit Buttons */}
               <View style={styles.editButtons}>
                 <Button
                   mode="outlined"
                   onPress={handleCancelEdit}
-                  style={styles.editButton}
                   disabled={saving}
+                  style={styles.editButton}
                   textColor="#FFF"
-                  buttonColor="transparent"
                 >
                   Avbryt
                 </Button>
                 <Button
                   mode="contained"
                   onPress={handleSaveProfile}
-                  style={styles.editButton}
-                  buttonColor="#6BCF7F"
-                  textColor="#2D5016"
                   loading={saving}
                   disabled={saving}
+                  style={styles.editButton}
+                  buttonColor="#FFF"
+                  textColor="#2D5016"
                 >
                   Spara
                 </Button>
@@ -354,72 +324,17 @@ export default function ProfileScreen({ navigation }: any) {
                     month: 'long'
                   }) : 'okänt'}
               </Text>
-              
               <Button
-                mode="outlined"
+                mode="text"
                 onPress={() => setEditMode(true)}
-                icon="pencil"
                 style={{ marginTop: 12 }}
                 textColor="#FFF"
-                buttonColor="transparent"
+                icon="pencil"
               >
                 Redigera profil
               </Button>
             </>
           )}
-        </Card.Content>
-      </Card>
-
-      {/* Contact Requests */}
-      <Card style={styles.card}>
-        <Card.Content>
-          <Button
-            mode="outlined"
-            onPress={() => navigation.navigate('ContactRequests')}
-            icon="account-multiple"
-            style={{ marginBottom: 12 }}
-          >
-            Kontaktförfrågningar
-          </Button>
-        </Card.Content>
-      </Card>
-
-      {/* Integrity Settings */}
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text style={styles.sectionTitle}>Integritetsinställningar</Text>
-          
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Visa exakt avstånd</Text>
-              <Text style={styles.settingDescription}>
-                Tillåt godkända kontakter att se exakt avstånd istället för ungefärligt
-              </Text>
-            </View>
-            <Switch
-              value={exactDistance}
-              onValueChange={async (value) => {
-                setExactDistance(value);
-                const currentUser = auth.currentUser;
-                if (currentUser) {
-                  await updateDoc(doc(db, 'users', currentUser.uid), {
-                    'privacy_settings.exact_distance': value
-                  });
-                }
-              }}
-              color="#2D5016"
-            />
-          </View>
-          <Divider style={{ marginVertical: 16 }} />
-          
-          <Button
-            mode="outlined"
-            onPress={() => navigation.navigate('BlockedUsers')}
-            icon="account-cancel"
-            style={{ marginTop: 8 }}
-          >
-            Blockerade användare
-          </Button>
         </Card.Content>
       </Card>
 
@@ -433,44 +348,72 @@ export default function ProfileScreen({ navigation }: any) {
         </Card.Content>
       </Card>
 
-      {/* Stats Grid */}
-      <View style={styles.statsGrid}>
-        <Card style={styles.statCard}>
-          <Card.Content>
-            <Text style={styles.statNumber}>{stats.totalSent}</Text>
-            <Text style={styles.statLabel}>Hearts skickade</Text>
+      {/* Reputation - This shows detailed metrics, replaces Stats Grid */}
+      {loadingReputation ? (
+        <Card style={styles.card}>
+          <Card.Content style={styles.loadingContent}>
+            <ActivityIndicator size="small" color="#2D5016" />
+            <Text style={styles.loadingText}>Laddar reputation...</Text>
           </Card.Content>
         </Card>
-
-        <Card style={styles.statCard}>
+      ) : reputation ? (
+        <>
+          <ReputationCard reputation={reputation} showDetails={true} />
+          
+          {/* Improvement Tips */}
+          {tips.length > 0 && (
+            <Card style={styles.tipsCard}>
+              <Card.Content>
+                <Text style={styles.tipsTitle}>💡 Så förbättrar du din reputation</Text>
+                {tips.map((tip, index) => (
+                  <View key={index} style={styles.tipRow}>
+                    <Text style={styles.tipBullet}>•</Text>
+                    <Text style={styles.tipText}>{tip}</Text>
+                  </View>
+                ))}
+              </Card.Content>
+            </Card>
+          )}
+          
+          {/* Refresh Button */}
+          <Button
+            mode="outlined"
+            onPress={handleRefreshReputation}
+            loading={refreshingReputation}
+            disabled={refreshingReputation}
+            style={styles.refreshButton}
+            icon="refresh"
+          >
+            Uppdatera reputation
+          </Button>
+        </>
+      ) : (
+        <Card style={styles.card}>
           <Card.Content>
-            <Text style={styles.statNumber}>{stats.totalReceived}</Text>
-            <Text style={styles.statLabel}>Hearts mottagna</Text>
+            <Text style={styles.noReputation}>
+              Ingen reputation beräknad än. Börja hjälpa grannar för att bygga din reputation!
+            </Text>
+            <Button
+              mode="contained"
+              onPress={handleRefreshReputation}
+              loading={refreshingReputation}
+              disabled={refreshingReputation}
+              style={styles.calculateButton}
+              buttonColor="#2D5016"
+            >
+              Beräkna min reputation
+            </Button>
           </Card.Content>
         </Card>
+      )}
 
-        <Card style={styles.statCard}>
-          <Card.Content>
-            <Text style={styles.statNumber}>{stats.resourcesPosted}</Text>
-            <Text style={styles.statLabel}>Resurser postade</Text>
-          </Card.Content>
-        </Card>
-
-        <Card style={styles.statCard}>
-          <Card.Content>
-            <Text style={styles.statNumber}>{stats.neighborsHelped}</Text>
-            <Text style={styles.statLabel}>Grannar hjälpta</Text>
-          </Card.Content>
-        </Card>
-      </View>
-
-      {/* Recent Activity */}
+      {/* Recent Activity - Unique value, keep this! */}
       <Card style={styles.card}>
         <Card.Content>
           <Text style={styles.sectionTitle}>Senaste aktivitet</Text>
           
           {recentTransactions.length === 0 ? (
-            <Text style={styles.emptyText}>Ingen aktivitet ännu</Text>
+            <Text style={styles.emptyText}>Ingen aktivitet än</Text>
           ) : (
             recentTransactions.map((tx, index) => {
               const isSent = tx.from_user === auth.currentUser?.uid;
@@ -500,6 +443,40 @@ export default function ProfileScreen({ navigation }: any) {
         </Card.Content>
       </Card>
 
+      {/* Privacy Settings */}
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text style={styles.sectionTitle}>Sekretessinställningar</Text>
+          
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Visa exakt avstånd</Text>
+              <Text style={styles.settingDescription}>
+                Om av: visar "Nära", "Inom 500m" etc. Om på: visar "247m"
+              </Text>
+            </View>
+            <Switch
+              value={exactDistance}
+              onValueChange={async (value) => {
+                setExactDistance(value);
+                try {
+                  const currentUser = auth.currentUser;
+                  if (currentUser) {
+                    await updateDoc(doc(db, 'users', currentUser.uid), {
+                      'privacy_settings.exact_distance': value
+                    });
+                  }
+                } catch (error) {
+                  console.error('Error updating privacy settings:', error);
+                  setExactDistance(!value); // Revert on error
+                }
+              }}
+              color="#2D5016"
+            />
+          </View>
+        </Card.Content>
+      </Card>
+
       {/* Actions */}
       <Card style={styles.card}>
         <Card.Content>
@@ -522,33 +499,44 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F3F0',
     padding: 16
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F3F0'
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666'
+  },
+  loadingContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 12
+  },
   headerCard: {
     marginBottom: 16,
-    backgroundColor: '#2D5016' // Dark green background
+    backgroundColor: '#2D5016'
   },
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFF', // White text
+    color: '#FFF',
     marginBottom: 4
   },
   displayName: {
     fontSize: 14,
-    color: '#E0E0E0', // Light gray
+    color: '#E0E0E0',
     marginTop: 4,
     marginBottom: 4
   },
   joinDate: {
     fontSize: 14,
-    color: '#E0E0E0', // Light gray
+    color: '#E0E0E0',
     opacity: 0.8
-  },
-  editLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#2D5016',
-    marginTop: 12,
-    marginBottom: 4
   },
   fieldContainer: {
     marginBottom: 20
@@ -556,7 +544,7 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFF', // White text on dark background
+    color: '#FFF',
     marginBottom: 8
   },
   editInput: {
@@ -572,7 +560,7 @@ const styles = StyleSheet.create({
   },
   helperText: {
     fontSize: 12,
-    color: '#E0E0E0', // Light gray on dark background
+    color: '#E0E0E0',
     marginTop: 4,
     fontStyle: 'italic',
     lineHeight: 16
@@ -582,14 +570,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 4
-  },
-  checkboxWrapper: {
-    backgroundColor: '#2D5016', // Match the header background
-    borderRadius: 0,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center'
   },
   checkboxLabel: {
     fontSize: 14,
@@ -613,28 +593,45 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 8
   },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 16
+  noReputation: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 20
   },
-  statCard: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: '#FFF'
+  calculateButton: {
+    marginTop: 8
   },
-  statNumber: {
-    fontSize: 28,
+  tipsCard: {
+    marginBottom: 16,
+    backgroundColor: '#E8F5E9'
+  },
+  tipsTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#2D5016',
-    textAlign: 'center'
+    marginBottom: 12
   },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 4
+  tipRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    paddingRight: 8
+  },
+  tipBullet: {
+    fontSize: 16,
+    color: '#2D5016',
+    marginRight: 8,
+    marginTop: 2
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20
+  },
+  refreshButton: {
+    marginBottom: 16
   },
   emptyText: {
     color: '#999',

@@ -14,8 +14,18 @@ service cloud.firestore {
     // Users: All authenticated can read, only owner can write
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow create: if isOwner(userId);
-      allow update, delete: if isOwner(userId);
+      
+      // Create: Owner can create their profile, but NOT with reputation field
+      allow create: if isOwner(userId) &&
+                       !request.resource.data.keys().hasAny(['reputation']);
+      
+      // Update: Owner can update their profile, but NOT the reputation field
+      allow update: if isOwner(userId) &&
+                       !request.resource.data.diff(resource.data).affectedKeys()
+                         .hasAny(['reputation']);
+      
+      // Delete: Owner can delete their profile
+      allow delete: if isOwner(userId);
     }
     
     // Resources: All can read, only owner can modify

@@ -1,3 +1,4 @@
+// src/screens/SendHeartsScreen.tsx
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Text, Card, Button, TextInput, SegmentedButtons, Snackbar } from 'react-native-paper';

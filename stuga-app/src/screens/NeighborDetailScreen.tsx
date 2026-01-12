@@ -1,3 +1,4 @@
+// src/screens/NeighborDetailScreen.tsx
 import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Linking, Alert, View, ScrollView, StyleSheet } from 'react-native';
@@ -15,6 +16,9 @@ import { SkeletonCard } from '../components/SkeletonCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { UrgencyBadge } from '../components/UrgencyBadge';
 import { isExpired } from '../lib/expiryHelpers';
+import ReputationCard from '../components/ReputationCard';
+import { getReputation } from '../lib/reputationHelpers';
+import type { Reputation } from '../lib/reputationHelpers';
 
 export default function NeighborDetailScreen({ route, navigation }: any) {
   const { neighbor } = route.params;
@@ -23,7 +27,9 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
   const [pendingRequestId, setPendingRequestId] = useState<string | null>(null);
   const [checkingContact, setCheckingContact] = useState(true);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [reputation, setReputation] = useState<Reputation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingReputation, setLoadingReputation] = useState(true);
   const [distance, setDistance] = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const insets = useSafeAreaInsets();
@@ -211,6 +217,9 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
   }
 
   async function loadNeighborResources() {
+    setLoading(true);
+    setLoadingReputation(true);
+    
     try {
       const q = query(
         collection(db, 'resources'),
@@ -226,6 +235,16 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
       console.error('Error loading resources:', error);
     } finally {
       setLoading(false);
+    }
+
+    // Load reputation
+    try {
+      const rep = await getReputation(neighbor.user_id);
+      setReputation(rep);
+    } catch (error) {
+      console.error('Error loading reputation:', error);
+    } finally {
+      setLoadingReputation(false);
     }
   }
 
@@ -470,6 +489,26 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
         </Card.Content>
       </Card>
 
+      {/* Reputation */}
+      {loadingReputation ? (
+        <Card style={styles.card}>
+          <Card.Content style={styles.loadingContent}>
+            <ActivityIndicator size="small" color="#2D5016" />
+            <Text style={styles.loadingText}>Laddar reputation...</Text>
+          </Card.Content>
+        </Card>
+      ) : reputation ? (
+        <ReputationCard reputation={reputation} showDetails={true} />
+      ) : (
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text style={styles.noReputation}>
+              Ingen reputation beräknad än för denna granne.
+            </Text>
+          </Card.Content>
+        </Card>
+      )}
+
       {loading ? (
         <>
           <Text style={styles.sectionTitle}>Laddar resurser...</Text>
@@ -594,6 +633,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 4,
     color: '#666'
+  },
+  loadingContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 12
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#666'
+  },
+  noReputation: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    paddingVertical: 12
   },
   sectionTitle: {
     fontSize: 18,

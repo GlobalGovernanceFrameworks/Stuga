@@ -23,6 +23,7 @@ export interface User {
     show_hearts: boolean;
   };
   blocked_users?: string[];
+  reputation?: Reputation;      // Calculated reputation data
 }
 
 // Resource type
@@ -79,3 +80,23 @@ export interface ContactRequest {
   responded_at?: number;
   message?: string; // Optional message with request
 }
+
+// Reputation type
+export interface Reputation {
+  score: number;                // 0-100 overall reputation score
+  level: 'bronze' | 'silver' | 'gold' | 'platinum';
+  
+  metrics: {
+    hearts_given: number;       // Total Hearts sent to others
+    hearts_received: number;    // Total Hearts received from others
+    resources_shared: number;   // Total resources posted (offers + needs)
+    response_time_avg: number;  // Average hours to respond to contact requests
+    completion_rate: number;    // % of resources marked as completed (0-1)
+    active_days: number;        // Number of days with activity
+  };
+  
+  badges: string[];             // Earned badges: "generous_giver", "quick_responder", etc.
+  calculated_at: number;        // Timestamp of last calculation
+  calculated_by: 'server' | 'client';
+}
+

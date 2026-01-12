@@ -1,3 +1,4 @@
+// src/screens/AddResourceScreen.tsx
 import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, Button, SegmentedButtons, Card, Snackbar, Switch } from 'react-native-paper';

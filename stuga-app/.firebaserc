@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "stuga-pilot"
-  }
+    "default": "stuga-pilot",
+    "development": "stuga-dev"
+  },
+  "targets": {},
+  "etags": {}
 }

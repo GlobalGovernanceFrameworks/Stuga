@@ -1,3 +1,4 @@
+// src/screens/HomeScreen.tsx
 import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -6,6 +7,8 @@ import { Button, Text, Card, ActivityIndicator, FAB, Snackbar } from 'react-nati
 import { doc, updateDoc, collection, getDocs, setDoc } from 'firebase/firestore';
 import { getBlockedUsers } from '../lib/blockHelpers';
 import { requestLocationPermission, getCurrentLocation, roundLocationForPrivacy, calculateDistance, formatDistance, getDirection, formatDistanceFuzzy } from '../lib/locationHelpers';
+import { getReputation, getReputationLevelIcon } from '../lib/reputationHelpers';
+import type { Reputation } from '../lib/reputationHelpers';
 import { db, auth } from '../config/firebase';
 import { User } from '../types';
 import { SkeletonCard } from '../components/SkeletonCard';
@@ -369,6 +372,15 @@ export default function HomeScreen({ navigation }: any) {
                         <Text style={styles.distance}>{formatDistanceFuzzy(item.distance)}</Text>
                       )}
                     </View>
+
+                    {item.reputation && (
+                      <View style={styles.reputationRow}>
+                        <Text style={styles.reputationText}>
+                          {getReputationLevelIcon(item.reputation.level)} {item.reputation.score}/100
+                        </Text>
+                      </View>
+                    )}
+
                     <Text style={styles.hearts}>🔥 {item.hearts_balance} Hearts</Text>
                   </Card.Content>
                 </Card>
@@ -624,5 +636,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#999',
     fontStyle: 'italic'
+  },
+  reputationRow: {
+    marginVertical: 4
+  },
+  reputationText: {
+    fontSize: 12,
+    color: '#666'
   }
 });

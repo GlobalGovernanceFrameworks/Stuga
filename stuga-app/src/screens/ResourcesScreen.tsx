@@ -1,3 +1,4 @@
+// src/screens/ResourcesScreen.tsx
 import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { View, ScrollView, StyleSheet, FlatList } from 'react-native';

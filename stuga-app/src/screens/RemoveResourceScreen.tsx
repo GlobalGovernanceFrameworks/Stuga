@@ -1,3 +1,4 @@
+// src/screens/RemoveResourceScreen.tsx
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 import { Text, Card, Button, ActivityIndicator, Snackbar } from 'react-native-paper';
