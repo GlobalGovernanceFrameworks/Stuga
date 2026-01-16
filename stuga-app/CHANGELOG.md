@@ -23,6 +23,7 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Email/lösenord-autentisering ersätter anonym auth
 - LoginScreen med möjlighet att skapa konto eller logga in
 - Persistent inloggning (användare förblir inloggade mellan sessioner)
+- Återställning av lösenord via email (Firebase-hanterat)
 
 ### Buggfixar
 - Felaktig notifikationsmetod i useNotifications.ts (.remove() istället för removeNotificationSubscription())

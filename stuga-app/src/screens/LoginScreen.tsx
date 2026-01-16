@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { Text, TextInput, Button, Card } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
 export default function LoginScreen({ onLoginComplete }: { onLoginComplete: () => void }) {
@@ -64,6 +64,39 @@ export default function LoginScreen({ onLoginComplete }: { onLoginComplete: () =
     }
   }
 
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      Alert.alert('Ange e-post', 'Fyll i din e-postadress först.');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Ogiltigt format', 'Ange en giltig e-postadress först.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert(
+        'E-post skickad',
+        'Kontrollera din inkorg för instruktioner om att återställa lösenordet.'
+      );
+    } catch (error: any) {
+      console.error('Password reset error:', error);
+      
+      if (error.code === 'auth/user-not-found') {
+        Alert.alert('Användare saknas', 'Ingen användare med den e-postadressen.');
+      } else {
+        Alert.alert('Fel', 'Kunde inte skicka återställnings-e-post. Försök igen.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F3F0' }}>
       <KeyboardAvoidingView 
@@ -109,6 +142,18 @@ export default function LoginScreen({ onLoginComplete }: { onLoginComplete: () =
                 secureTextEntry
                 autoComplete={isNewAccount ? "password-new" : "password"}
               />
+
+              {!isNewAccount && (
+                <Button
+                  mode="text"
+                  onPress={handleForgotPassword}
+                  disabled={loading}
+                  style={styles.forgotButton}
+                  compact
+                >
+                  Glömt lösenord?
+                </Button>
+              )}
 
               <Button
                 mode="contained"
@@ -196,6 +241,10 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: '#fff'
+  },
+  forgotButton: {
+    alignSelf: 'flex-end',
+    marginTop: 8
   },
   loginButton: {
     marginTop: 24,
