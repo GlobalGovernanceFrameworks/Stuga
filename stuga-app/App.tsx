@@ -6,22 +6,50 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
 import RegistrationScreen from './src/screens/RegistrationScreen';
+import LoginScreen from './src/screens/LoginScreen';
 import { initDatabase } from './src/lib/database';
-import { signInAnonymously } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from './src/config/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 export default function App() {
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const [isRegistered, setIsRegistered] = useState(false);
 
   useEffect(() => {
+    // TEMPORARY: Force logout to test new login flow
     initDatabase();
-    checkRegistrationStatus();
+
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      console.log('Auth state changed:', currentUser?.uid || 'not logged in');
+      
+      if (currentUser) {
+        // User is logged in - check if profile is complete
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        
+        if (userDoc.exists() && userDoc.data().registration_completed) {
+          console.log('User profile complete');
+          setIsRegistered(true);
+        } else {
+          console.log('User needs to complete registration');
+          setIsRegistered(false);
+        }
+        setUser(currentUser);
+      } else {
+        // No user logged in
+        console.log('No user logged in');
+        setUser(null);
+        setIsRegistered(false);
+      }
+      
+      setLoading(false);
+    });
 
     // Handle notification taps when app is backgrounded/closed
-    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+    const notificationSubscription = Notifications.addNotificationResponseReceivedListener(response => {
       const data = response.notification.request.content.data;
       
       if (data.type === 'urgent_resource' && navigationRef.current) {
@@ -29,32 +57,15 @@ export default function App() {
       }
     });
 
-    return () => subscription.remove();
+    return () => {
+      unsubscribe();
+      notificationSubscription.remove();
+    };
   }, []);
 
-  async function checkRegistrationStatus() {
-    try {
-      // Sign in anonymously
-      const userCredential = await signInAnonymously(auth);
-      const userId = userCredential.user.uid;
-      
-      console.log('🔐 Signed in:', userId);
-
-      // Check if user document exists and has registration_completed
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      
-      if (userDoc.exists() && userDoc.data().registration_completed) {
-        console.log('✅ User already registered');
-        setIsRegistered(true);
-      } else {
-        console.log('ℹ️ New user, showing registration');
-        setIsRegistered(false);
-      }
-    } catch (error) {
-      console.error('Auth error:', error);
-    } finally {
-      setLoading(false);
-    }
+  function handleLoginComplete() {
+    // Auth state listener will handle the rest
+    console.log('Login complete, checking profile...');
   }
 
   function handleRegistrationComplete() {
@@ -71,10 +82,12 @@ export default function App() {
 
   return (
     <PaperProvider>
-      {isRegistered ? (
-        <AppNavigator navigationRef={navigationRef} />
-      ) : (
+      {!user ? (
+        <LoginScreen onLoginComplete={handleLoginComplete} />
+      ) : !isRegistered ? (
         <RegistrationScreen onRegistrationComplete={handleRegistrationComplete} />
+      ) : (
+        <AppNavigator navigationRef={navigationRef} />
       )}
     </PaperProvider>
   );

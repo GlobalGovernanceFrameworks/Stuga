@@ -17,6 +17,17 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Förbättrad platshistorik och tracking
 - BankID-integration för produktionsanvändare
 
+## [1.1.2] - 2025-01-16
+
+### Tillagt
+- Email/lösenord-autentisering ersätter anonym auth
+- LoginScreen med möjlighet att skapa konto eller logga in
+- Persistent inloggning (användare förblir inloggade mellan sessioner)
+
+### Buggfixar
+- Felaktig notifikationsmetod i useNotifications.ts (.remove() istället för removeNotificationSubscription())
+- Dubbelregistrering av användare vid varje appstart
+
 ## [1.1.1] - 2026-01-11
 
 ### Infrastructure
