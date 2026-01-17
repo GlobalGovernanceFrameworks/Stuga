@@ -111,7 +111,7 @@ export default function RegistrationScreen({ onRegistrationComplete }: { onRegis
           accuracy: Math.round(location.accuracy),
           updated_at: Date.now()
         },
-        hearts_balance: 100,
+        hearts_balance: 250,
         availability_status: 'available',
         registration_completed: true,
         privacy_settings: { 

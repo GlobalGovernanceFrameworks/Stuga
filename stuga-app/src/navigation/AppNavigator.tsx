@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { IconButton } from 'react-native-paper';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNetworkState } from '../hooks/useNetworkState';
 import HomeScreen from '../screens/HomeScreen';
@@ -16,17 +17,25 @@ import ResourcesScreen from '../screens/ResourcesScreen';
 import ContactRequestsScreen from '../screens/ContactRequestsScreen';
 import BlockedUsersScreen from '../screens/BlockedUsersScreen';
 import BlockCaptainGuideScreen from '../screens/BlockCaptainGuideScreen';
+import HelpScreen from '../screens/HelpScreen';
 
 const Stack = createNativeStackNavigator();
 
 function HeaderRight() {
   const { isOffline } = useNetworkState();
-  
-  if (!isOffline) return null;
+  const navigation = useNavigation();
   
   return (
     <View style={styles.headerRight}>
-      <Text style={styles.offlineIndicator}>📡 Offline</Text>
+      {isOffline && (
+        <Text style={styles.offlineIndicator}>📡 Offline</Text>
+      )}
+      <IconButton
+        icon="help-circle-outline"
+        iconColor="#fff"
+        size={24}
+        onPress={() => navigation.navigate('Help' as never)}
+      />
     </View>
   );
 }
@@ -107,6 +116,11 @@ export default function AppNavigator({ navigationRef }: { navigationRef?: any })
           component={BlockCaptainGuideScreen}
           options={{ title: 'Kvartersvärd - Guide' }}
         />
+        <Stack.Screen 
+          name="Help" 
+          component={HelpScreen}
+          options={{ title: 'Hjälp & Guide' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -115,6 +129,12 @@ export default function AppNavigator({ navigationRef }: { navigationRef?: any })
 const styles = StyleSheet.create({
   headerRight: {
     marginRight: 12
+  },
+  headerRight: {
+    marginRight: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8
   },
   offlineIndicator: {
     color: '#FFA500',

@@ -18,6 +18,11 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
+// Helper for expiry timestamps
+function hoursFromNow(hours: number): number {
+  return Date.now() + (hours * 60 * 60 * 1000);
+}
+
 async function seedTestData() {
   console.log('🌱 Seeding test data...\n');
 
@@ -26,8 +31,14 @@ async function seedTestData() {
     {
       user_id: 'test-anna-123',
       name: 'Anna Svensson',
+      display_name: 'Anna S',
       phone_number: '+46701234567',
       registration_completed: true,
+      privacy_settings: {
+        exact_distance: false,
+        show_hearts: true
+      },
+      blocked_users: [],
       bankid_verified: true,
       created_at: Date.now(),
       location: {
@@ -36,15 +47,22 @@ async function seedTestData() {
         accuracy: 50,
         updated_at: Date.now()
       },
-      hearts_balance: 245,
+      hearts_balance: 320,
       availability_status: 'available',
-      bluetooth_id: 'bt-anna-123'
+      bluetooth_id: 'bt-anna-123',
+      is_block_captain: false
     },
     {
       user_id: 'test-sven-456',
       name: 'Sven Andersson',
+      display_name: 'Sven från Väsby',
       phone_number: '+46702345678',
       registration_completed: true,
+      privacy_settings: {
+        exact_distance: false,
+        show_hearts: true
+      },
+      blocked_users: [],
       bankid_verified: true,
       created_at: Date.now(),
       location: {
@@ -53,15 +71,22 @@ async function seedTestData() {
         accuracy: 50,
         updated_at: Date.now()
       },
-      hearts_balance: 180,
+      hearts_balance: 240,
       availability_status: 'available',
-      bluetooth_id: 'bt-sven-456'
+      bluetooth_id: 'bt-sven-456',
+      is_block_captain: false
     },
     {
       user_id: 'test-maria-789',
       name: 'Maria Johansson',
+      display_name: 'Maria J',
       phone_number: '+46703456789',
       registration_completed: true,
+      privacy_settings: {
+        exact_distance: false,
+        show_hearts: true
+      },
+      blocked_users: [],
       bankid_verified: true,
       created_at: Date.now(),
       location: {
@@ -70,15 +95,23 @@ async function seedTestData() {
         accuracy: 50,
         updated_at: Date.now()
       },
-      hearts_balance: 320,
+      hearts_balance: 380,
       availability_status: 'available',
-      bluetooth_id: 'bt-maria-789'
+      bluetooth_id: 'bt-maria-789',
+      is_block_captain: true,
+      block_captain_phone: '08-590 970 00'
     },
     {
       user_id: 'test-lars-101',
       name: 'Lars Bergström',
+      display_name: 'Lasse',
       phone_number: '+46704567890', 
       registration_completed: true,
+      privacy_settings: {
+        exact_distance: false,
+        show_hearts: true
+      },
+      blocked_users: [],
       bankid_verified: true,
       created_at: Date.now(),
       location: {
@@ -87,9 +120,11 @@ async function seedTestData() {
         accuracy: 50,
         updated_at: Date.now()
       },
-      hearts_balance: 150,
+      hearts_balance: 260,
       availability_status: 'available',
-      bluetooth_id: 'bt-lars-101'
+      bluetooth_id: 'bt-lars-101',
+      is_block_captain: true,
+      block_captain_phone: '08-590 970 00'
     }
   ];
 
@@ -98,26 +133,28 @@ async function seedTestData() {
     console.log(`✅ Created user: ${user.name}`);
   }
 
-  const currentUID = '2Dx0SsdQSxTpJarSBITT2WHXRF02'; // From console logs
+  const currentUID = 'DcrMYXCmGTX9c5eATMnbG99IUUZ2'; // From console logs
 
   // Create a test user for your anonymous auth
   await db.collection('users').doc(currentUID).set({
     user_id: currentUID,
-    name: 'Testanvändare (Du)',
+    name: 'Björn Kenneth Holmström',
+    display_name: 'Björn H',
+    phone_number: '+46793339462',
     bankid_verified: false,
     created_at: Date.now(),
     location: {
-      lat: 59.5186,
-      lon: 17.9448,
+      lat: 59.517,
+      lon: 17.915,
       accuracy: 50,
       updated_at: Date.now()
     },
-    hearts_balance: 500,
+    hearts_balance: 250,
     availability_status: 'available'
   });
   console.log('✅ Created test user for anonymous auth');
 
-  // Create test resources - Crisis-relevant and realistic
+  // Create test resources with urgency levels
   const resources = [
     // Anna's resources
     {
@@ -129,6 +166,7 @@ async function seedTestData() {
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
+      expires_at: hoursFromNow(168), // 1 week - 🟢 Available
       created_at: Date.now(),
       updated_at: Date.now()
     },
@@ -141,6 +179,7 @@ async function seedTestData() {
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
+      expires_at: hoursFromNow(12), // 12 hours - 🔴 Brådskande
       created_at: Date.now(),
       updated_at: Date.now()
     },
@@ -150,10 +189,11 @@ async function seedTestData() {
       type: 'offer',
       category: 'mat',
       title: 'Campingkök och gasolflaskor',
-      description: '2 st gasolflaskor (fulla) och Primus spiskök. Kan dela eller laga mat åt flera familjer.',
+      description: '2 st gasolflaskor (fulla) och Primus spisköök. Kan dela eller laga mat åt flera familjer.',
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
+      expires_at: hoursFromNow(48), // 2 days - 🟡 Snart utgången
       created_at: Date.now(),
       updated_at: Date.now()
     },
@@ -166,6 +206,7 @@ async function seedTestData() {
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
+      expires_at: hoursFromNow(6), // 6 hours - 🔴 BRÅDSKANDE
       created_at: Date.now(),
       updated_at: Date.now()
     },
@@ -179,6 +220,7 @@ async function seedTestData() {
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
+      // No expiry - always available
       created_at: Date.now(),
       updated_at: Date.now()
     },
@@ -191,6 +233,7 @@ async function seedTestData() {
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
+      expires_at: hoursFromNow(72), // 3 days - 🟡 Snart utgången
       created_at: Date.now(),
       updated_at: Date.now()
     },
@@ -204,6 +247,7 @@ async function seedTestData() {
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
+      // No expiry - tools always available
       created_at: Date.now(),
       updated_at: Date.now()
     },
@@ -216,6 +260,7 @@ async function seedTestData() {
       status: 'open',
       matched_with_user: null,
       hearts_value: null,
+      expires_at: hoursFromNow(336), // 2 weeks - 🟢 Tillgänglig
       created_at: Date.now(),
       updated_at: Date.now()
     }
@@ -223,7 +268,10 @@ async function seedTestData() {
 
   for (const resource of resources) {
     await db.collection('resources').add(resource);
-    console.log(`✅ Created resource: ${resource.title}`);
+    const urgency = resource.expires_at 
+      ? `(expires in ${Math.round((resource.expires_at - Date.now()) / (60 * 60 * 1000))}h)`
+      : '(no expiry)';
+    console.log(`✅ Created resource: ${resource.title} ${urgency}`);
   }
 
   // Create test Hearts transactions - show the system in use
@@ -252,18 +300,56 @@ async function seedTestData() {
     }
   ];
 
+  // Create pre-accepted contact requests
+  const contactRequests = [
+    {
+      from_user: currentUID,  // You
+      to_user: 'test-anna-123',
+      status: 'accepted',
+      created_at: Date.now() - 172800000, // 2 days ago
+      responded_at: Date.now() - 172800000
+    },
+    {
+      from_user: currentUID,  // You
+      to_user: 'test-sven-456',
+      status: 'accepted',
+      created_at: Date.now() - 86400000, // Yesterday
+      responded_at: Date.now() - 86400000
+    },
+    {
+      from_user: 'test-maria-789',
+      to_user: currentUID,  // You
+      status: 'accepted',
+      created_at: Date.now() - 259200000, // 3 days ago
+      responded_at: Date.now() - 259200000
+    }
+  ];
+
+  for (const request of contactRequests) {
+    await db.collection('contact_requests').add(request);
+    console.log(`✅ Created contact request: ${request.from_user} → ${request.to_user}`);
+  }
+
   for (const transaction of transactions) {
     await db.collection('hearts_transactions').add(transaction);
     console.log(`✅ Created Hearts transaction: ${transaction.reason}`);
   }
 
-  console.log('\n🎉 Test data seeded successfully!');
-  console.log('\nDemo-ready resources created:');
-  console.log('  - Generator och första hjälpen (Anna)');
-  console.log('  - Campingkök och matbehov (Sven)');
-  console.log('  - Radio och vedspis (Maria)');
-  console.log('  - Verktyg och fyrhjulsdrift (Lars)');
-  console.log('\n4 neighbors within 500m, ready for demo!\n');
+  console.log('\n🎉 Test data seeded successfully with urgency levels!');
+  console.log('\nDemo-ready resources with urgency:');
+  console.log('  🔴 URGENT (< 24h):');
+  console.log('    - Torrvaror (6h) - Family needs food NOW');
+  console.log('    - Första hjälpen (12h) - Medical help today');
+  console.log('  🟡 SOON (2-3 days):');
+  console.log('    - Campingkök (48h) - Limited fuel');
+  console.log('    - Vedspis (72h) - Shelter for cold weather');
+  console.log('  🟢 AVAILABLE (1-2 weeks):');
+  console.log('    - Generator (1 week)');
+  console.log('    - Fyrhjulsdrift (2 weeks)');
+  console.log('  ⚪ NO EXPIRY:');
+  console.log('    - Batteriradio (always available)');
+  console.log('    - Elverktyg (always available)');
+  console.log('\n4 neighbors within 500m, perfect for pilot demo!\n');
   
   process.exit(0);
 }

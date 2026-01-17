@@ -16,6 +16,28 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Förbättrad platshistorik och tracking
 - BankID-integration för produktionsanvändare
 
+## [1.1.4] - 2025-01-17
+
+### Lagt till
+- HelpScreen med kompakt accordion-layout
+  - 6 expanderbara sektioner: Symboler, Hearts, Kvartersvärd, Offline, Integritet, FAQ
+  - 17 emojis/indikatorer dokumenterade med förklaringar
+  - Öppnar med "Symboler & Indikatorer" som default
+  - Länk till fullständig ANVÄNDARGUIDE.md
+- ?-knapp i AppNavigator header (alltid synlig)
+  - Placerad till höger om offline-indikator
+  - Ger omedelbar åtkomst till hjälp från alla skärmar
+
+### Förbättrat
+- Emoji-kongruens mellan HelpScreen och app (100% täckning)
+  - Nya sektioner: Resurstyper (📤📥), Hearts-transaktioner (✓⏳)
+  - Brådskande-nivåer kompletterade med ⚪ Utgången
+  - Alla status-indikatorer dokumenterade (📡🔄🔶)
+
+### Dokumenterat
+- EMOJI_AUDIT.md: Fullständig mappning av alla emojis i appen
+- HELPSCREEN_INTEGRATION.md: Steg-för-steg installationsguide
+
 ## [1.1.3] - 2025-01-17
 
 ### Tillagt
