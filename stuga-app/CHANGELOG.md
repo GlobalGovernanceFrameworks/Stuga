@@ -8,7 +8,6 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 
 ### Planerat
 - Skapa development build för full notifikationsfunktionalitet
-- Spela in demofilm för Upplands Väsby kommun (2 minuter)
 - Testa Bluetooth-upptäckt med två enheter
 - Testa med verkliga användare i Upplands Väsby
 - Samla feedback från kommunkontakt och pilotanvändare
@@ -16,6 +15,26 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Förbered för expansion till fler områden
 - Förbättrad platshistorik och tracking
 - BankID-integration för produktionsanvändare
+
+## [1.1.3] - 2025-01-17
+
+### Tillagt
+- Kvartersvärd-funktionalitet ("Block Captain Lite")
+  - `is_block_captain` och `block_captain_phone` i User-modell
+  - Opt-in via switch i ProfileScreen
+  - BlockCaptainGuideScreen med MSB-baserad krischecklista
+  - Viktiga nummer med direktringning (112, kommunen)
+  - 🛡️ badge vid kvartersvärdens namn i alla vyer
+- Formatering av kontaktdatum i NeighborDetailScreen
+  - Visar relativ tid (idag, igår, X dagar sedan)
+  - Använder `responded_at` från kontaktförfrågan
+
+### Buggfixar
+- Saknad View-import i BlockCaptainGuideScreen
+- TODO-kommentar för datuformatering i NeighborDetailScreen
+
+### Ändrat
+- RegistrationScreen sätter `is_block_captain: false` som default
 
 ## [1.1.2] - 2025-01-16
 

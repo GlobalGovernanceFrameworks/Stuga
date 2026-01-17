@@ -362,7 +362,9 @@ export default function HomeScreen({ navigation }: any) {
                   <Card.Content>
                     <View style={styles.cardHeader}>
                       <View style={styles.nameRow}>
-                        <Text style={styles.name}>🟢 {item.display_name || item.name}</Text>
+                        <Text style={styles.name}>
+                          {item.is_block_captain && '🛡️ '}🟢 {item.display_name || item.name}
+                        </Text>
                         {viaBluetooth && <Text style={styles.btIcon}>📶</Text>}
                       </View>
                       {distance && (

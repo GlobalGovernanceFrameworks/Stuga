@@ -49,7 +49,8 @@ async function seedTestData() {
       },
       hearts_balance: 245,
       availability_status: 'available',
-      bluetooth_id: 'bt-anna-123'
+      bluetooth_id: 'bt-anna-123',
+      is_block_captain: false
     },
     {
       user_id: 'test-sven-456',
@@ -72,7 +73,8 @@ async function seedTestData() {
       },
       hearts_balance: 180,
       availability_status: 'available',
-      bluetooth_id: 'bt-sven-456'
+      bluetooth_id: 'bt-sven-456',
+      is_block_captain: false
     },
     {
       user_id: 'test-maria-789',
@@ -95,7 +97,9 @@ async function seedTestData() {
       },
       hearts_balance: 320,
       availability_status: 'available',
-      bluetooth_id: 'bt-maria-789'
+      bluetooth_id: 'bt-maria-789',
+      is_block_captain: true,
+      block_captain_phone: '08-590 970 00'
     },
     {
       user_id: 'test-lars-101',
@@ -118,7 +122,9 @@ async function seedTestData() {
       },
       hearts_balance: 150,
       availability_status: 'available',
-      bluetooth_id: 'bt-lars-101'
+      bluetooth_id: 'bt-lars-101',
+      is_block_captain: true,
+      block_captain_phone: '08-590 970 00'
     }
   ];
 

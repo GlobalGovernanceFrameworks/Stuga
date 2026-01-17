@@ -23,6 +23,8 @@ export interface User {
     show_hearts: boolean;
   };
   blocked_users?: string[];
+  is_block_captain?: boolean;
+  block_captain_phone?: string;    // Kommunens direktnummer
 }
 
 // Resource type

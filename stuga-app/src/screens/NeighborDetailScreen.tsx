@@ -21,6 +21,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
   const [resources, setResources] = useState<Resource[]>([]);
   const [contactStatus, setContactStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'accepted' | 'declined'>('none');
   const [pendingRequestId, setPendingRequestId] = useState<string | null>(null);
+  const [contactAcceptedDate, setContactAcceptedDate] = useState<number | null>(null);
   const [checkingContact, setCheckingContact] = useState(true);
   const [isBlocked, setIsBlocked] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -166,6 +167,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
       
       if (data.status === 'accepted') {
         setContactStatus('accepted');
+        setContactAcceptedDate(data.responded_at || data.created_at);
       } else if (data.status === 'declined') {
         setContactStatus('declined');
       } else if (data.from_user === currentUser.uid) {
@@ -179,6 +181,33 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
     } finally {
       setCheckingContact(false);
     }
+  }
+
+  function formatContactDate(timestamp: number | null): string {
+    if (!timestamp) return 'nyligen';
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'idag';
+    if (diffDays === 1) return 'igår';
+    if (diffDays < 7) return `${diffDays} dagar sedan`;
+    if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return weeks === 1 ? '1 vecka sedan' : `${weeks} veckor sedan`;
+    }
+    if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30);
+      return months === 1 ? '1 månad sedan' : `${months} månader sedan`;
+    }
+    
+    return date.toLocaleDateString('sv-SE', { 
+      year: 'numeric', 
+      month: 'long',
+      day: 'numeric'
+    });
   }
 
   async function loadDistance() {
@@ -449,6 +478,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
       <Card style={styles.card}>
         <Card.Content>
           <Text style={styles.name}>
+            {neighbor.is_block_captain && '🛡️ '}
             {contactStatus === 'accepted' ? getRealName(neighbor) : getDisplayName(neighbor)}
           </Text>
 
@@ -464,7 +494,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
           <Text style={styles.info}>🔥 {neighbor.hearts_balance} Hearts</Text>
           {contactStatus === 'accepted' && (
             <Text style={styles.contactInfo}>
-              ✓ Ni har kontakt sedan {/* TODO: format date */}
+              ✓ Ni har kontakt sedan {formatContactDate(contactAcceptedDate)}
             </Text>
           )}
         </Card.Content>

@@ -15,6 +15,7 @@ import MyResourcesScreen from '../screens/MyResourcesScreen';
 import ResourcesScreen from '../screens/ResourcesScreen';
 import ContactRequestsScreen from '../screens/ContactRequestsScreen';
 import BlockedUsersScreen from '../screens/BlockedUsersScreen';
+import BlockCaptainGuideScreen from '../screens/BlockCaptainGuideScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -100,6 +101,11 @@ export default function AppNavigator({ navigationRef }: { navigationRef?: any })
           name="BlockedUsers" 
           component={BlockedUsersScreen}
           options={{ title: 'Blockerade användare' }}
+        />
+        <Stack.Screen 
+          name="BlockCaptainGuide" 
+          component={BlockCaptainGuideScreen}
+          options={{ title: 'Kvartersvärd - Guide' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

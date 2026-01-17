@@ -65,7 +65,7 @@ export default function RegistrationScreen({ onRegistrationComplete }: { onRegis
         return;
       }
 
-      // Check if in pilot area (Upplands Väsby)
+      // Check if in pilot area (Upplands VÃ¤sby)
       const distanceFromCenter = calculateDistance(
         location.lat,
         location.lon,
@@ -118,7 +118,8 @@ export default function RegistrationScreen({ onRegistrationComplete }: { onRegis
           exact_distance: false,
           show_hearts: true
         },
-        blocked_users: [] 
+        blocked_users: [],
+        is_block_captain: false
       });
 
       console.log('✅ User registered successfully');
@@ -170,7 +171,7 @@ export default function RegistrationScreen({ onRegistrationComplete }: { onRegis
                 📝 Ditt riktiga namn sparas privat och visas bara när du godkänner kontakt
               </Text>
 
-              {/* NEW - Display name input */}
+              {/* Display name input */}
               <Text style={styles.label}>Visningsnamn (valfritt)</Text>
               <TextInput
                 value={displayName}

@@ -267,7 +267,9 @@ export default function ResourcesScreen({ navigation }: any) {
                     <Text style={styles.resourceTitle}>{item.title}</Text>
                     
                     <View style={styles.ownerRow}>
-                      <Text style={styles.ownerName}>🟢 {item.ownerName}</Text>
+                      <Text style={styles.ownerName}>
+                        {fullUser?.is_block_captain && '🛡️ '}🟢 {item.ownerName}
+                      </Text>
                       {item.distance && userLocation && (
                         <Text style={styles.distance}>
                           {formatDistanceFuzzy(item.distance)}
