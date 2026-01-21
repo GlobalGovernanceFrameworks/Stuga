@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { View, ScrollView, StyleSheet, FlatList } from 'react-native';
-import { Text, Card, Searchbar, Chip, SegmentedButtons } from 'react-native-paper';
+import { Text, Card, Searchbar, Chip, SegmentedButtons, Button } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
@@ -235,6 +235,17 @@ export default function ResourcesScreen({ navigation }: any) {
                   ? `Inga resurser matchade "${searchQuery}"`
                   : 'Inga resurser i denna kategori'}
               </Text>
+              {!searchQuery && (
+                <Button
+                  mode="contained"
+                  onPress={() => navigation.navigate('AddResource')}
+                  style={{ marginTop: 16 }}
+                  buttonColor="#2D5016"
+                  icon="plus"
+                >
+                  Lägg till resurs
+                </Button>
+              )}
             </Card.Content>
           </Card>
         ) : (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Alert, Linking } from 'react-native';
 import { Text, TextInput, Button, Card, ActivityIndicator } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { doc, setDoc } from 'firebase/firestore';
@@ -51,17 +51,41 @@ export default function RegistrationScreen({ onRegistrationComplete }: { onRegis
       if (!hasPermission) {
         Alert.alert(
           'Platsbehörighet krävs',
-          'Stuga behöver din plats för att hitta grannar i närheten. Aktivera platsåtkomst i inställningarna.'
+          'Stuga behöver din plats för att hitta grannar i närheten.',
+          [
+            { text: 'Avbryt', style: 'cancel', onPress: () => setLoading(false) },
+            { text: 'Försök igen', onPress: handleRegister },
+            {
+              text: 'Inställningar',
+              onPress: async () => {
+                setLoading(false);
+                try {
+                  if (Platform.OS === 'ios') {
+                    await Linking.openURL('app-settings:');
+                  } else {
+                    await Linking.openSettings();
+                  }
+                } catch (error) {
+                  console.error('Could not open settings:', error);
+                }
+              }
+            }
+          ]
         );
-        setLoading(false);
         return;
       }
 
       // Get current location
       const location = await getCurrentLocation();
       if (!location) {
-        Alert.alert('Fel', 'Kunde inte hämta din plats. Försök igen.');
-        setLoading(false);
+        Alert.alert(
+          'Kunde inte hämta position',
+          'Kontrollera att GPS är aktiverad och att du har god satellitmottagning.',
+          [
+            { text: 'Avbryt', style: 'cancel', onPress: () => setLoading(false) },
+            { text: 'Försök igen', onPress: handleRegister }
+          ]
+        );
         return;
       }
 
@@ -215,6 +239,16 @@ export default function RegistrationScreen({ onRegistrationComplete }: { onRegis
                 • Dela resurser (mat, verktyg, kunskap){'\n'}
                 • Tacka med Hearts-valuta{'\n'}
                 • Brådskande behov prioriteras automatiskt
+              </Text>
+            </Card.Content>
+          </Card>
+
+          <Card style={styles.infoCard}>
+            <Card.Content>
+              <Text style={styles.infoTitle}>📍 Varför behövs platsåtkomst?</Text>
+              <Text style={styles.infoText}>
+                Stuga använder din plats för att hitta grannar inom 500m. 
+                Din exakta position delas aldrig - vi avrundar till ~50m för integritet.
               </Text>
             </Card.Content>
           </Card>

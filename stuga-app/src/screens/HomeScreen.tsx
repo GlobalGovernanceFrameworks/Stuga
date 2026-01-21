@@ -31,6 +31,7 @@ export default function HomeScreen({ navigation }: any) {
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   // Run ONCE on mount
   useEffect(() => {
@@ -205,6 +206,27 @@ export default function HomeScreen({ navigation }: any) {
     showSnackbar('✓ Data uppdaterad', 3000);
   }
 
+  async function openAppSettings() {
+    try {
+      if (Platform.OS === 'ios') {
+        await Linking.openURL('app-settings:');
+      } else {
+        await Linking.openSettings();
+      }
+    } catch (error) {
+      console.error('Could not open settings:', error);
+      showSnackbar('Kunde inte öppna inställningar. Öppna manuellt och leta upp Stuga.', 5000);
+    }
+  }
+
+  async function retryLocation() {
+    setLocationError(null);
+    setLoading(true);
+    const location = await requestAndUpdateLocation();
+    await loadNeighbors(location);
+    setLoading(false);
+  }
+
   function HeaderSection({ 
     neighborCount, 
     showRadius, 
@@ -289,6 +311,37 @@ export default function HomeScreen({ navigation }: any) {
               <Text style={styles.bluetoothText}>
                 📶 Bluetooth aktiv · {nearbyDevices} enheter i närheten
               </Text>
+            </Card.Content>
+          </Card>
+        )}
+
+        {locationError && (
+          <Card style={styles.locationErrorCard}>
+            <Card.Content>
+              <View style={styles.errorHeader}>
+                <Text style={styles.errorIcon}>📍</Text>
+                <Text style={styles.errorTitle}>Platsåtkomst krävs</Text>
+              </View>
+              <Text style={styles.errorText}>{locationError}</Text>
+              <View style={styles.errorActions}>
+                <Button
+                  mode="contained"
+                  onPress={retryLocation}
+                  style={styles.errorButton}
+                  buttonColor="#2D5016"
+                  icon="refresh"
+                >
+                  Försök igen
+                </Button>
+                <Button
+                  mode="outlined"
+                  onPress={openAppSettings}
+                  style={styles.errorButton}
+                  icon="cog"
+                >
+                  Inställningar
+                </Button>
+              </View>
             </Card.Content>
           </Card>
         )}
@@ -626,5 +679,38 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#999',
     fontStyle: 'italic'
-  }
+  },
+  locationErrorCard: {
+    marginBottom: 12,
+    backgroundColor: '#FFF4E6',
+    borderLeftWidth: 4,
+    borderLeftColor: '#FF6B35'
+  },
+  errorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8
+  },
+  errorIcon: {
+    fontSize: 24,
+    marginRight: 8
+  },
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2D5016'
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 12
+  },
+  errorActions: {
+    flexDirection: 'row',
+    gap: 8
+  },
+  errorButton: {
+    flex: 1
+  },
 });

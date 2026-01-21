@@ -192,6 +192,17 @@ export default function MyResourcesScreen({ navigation }: any) {
                 {filter === 'completed' && 'Slutförda erbjudanden och behov visas här.'}
                 {filter === 'all' && 'Lägg till din första resurs!'}
               </Text>
+              {(filter === 'open' || filter === 'all') && (
+                <Button
+                  mode="contained"
+                  onPress={() => navigation.navigate('AddResource')}
+                  style={{ marginTop: 16 }}
+                  buttonColor="#2D5016"
+                  icon="plus"
+                >
+                  Lägg till resurs
+                </Button>
+              )}
             </Card.Content>
           </Card>
         ) : (

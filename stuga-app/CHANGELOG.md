@@ -16,6 +16,40 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
 - Förbättrad platshistorik och tracking
 - BankID-integration för produktionsanvändare
 
+## [1.1.5] - 2025-01-21
+
+### Lagt till
+**Fas 1: GPS & Location Error Handling**
+- Error state tracking i HomeScreen (`locationError`)
+- Location error card med actionable knappar:
+  - "Försök igen" - manuell retry av GPS
+  - "Inställningar" - öppnar systemets plats-inställningar
+- `openAppSettings()` helper för platform-aware navigation (iOS/Android)
+- `retryLocation()` funktion för att försöka igen
+- Förbättrade error messages:
+  - "Platsåtkomst nekad. Stuga behöver din plats..." (permission denied)
+  - "Kunde inte hämta din position. Kontrollera att GPS är aktiverad." (GPS timeout)
+
+**Fas 2: Empty States Improvements**
+- ResourcesScreen: "Lägg till resurs"-knapp i tom kategori
+- MyResourcesScreen: "Lägg till resurs"-knapp för filter "Öppna" och "Alla"
+- HeartsHistoryScreen: Färgad Card med 💚 emoji + "Hitta grannar"-knapp
+
+### Förbättrat
+- RegistrationScreen: 3-knappars Alert vid nekad GPS (Avbryt/Försök igen/Inställningar)
+- RegistrationScreen: 2-knappars Alert vid GPS-timeout (Avbryt/Försök igen)
+- Alla error states cleara automatiskt vid lyckad åtgärd
+- Empty states ger nu tydlig guidance istället för statisk text
+
+### Ändrat
+- HeartsHistoryScreen: Kräver nu `navigation` prop (breaking change)
+- Empty state styling uppdaterad (Card-baserad istället för View)
+
+### Tekniskt
+- Tillagda imports: `Linking`, `Platform` i HomeScreen och RegistrationScreen
+- Nya styles i HeartsHistoryScreen: `emptyCard`, `emptyContent`, `emptyIcon`
+- Inga nya dependencies
+
 ## [1.1.4] - 2025-01-17
 
 ### Lagt till
@@ -33,10 +67,6 @@ Formatet baseras på [Keep a Changelog](https://keepachangelog.com/sv-SE/1.0.0/)
   - Nya sektioner: Resurstyper (📤📥), Hearts-transaktioner (✓⏳)
   - Brådskande-nivåer kompletterade med ⚪ Utgången
   - Alla status-indikatorer dokumenterade (📡🔄🔶)
-
-### Dokumenterat
-- EMOJI_AUDIT.md: Fullständig mappning av alla emojis i appen
-- HELPSCREEN_INTEGRATION.md: Steg-för-steg installationsguide
 
 ## [1.1.3] - 2025-01-17
 

@@ -8,7 +8,7 @@ import { db, auth } from '../config/firebase';
 import { HeartsTransaction } from '../types';
 import { SkeletonCard } from '../components/SkeletonCard';
 
-export default function HeartsHistoryScreen() {
+export default function HeartsHistoryScreen({ navigation }: any) {
   const [transactions, setTransactions] = useState<HeartsTransaction[]>([]);
   const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -196,12 +196,24 @@ export default function HeartsHistoryScreen() {
       )}
 
       {transactions.length === 0 && (
-        <View style={styles.empty}>
-          <Text style={styles.emptyText}>Inga transaktioner än</Text>
-          <Text style={styles.emptySubtext}>
-            Skicka Hearts till grannar för att tacka för hjälp!
-          </Text>
-        </View>
+        <Card style={styles.emptyCard}>
+          <Card.Content style={styles.emptyContent}>
+            <Text style={styles.emptyIcon}>💚</Text>
+            <Text style={styles.emptyText}>Inga transaktioner än</Text>
+            <Text style={styles.emptySubtext}>
+              Skicka Hearts till grannar för att tacka för hjälp!
+            </Text>
+            <Button
+              mode="contained"
+              onPress={() => navigation.navigate('Home')}
+              style={{ marginTop: 16 }}
+              buttonColor="#2D5016"
+              icon="home"
+            >
+              Hitta grannar
+            </Button>
+          </Card.Content>
+        </Card>
       )}
     </ScrollView>
   );
@@ -277,18 +289,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999'
   },
-  empty: {
+  emptyCard: {
+    marginTop: 32,
+    backgroundColor: '#FFF4E6'
+  },
+  emptyContent: {
     alignItems: 'center',
-    marginTop: 64
+    paddingVertical: 24
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: 16
   },
   emptyText: {
     fontSize: 18,
-    color: '#999',
+    fontWeight: 'bold',
+    color: '#2D5016',
     marginBottom: 8
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#BBB',
+    color: '#666',
     textAlign: 'center',
     paddingHorizontal: 32
   },
