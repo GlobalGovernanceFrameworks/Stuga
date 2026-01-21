@@ -5,6 +5,7 @@ import { Text, Card, ActivityIndicator, Divider, Button } from 'react-native-pap
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, query, where, getDocs, or, updateDoc, doc } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
+import { useSnackbar } from '../hooks/useSnackbar';
 import { HeartsTransaction } from '../types';
 import { SkeletonCard } from '../components/SkeletonCard';
 
@@ -13,6 +14,7 @@ export default function HeartsHistoryScreen({ navigation }: any) {
   const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [myBalance, setMyBalance] = useState(0);
+  const { showSnackbar } = useSnackbar();
 
   const insets = useSafeAreaInsets();
 
@@ -74,6 +76,8 @@ export default function HeartsHistoryScreen({ navigation }: any) {
 
     } catch (error) {
       console.error('Error loading transactions:', error);
+      showSnackbar('⚠️ Kunde inte ladda Hearts-historik. Försök igen.', 5000);
+      setTransactions([]);  // Clear to show empty state
     } finally {
       setLoading(false);
     }
@@ -108,7 +112,7 @@ export default function HeartsHistoryScreen({ navigation }: any) {
       alert('✅ Hearts bekräftade! Saldo uppdaterat.');
     } catch (error) {
       console.error('Error confirming Hearts:', error);
-      alert('Kunde inte bekräfta Hearts');
+      showSnackbar('⚠️ Kunde inte bekräfta Hearts. Försök igen.', 5000);
     }
   }
 

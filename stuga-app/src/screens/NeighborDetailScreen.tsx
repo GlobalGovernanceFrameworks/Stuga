@@ -14,6 +14,7 @@ import { getCurrentLocation, calculateDistance, formatDistance, formatDistanceFu
 import { SkeletonCard } from '../components/SkeletonCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { UrgencyBadge } from '../components/UrgencyBadge';
+import { useSnackbar } from '../hooks/useSnackbar';
 import { isExpired } from '../lib/expiryHelpers';
 
 export default function NeighborDetailScreen({ route, navigation }: any) {
@@ -27,6 +28,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [distance, setDistance] = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const { showSnackbar } = useSnackbar();
   const insets = useSafeAreaInsets();
   const currentUser = auth.currentUser;
   const isMe = currentUser?.uid === neighbor.user_id;
@@ -178,6 +180,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
       
     } catch (error) {
       console.error('Error checking contact status:', error);
+      showSnackbar('⚠️ Kunde inte ladda kontaktstatus.', 4000);
     } finally {
       setCheckingContact(false);
     }
@@ -236,6 +239,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
       setDistance(dist);
     } catch (error) {
       console.error('Error loading distance:', error);
+      // Silent fail - distance är nice-to-have
     }
   }
 
@@ -253,6 +257,8 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
       setResources(data);
     } catch (error) {
       console.error('Error loading resources:', error);
+      showSnackbar('⚠️ Kunde inte ladda resurser. Försök igen.', 5000);
+      setResources([]);  // Clear stale data
     } finally {
       setLoading(false);
     }
@@ -351,7 +357,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
 
   function handleSendSMS() {
     // Existing SMS function - only callable when contact accepted
-    if (!neighbor.phone_number) {
+    if (!neighbor?.phone_number) {
       Alert.alert(
         'Telefonnummer saknas',
         `${getRealName(neighbor)} har inte delat sitt telefonnummer än.`,
@@ -491,7 +497,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
             </Text>
           )}
 
-          <Text style={styles.info}>🔥 {neighbor.hearts_balance} Hearts</Text>
+          <Text style={styles.info}>🔥 {neighbor?.hearts_balance ?? 0} Hearts</Text>
           {contactStatus === 'accepted' && (
             <Text style={styles.contactInfo}>
               ✓ Ni har kontakt sedan {formatContactDate(contactAcceptedDate)}
@@ -548,7 +554,7 @@ export default function NeighborDetailScreen({ route, navigation }: any) {
                 <Text style={styles.emptyIcon}>📦</Text>
                 <Text style={styles.emptyTitle}>Inga resurser Ã¤n</Text>
                 <Text style={styles.emptyText}>
-                  {neighbor.name.split(' ')[0]} har inte lagt till några resurser ännu.
+                  {getDisplayName(neighbor).split(' ')[0]} har inte lagt till några resurser ännu.
                 </Text>
                 {!isMe && (
                   <Text style={styles.emptyHint}>

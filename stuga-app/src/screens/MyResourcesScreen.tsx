@@ -10,6 +10,7 @@ import { getCategoryLabel } from '../lib/categoryHelpers';
 import { StatusBadge } from '../components/StatusBadge';
 import { UrgencyBadge } from '../components/UrgencyBadge';
 import { SkeletonCard } from '../components/SkeletonCard';
+import { useSnackbar } from '../hooks/useSnackbar';
 import { isExpired } from '../lib/expiryHelpers';
 
 type FilterType = 'all' | 'open' | 'completed';
@@ -19,6 +20,7 @@ export default function MyResourcesScreen({ navigation }: any) {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('open');
+  const { showSnackbar } = useSnackbar();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -48,6 +50,10 @@ export default function MyResourcesScreen({ navigation }: any) {
       setResources(data);
     } catch (error) {
       console.error('Error loading resources:', error);
+      showSnackbar('⚠️ Kunde inte ladda resurser. Försök igen.', 5000);
+      
+      // Clear resources to avoid showing stale data
+      setResources([]);
     } finally {
       setLoading(false);
     }
@@ -71,7 +77,7 @@ export default function MyResourcesScreen({ navigation }: any) {
               Alert.alert('✓', 'Resurs markerad som slutförd!');
             } catch (error) {
               console.error('Error marking fulfilled:', error);
-              Alert.alert('Fel', 'Kunde inte uppdatera resurs');
+              showSnackbar('⚠️ Kunde inte markera som slutförd. Försök igen.', 5000);
             }
           }
         }
@@ -89,7 +95,7 @@ export default function MyResourcesScreen({ navigation }: any) {
       Alert.alert('✓', 'Resurs återöppnad!');
     } catch (error) {
       console.error('Error reopening:', error);
-      Alert.alert('Fel', 'Kunde inte öppna resurs');
+      showSnackbar('⚠️ Kunde inte öppna resurs. Försök igen.', 5000);
     }
   }
 
@@ -109,7 +115,7 @@ export default function MyResourcesScreen({ navigation }: any) {
               Alert.alert('✓', 'Resurs borttagen!');
             } catch (error) {
               console.error('Error deleting:', error);
-              Alert.alert('Fel', 'Kunde inte ta bort resurs');
+              showSnackbar('⚠️ Kunde inte ta bort resurs. Försök igen.', 5000);
             }
           }
         }

@@ -144,7 +144,7 @@ export default function HomeScreen({ navigation }: any) {
       // Filter out current user, test users, AND blocked users
       const filteredUsers = users.filter(user => 
         user.id !== currentUser?.uid &&
-        !user.name.startsWith('Testanvändare') &&
+        !user?.name?.startsWith('Testanvändare') &&
         !blocked.includes(user.user_id)
       );
       
@@ -192,6 +192,10 @@ export default function HomeScreen({ navigation }: any) {
       }
     } catch (error) {
       console.error('Error loading neighbors:', error);
+      showSnackbar('⚠️ Kunde inte ladda grannar. Försök igen.', 5000);
+      
+      // Clear neighbors to show empty state instead of stale data
+      setNeighbors([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -424,7 +428,9 @@ export default function HomeScreen({ navigation }: any) {
                         <Text style={styles.distance}>{formatDistanceFuzzy(item.distance)}</Text>
                       )}
                     </View>
-                    <Text style={styles.hearts}>🔥 {item.hearts_balance} Hearts</Text>
+                    {item?.hearts_balance !== undefined && (
+  <Text style={styles.hearts}>🔥 {item.hearts_balance} Hearts</Text>
+)}
                   </Card.Content>
                 </Card>
               );

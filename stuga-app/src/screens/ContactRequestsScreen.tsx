@@ -5,6 +5,7 @@ import { Text, Card, Button, Divider } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
+import { useSnackbar } from '../hooks/useSnackbar';
 import { ContactRequest, User } from '../types';
 import { acceptContactRequest, declineContactRequest } from '../lib/contactHelpers';
 import { getDisplayName } from '../lib/displayHelpers';
@@ -13,6 +14,7 @@ export default function ContactRequestsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const [requests, setRequests] = useState<(ContactRequest & { fromUser?: User })[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showSnackbar } = useSnackbar();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -53,6 +55,8 @@ export default function ContactRequestsScreen({ navigation }: any) {
       setRequests(enrichedRequests);
     } catch (error) {
       console.error('Error loading requests:', error);
+      showSnackbar('⚠️ Kunde inte ladda förfrågningar. Försök igen.', 5000);
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -65,6 +69,7 @@ export default function ContactRequestsScreen({ navigation }: any) {
       // TODO: Show snackbar
     } catch (error) {
       console.error('Error accepting request:', error);
+      showSnackbar('⚠️ Kunde inte acceptera förfrågan. Försök igen.', 5000);
     }
   }
 
@@ -74,6 +79,7 @@ export default function ContactRequestsScreen({ navigation }: any) {
       await loadRequests(); // Refresh
     } catch (error) {
       console.error('Error declining request:', error);
+      showSnackbar('⚠️ Kunde inte avböja förfrågan. Försök igen.', 5000);
     }
   }
 

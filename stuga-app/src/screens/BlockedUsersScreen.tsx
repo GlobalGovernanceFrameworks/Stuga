@@ -5,6 +5,7 @@ import { Text, Card, Button, Divider } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
+import { useSnackbar } from '../hooks/useSnackbar';
 import { User } from '../types';
 import { getBlockedUsers, unblockUser } from '../lib/blockHelpers';
 import { getDisplayName } from '../lib/displayHelpers';
@@ -13,6 +14,7 @@ export default function BlockedUsersScreen() {
   const insets = useSafeAreaInsets();
   const [blockedUsers, setBlockedUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showSnackbar } = useSnackbar();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -43,6 +45,7 @@ export default function BlockedUsersScreen() {
       setBlockedUsers(blocked);
     } catch (error) {
       console.error('Error loading blocked users:', error);
+      showSnackbar('⚠️ Kunde inte ladda blockerade. Försök igen.', 5000);
     } finally {
       setLoading(false);
     }
@@ -62,10 +65,10 @@ export default function BlockedUsersScreen() {
               if (!currentUser) return;
 
               await unblockUser(currentUser.uid, user.user_id);
-              await loadBlockedUsers(); // Refresh
+              await loadBlockedUsers();
               Alert.alert('Avblockerad', `${getDisplayName(user)} är nu avblockerad.`);
             } catch (error) {
-              Alert.alert('Fel', 'Kunde inte avblockera användare');
+              showSnackbar('⚠️ Kunde inte avblockera. Försök igen.', 5000);
             }
           }
         }

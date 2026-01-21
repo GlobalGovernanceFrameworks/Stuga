@@ -37,7 +37,7 @@ export default function SendHeartsScreen({ route, navigation }: any) {
       
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       if (userDoc.exists()) {
-        setMyBalance(userDoc.data().hearts_balance || 0);
+        setMyBalance(userDoc.data()?.hearts_balance ?? 0);
       }
     } catch (error) {
       console.error('Error loading balance:', error);
@@ -141,7 +141,7 @@ export default function SendHeartsScreen({ route, navigation }: any) {
           <Card.Content>
             <Text style={styles.title}>Skicka Hearts till:</Text>
             <Text style={styles.name}>{neighbor.name}</Text>
-            <Text style={styles.info}>🔥 Deras saldo: {neighbor.hearts_balance} Hearts</Text>
+            <Text style={styles.info}>🔥 Deras saldo: {neighbor?.hearts_balance ?? 0} Hearts</Text>
           </Card.Content>
         </Card>
 
@@ -208,7 +208,7 @@ export default function SendHeartsScreen({ route, navigation }: any) {
               )}
               {hasPending && (
                 <Text style={styles.warningText}>
-                  ⏳ Du har redan en obekräftad transaktion till {neighbor.name.split(' ')[0]}
+                  ⏳ Du har redan en obekräftad transaktion till {neighbor?.name?.split(' ')[0] ?? 'grannen'}
                 </Text>
               )}
             </View>

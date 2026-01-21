@@ -100,7 +100,7 @@ export default function ResourcesScreen({ navigation }: any) {
 
           return {
             ...resource,
-            ownerName: owner?.display_name || owner?.name || 'Okänd användare', // CHANGED
+            ownerName: owner?.display_name ?? owner?.name ?? 'Okänd användare',
             ownerLocation: owner?.location,
             distance
           };
